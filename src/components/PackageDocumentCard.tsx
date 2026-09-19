@@ -171,10 +171,11 @@ export function DocumentCard({
     onChange({
       ...doc,
       content,
-      claims: claimsStillMade(
-        content,
-        doc.claims.filter((_, i) => i !== index),
-      ),
+      /* Every claim is re-derived from the new content — including the one
+         just removed. If its sentence somehow still appears elsewhere, it is
+         still being made and must stay flagged; pre-filtering it out would
+         hide a claim the document still asserts. */
+      claims: claimsStillMade(content, doc.claims),
     });
     setDraft(content);
   }
@@ -400,9 +401,9 @@ function ClaimRow({
           </div>
           {unremovable && (
             <p className="mt-2 text-sm text-rose-800" role="alert">
-              This sentence is part of a longer sentence in this document, so
-              removing it on its own would leave the rest mangled. Edit the text
-              directly to change it.
+              This sentence isn&apos;t a whole sentence in the document — it sits
+              inside a longer one — so removing it on its own would leave the rest
+              mangled. Edit the text directly to change it.
             </p>
           )}
         </>
@@ -416,64 +417,61 @@ function ClaimRow({
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
 
-/** Does this text end where a sentence ends? */
-function endsSentence(text: string): boolean {
-  return /[.!?]["'”’)\]]?\s*$/.test(text);
+/**
+ * Split content into whole units — sentences, and the line breaks between
+ * them — such that `units.join("")` reproduces the input exactly.
+ *
+ * Exported for testing: the reconstruction property is what makes whole-unit
+ * removal safe, and it is worth asserting directly.
+ */
+export function splitUnits(content: string): string[] {
+  return content.match(/[^.!?\n]*[.!?]+["'\u201d\u2019)\]]*[ \t]*|[^.!?\n]+|\n/g) ?? [];
 }
 
 /**
- * Remove one sentence from a document, leaving the surrounding prose readable.
+ * Remove one sentence from a document, leaving every other sentence byte-identical.
  *
- * Nothing is rewritten around the hole — inventing a bridging phrase would be
- * writing new prose about a real person, which is the exact thing this surface
- * exists to prevent.
+ * REMOVAL OPERATES ON WHOLE UNITS, NEVER ON ARBITRARY SUBSTRINGS, and that is
+ * the entire safety property of this function. The original implementation was
+ * `content.split(sentence).join("")`, an unbounded global replace, which had a
+ * data-corruption bug a tester proved with a repro: when one claim's text is a
+ * substring of a LONGER sentence, removing the short claim rips its words out
+ * of the middle of the long one. The long sentence is left mangled, and because
+ * its text no longer matches its claim, `claimsStillMade` silently drops that
+ * claim too — so corrupted prose lands in the document the user sends an
+ * employer, with nothing on the honesty surface covering it.
  *
- * IT REMOVES SENTENCES, NOT SUBSTRINGS, and that distinction is the whole
- * point of the boundary check below. A plain `split(sentence).join("")` looks
- * equivalent and is not: when one claim's text is a PREFIX of another claim's
- * text — "I built the payments pipeline" inside "I built the payments pipeline
- * at my last internship, handling 10,000 transactions daily." — removing the
- * shorter one tears the opening words out of the longer SURVIVING sentence,
- * leaving the user a headless fragment they never asked for. Worse, the longer
- * sentence's text then no longer matches its claim, so `claimsStillMade` drops
- * an EVIDENCED claim, and mangled prose ends up in the export with nothing on
- * the honesty surface covering it. (Found by tester, proven with a repro, not
- * theoretical.)
+ * A boundary check on the occurrence is NOT sufficient either, and that was a
+ * second, weaker attempt: a claim like "I shipped the feature." inside "I led
+ * the team and I shipped the feature." starts at a word boundary and ends a
+ * sentence, yet cutting it leaves the dangling fragment "I led the team and".
+ * Only whole-unit removal cannot corrupt a neighbour, because it never cuts
+ * inside one.
  *
- * So an occurrence is removed only where it genuinely ends a sentence and
- * starts at a word boundary. Where it does not, NOTHING is removed and the
- * content comes back unchanged — the caller detects that and tells the user to
- * edit the text directly, rather than silently doing nothing or silently
- * corrupting a neighbouring sentence.
+ * WHEN THE CLAIM IS NOT A WHOLE UNIT, NOTHING IS REMOVED. There is deliberately
+ * no substring fallback "so that it works" — partial removal is precisely the
+ * corruption being fixed here. The content comes back unchanged, the caller
+ * detects that and tells the user, and the claim stays unresolved and keeps
+ * blocking export. Silent partial mangling must not be reachable.
+ *
+ * Nothing is rewritten around the hole either: inventing a bridging phrase
+ * would be writing new prose about a real person, which is the exact thing
+ * this surface exists to prevent.
  */
 export function removeSentence(content: string, sentence: string): string {
-  if (!sentence || !content.includes(sentence)) return content;
+  const target = sentence.trim();
+  if (!target) return content;
 
-  let out = "";
-  let cursor = 0;
   let removedAny = false;
-
-  for (;;) {
-    const at = content.indexOf(sentence, cursor);
-    if (at === -1) break;
-    const end = at + sentence.length;
-    const startsClean = at === 0 || /\s/.test(content[at - 1]);
-    /* The occurrence must finish a sentence: either the claim text carries its
-       own terminator, or it runs to the end of the document. */
-    const finishesClean = endsSentence(sentence) || end === content.length;
-
-    if (startsClean && finishesClean) {
-      out += content.slice(cursor, at);
-      removedAny = true;
-    } else {
-      out += content.slice(cursor, end);
-    }
-    cursor = end;
-  }
+  const kept = splitUnits(content).map((unit) => {
+    if (unit.trim() !== target) return unit;
+    removedAny = true;
+    return "";
+  });
   if (!removedAny) return content;
-  out += content.slice(cursor);
 
-  return out
+  return kept
+    .join("")
     .replace(/[ \t]{2,}/g, " ")
     .replace(/\n{3,}/g, "\n\n")
     .replace(/[ \t]+\n/g, "\n")

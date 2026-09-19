@@ -20,6 +20,22 @@ import path from "node:path";
 const DIR = path.join(process.cwd(), "src", "lib", "package");
 const read = (file: string) => readFileSync(path.join(DIR, file), "utf8");
 
+/**
+ * Strip comments before checking for a forbidden CALL.
+ *
+ * Without this, a doc comment that correctly states the rule ("Never
+ * `new Date()` inside this engine") trips the very check it documents, and
+ * the tempting fix is to reword an accurate comment into a vaguer one to
+ * please a regex. The comment is the useful artifact; the regex is the thing
+ * that should be precise. This is the same false positive that bit
+ * coder-intake in P1.
+ */
+function code(file: string): string {
+  return read(file)
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/(^|[^:])\/\/.*$/gm, "$1");
+}
+
 const SOURCES = readdirSync(DIR).filter(
   (file) => file.endsWith(".ts") && !file.endsWith(".test.ts"),
 );
@@ -45,8 +61,13 @@ describe("server-only guard", () => {
 
 describe("purity", () => {
   it("no module in the package engine reads a clock or a random source", () => {
+    // Guard the guard: if comment-stripping ever ate real code, this check
+    // would pass vacuously on an empty string.
     for (const file of SOURCES) {
-      expect(read(file), file).not.toMatch(/new Date\(|Date\.now\(|Math\.random\(/);
+      expect(code(file).length, file).toBeGreaterThan(200);
+    }
+    for (const file of SOURCES) {
+      expect(code(file), file).not.toMatch(/new Date\(|Date\.now\(|Math\.random\(/);
     }
   });
 

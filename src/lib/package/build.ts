@@ -40,7 +40,7 @@ export interface BuildPackageInput {
   candidate: Candidate;
   /** The answer library. Passed in — `lib/answers.ts` is a client module. */
   library: ApplicationAnswer[];
-  /** ISO timestamp from the caller. This module never reads a clock. */
+  /** ISO timestamp from the caller. Never `new Date()` inside this engine. */
   builtAt: string;
   /**
    * A model-generated cover letter. ABSENT is the normal, supported case:

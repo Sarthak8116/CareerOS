@@ -1,4 +1,3 @@
-import JSZip from "jszip";
 import type { ApplicationPackage, PackageDocument } from "@/lib/types";
 import { assertSafeEntryPath } from "@/lib/package/filenames";
 import { countUnsupported } from "@/lib/package/claims";
@@ -15,6 +14,13 @@ import { countUnsupported } from "@/lib/package/claims";
  *
  * `packageEntries` is pure and is where the manifest is written, so the
  * archive's contents are testable without unzipping anything.
+ *
+ * ZIPPING HAPPENS IN THE BROWSER, DELIBERATELY. This archive holds the user's
+ * cover letter, their personal information, and their answers to application
+ * questions. Building it client-side means those documents never leave the
+ * machine to be exported. A server route would put a person's private
+ * documents on the network purely so we could compress them — a worse privacy
+ * posture for no benefit. Do not "simplify" this into an API route.
  */
 
 export interface PackageEntry {
@@ -121,6 +127,12 @@ export function packageEntries(pkg: ApplicationPackage): PackageEntry[] {
 export async function buildPackageZip(
   pkg: ApplicationPackage,
 ): Promise<Uint8Array> {
+  // DYNAMIC ON PURPOSE — do not hoist this to the top of the file. A static
+  // import pulls ~45 kB of JSZip into the first load of the application page
+  // for every visitor, including the many who review a package and never
+  // export it. Imported here, it is fetched when the user actually clicks
+  // export.
+  const { default: JSZip } = await import("jszip");
   const zip = new JSZip();
   for (const entry of packageEntries(pkg)) {
     zip.file(entry.path, entry.content);
