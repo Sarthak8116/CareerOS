@@ -5,6 +5,8 @@
 
 # next.js
 /.next/
+# Per-agent build dirs (NEXT_DIST_DIR; see next.config.mjs)
+/.next-*/
 /out/
 next-env.d.ts
 

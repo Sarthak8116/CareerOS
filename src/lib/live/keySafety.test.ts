@@ -54,6 +54,8 @@ import path from "node:path";
 
 const SRC_DIR = path.join(process.cwd(), "src");
 const KEY_PATTERN = /NVIDIA_API_KEY/;
+/** Selects files on READING a key, not just naming one (see header comment). */
+const KEY_READ = /process\.env\.NVIDIA_API_KEY\w*/;
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
@@ -73,7 +75,7 @@ function walk(dir: string, out: string[] = []): string[] {
 }
 
 const files = walk(SRC_DIR).filter((f) =>
-  KEY_PATTERN.test(readFileSync(f, "utf8")),
+  KEY_READ.test(readFileSync(f, "utf8")),
 );
 
 const isNextApiRoute = (rel: string) =>
@@ -82,10 +84,11 @@ const isNextApiRoute = (rel: string) =>
 describe("Nemotron key-handling guards", () => {
   if (files.length === 0) {
     it.todo(
-      "no module under src/ reads an NVIDIA_API_KEY* var yet — " +
-        "the Nemotron provider swap (contract: careeros/contract/p2.5-nemotron-provider) " +
-        "hasn't landed. Re-run once coder-nemotron / coder-package report; " +
-        "this suite will then auto-discover whichever file(s) they created.",
+      "no module under src/ reads (process.env.NVIDIA_API_KEY*) an NVIDIA key " +
+        "yet — the Nemotron provider swap (contract: " +
+        "careeros/contract/p2.5-nemotron-provider) hasn't landed. Re-run once " +
+        "coder-nemotron reports; this suite auto-discovers whichever file(s) " +
+        "they created.",
     );
     return;
   }

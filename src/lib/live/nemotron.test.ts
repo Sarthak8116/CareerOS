@@ -395,22 +395,83 @@ describe("readDocumentPages — reasoning suppression during transcription (RESO
   });
 });
 
-describe("RESUME_SHAPER — contract-drift check (careeros/contract/p2.5-nemotron-provider)", () => {
-  // The frozen contract reserves NANO ("held as multimodal fallback for the
-  // résumé path only") for exactly this role. As shipped, RESUME_SHAPER is
-  // "super", not "nano" — verified directly against nemotron.ts:48. Both
-  // nemotron.ts's own doc comment above that line ("NANO is the model the
-  // contract reserves for the résumé path") and campaign.ts's module header
-  // ("nemotron-3-nano (omni) shapes that transcript into candidate+evidence")
-  // still describe the OLD value, so the comments now contradict the code
-  // they sit next to, independent of whether the model choice itself is
-  // right. This test does not assert which model SHOULD be used — that's a
-  // product/contract call for the team, not a tester's call — it only pins
-  // down what IS wired today so a silent flip either direction gets caught.
-  // Flagged to coder-nemotron and team-lead; update this test in the same
-  // change that resolves the discrepancy, not before.
-  it("RESUME_SHAPER is currently 'super', not the contract's 'nano' — reconcile with the team, don't silently accept", async () => {
-    const { RESUME_SHAPER } = await import("@/lib/live/nemotron");
+describe("RESUME_SHAPER vs. PAGE_READER_FALLBACK — deliberate deviation from the frozen contract, ruled and explained", () => {
+  // RESOLVED: flagged as an unexplained contradiction (RESUME_SHAPER="super"
+  // vs. comments/contract both still saying "nano"); team-lead ruled it a
+  // deliberate correctness call (the evidence graph is honesty-critical, so
+  // shaping gets the stronger model) and nemotron.ts:48 now explains why.
+  // Pinning both constants, not just asserting they exist, because coder-
+  // nemotron reported a real transient bug in this exact area: RESUME_SHAPER
+  // and the page-reading fallback used to be ONE constant when both were
+  // "nano". Flipping the shaper to "super" without splitting them would have
+  // silently repointed page-image reading at a text-only model — every page
+  // would fail and get reported as "we could not read your résumé", a lie
+  // about the cause. PAGE_READER_FALLBACK now exists specifically to keep
+  // these independent; test that they stay that way.
+  it("RESUME_SHAPER is 'super' (structured shaping) and PAGE_READER_FALLBACK is 'nano' (must stay multimodal)", async () => {
+    const { RESUME_SHAPER, PAGE_READER_FALLBACK } = await import(
+      "@/lib/live/nemotron"
+    );
     expect(RESUME_SHAPER).toBe("super");
+    expect(PAGE_READER_FALLBACK).toBe("nano");
+    // The bug class this guards: these must never collapse back to one value.
+    expect(PAGE_READER_FALLBACK).not.toBe(RESUME_SHAPER);
+  });
+
+  it("readDocumentPages' fallback pass actually calls the nano model, not whatever RESUME_SHAPER is", async () => {
+    process.env.NVIDIA_API_KEY = "shared-key-value";
+    const fetchMock = vi
+      .fn()
+      // PARSE attempt on the one page — fails, forcing the fallback.
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        text: async () => "parse failed",
+        json: async () => ({}),
+      } as Response)
+      // Fallback attempt — succeeds.
+      .mockResolvedValueOnce(
+        jsonResponse({ choices: [{ message: { content: "transcribed" } }] }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    const { readDocumentPages, NEMOTRON_MODELS } = await import(
+      "@/lib/live/nemotron"
+    );
+
+    const result = await readDocumentPages({
+      label: "resume",
+      pages: ["data:image/png;base64," + "A".repeat(40)],
+    });
+
+    expect(result.model).toBe("nano");
+    const secondBody = JSON.parse(
+      (fetchMock.mock.calls[1][1] as RequestInit).body as string,
+    );
+    expect(secondBody.model).toBe(NEMOTRON_MODELS.nano);
+    expect(secondBody.model).not.toBe(NEMOTRON_MODELS.super);
+  });
+});
+
+describe("readDocumentPages — re-guards page format before any bytes leave for the API", () => {
+  // isSupportedPageImage is live code inside readDocumentPages, not just the
+  // exported predicate (which the earlier "image-only boundary" describe
+  // block above tests directly). The route already validates PNG + magic
+  // bytes before calling in, so a page failing THIS check is our own bug —
+  // and per coder-nemotron, it deliberately throws rather than marking the
+  // page "unreadable", because telling the user their résumé was unreadable
+  // when the actual fault is ours would be dishonest.
+  it("throws (does not silently mark the page unreadable) and never calls fetch when a page isn't a supported image", async () => {
+    process.env.NVIDIA_API_KEY = "shared-key-value";
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const { readDocumentPages } = await import("@/lib/live/nemotron");
+
+    await expect(
+      readDocumentPages({
+        label: "resume",
+        pages: ["data:application/pdf;base64," + "A".repeat(40)],
+      }),
+    ).rejects.toThrow(/not a supported image/);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

@@ -71,7 +71,9 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error:
-          "Live mode is off. Add your NVIDIA API keys to .env.local and restart the server to run real jobs.",
+          // Names the variable explicitly: the intake page's banner tells the
+          // user this message carries the exact name, so it has to.
+          "Live mode is off. Set NVIDIA_API_KEY_PARSE (or NVIDIA_API_KEY) in .env.local and restart the server to run real jobs.",
       },
       { status: 503 },
     );

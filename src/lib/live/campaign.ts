@@ -17,9 +17,10 @@ import { enrichWithLinkedIn } from "@/lib/live/enrich";
  * Runs structured Nemotron calls (read résumé → shape candidate → parse job →
  * analyze) and assembles a Campaign in the SAME schema the whole UI renders.
  *
- * Model per step (each is the model the frozen provider contract assigns):
+ * Model per step (the contract's assignment, except the shaper — see below):
  *  - nemotron-parse            reads the rasterised résumé pages
- *  - nemotron-3-nano (omni)    shapes that transcript into candidate+evidence
+ *  - nemotron-3-super          shapes that transcript into candidate+evidence
+ *                              (RESUME_SHAPER; see nemotron.ts for why SUPER)
  *  - nemotron-3.5-lightning    parses the job posting
  *  - nemotron-3-super          produces the campaign analysis
  *
