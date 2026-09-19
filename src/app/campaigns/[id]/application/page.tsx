@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { Package, Sparkles } from "lucide-react";
-import type { ApplicationPackage, Campaign } from "@/lib/types";
+import type { ApplicationPackage, Campaign, Candidate } from "@/lib/types";
 import { getCampaign } from "@/lib/store";
 import { getAnswers } from "@/lib/answers";
-import { demoCandidate } from "@/lib/demo/candidate";
+import { getProfile } from "@/lib/profileStore";
 import { getResumeRecommendations, verifyClaims } from "@/lib/engine/resume";
 import {
   CoverLetterDraft,
@@ -37,6 +37,22 @@ export default function ApplicationStudioPage() {
   const id = params.id;
 
   const [campaign, setCampaign] = useState<Campaign | undefined>(undefined);
+  /**
+   * The REAL candidate, from the profile store.
+   *
+   * Read in the effect below rather than during render: `getProfile()` is a
+   * localStorage read, so a server render and the first client render would
+   * otherwise disagree. It is `undefined` until that effect runs, and nothing
+   * that consumes it is rendered before then.
+   *
+   * This page used to ground everything in `demoCandidate`, which meant a real
+   * user was shown claim verification and resume recommendations computed
+   * against SOMEONE ELSE'S evidence — the honesty surface asserting things
+   * about a different person and calling it their check. Never reintroduce a
+   * demo fallback here; `getProfile()` already falls back to one internally,
+   * once, in the one place that owns that decision.
+   */
+  const [candidate, setCandidate] = useState<Candidate | undefined>(undefined);
   const [loaded, setLoaded] = useState(false);
 
   /* The package is built ON REQUEST, not on mount: with a key present it costs
@@ -54,6 +70,7 @@ export default function ApplicationStudioPage() {
       const c = await getCampaign(id);
       if (!active) return;
       setCampaign(c);
+      setCandidate(getProfile());
       setLoaded(true);
     })();
     return () => {
@@ -63,10 +80,15 @@ export default function ApplicationStudioPage() {
 
   const recommendations = useMemo(
     () =>
-      campaign ? getResumeRecommendations(demoCandidate, campaign.job) : [],
-    [campaign],
+      campaign && candidate
+        ? getResumeRecommendations(candidate, campaign.job)
+        : [],
+    [campaign, candidate],
   );
-  const flags = useMemo(() => verifyClaims(demoCandidate), []);
+  const flags = useMemo(
+    () => (candidate ? verifyClaims(candidate) : []),
+    [candidate],
+  );
 
   /**
    * Assemble the package.
@@ -79,7 +101,7 @@ export default function ApplicationStudioPage() {
    * claims about the same file.
    */
   const build = useCallback(async () => {
-    if (!campaign) return;
+    if (!campaign || !candidate) return;
     setBuilding(true);
     setExportError(undefined);
     setBuildError(undefined);
@@ -89,7 +111,7 @@ export default function ApplicationStudioPage() {
       const res = await fetch("/api/package/cover-letter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ candidate: demoCandidate, job: campaign.job }),
+        body: JSON.stringify({ candidate, job: campaign.job }),
       });
       if (res.ok) {
         const body: unknown = await res.json();
@@ -107,7 +129,7 @@ export default function ApplicationStudioPage() {
     try {
       const built = buildApplicationPackage({
         campaign,
-        candidate: demoCandidate,
+        candidate,
         library: getAnswers(),
         builtAt: new Date().toISOString(),
         coverLetter,
@@ -123,7 +145,7 @@ export default function ApplicationStudioPage() {
     } finally {
       setBuilding(false);
     }
-  }, [campaign]);
+  }, [campaign, candidate]);
 
   /** Download the .zip the user just reviewed — not a freshly rebuilt one. */
   const exportZip = useCallback(async () => {

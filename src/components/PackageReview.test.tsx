@@ -7,7 +7,11 @@ import type {
   PackageDocument,
 } from "@/lib/types";
 import { PackageReview } from "@/components/PackageReview";
-import { removeSentence } from "@/components/PackageDocumentCard";
+import {
+  claimsStillMade,
+  removeSentence,
+  splitUnits,
+} from "@/components/PackageDocumentCard";
 
 /**
  * The four ways this surface could lie, each with a test that catches it:
@@ -223,7 +227,7 @@ describe("PackageReview — an unsupported claim blocks the download", () => {
     fireEvent.click(screen.getByRole("button", { name: /take it out/i }));
 
     expect(
-      screen.getByText(/part of a longer sentence in this document/i),
+      screen.getByText(/isn't a whole sentence in the document/i),
     ).toBeTruthy();
     // The longer, evidenced sentence is intact — not a headless fragment.
     expect(document.body.textContent).toContain(
@@ -513,5 +517,63 @@ describe("removeSentence", () => {
 
   it("leaves content untouched when the sentence is not present", () => {
     expect(removeSentence("Only this.", "Not here.")).toBe("Only this.");
+  });
+
+  it("will not cut a claim out of the MIDDLE of a sentence, even where it ends one", () => {
+    /* A boundary check alone is not enough: this claim starts at a word
+       boundary and ends a sentence, yet cutting it would leave the dangling
+       fragment "I led the team and". Only whole-unit removal is safe. */
+    const content = "I led the team and I shipped the feature.";
+    expect(removeSentence(content, "I shipped the feature.")).toBe(content);
+  });
+
+  it("removes only the standalone occurrence, leaving one embedded in a longer sentence intact", () => {
+    const content =
+      "I am excited about this role. Later in the letter: I am excited about this role.";
+    const out = removeSentence(content, "I am excited about this role.");
+    expect(out).toBe("Later in the letter: I am excited about this role.");
+    /* The sentence is STILL asserted inside the surviving one, so the claim is
+       still made and must stay flagged — blocking export — rather than being
+       dropped because one copy of it went away. */
+    expect(
+      claimsStillMade(out, [
+        { text: "I am excited about this role.", support: "unsupported" },
+      ]),
+    ).toHaveLength(1);
+  });
+
+  it("INVARIANT: after any removal, every surviving claim's text is still present verbatim", () => {
+    /* The property that makes this class of corruption impossible. If a
+       removal ever alters a sentence it did not target, some other claim's
+       text stops matching and this fails. */
+    const claims: PackageClaim[] = [
+      { text: "I built the payments pipeline", support: "unsupported" },
+      {
+        text: "I built the payments pipeline at my last internship.",
+        support: "evidenced",
+        evidenceId: "ev_payments",
+      },
+      { text: "Other sentence stands alone.", support: "evidenced" },
+    ];
+    const content =
+      "I built the payments pipeline at my last internship. Other sentence stands alone.";
+
+    for (const target of claims) {
+      const out = removeSentence(content, target.text);
+      for (const survivor of claimsStillMade(out, claims)) {
+        expect(out).toContain(survivor.text);
+      }
+    }
+  });
+
+  it("splitUnits reconstructs the input exactly — the property whole-unit removal rests on", () => {
+    for (const content of [
+      "One. Two! Three?",
+      "Dear team,\n\nA sentence.\n\nRegards",
+      "No terminator at all",
+      "Trailing spaces.   And more.",
+    ]) {
+      expect(splitUnits(content).join("")).toBe(content);
+    }
   });
 });

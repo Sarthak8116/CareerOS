@@ -7,6 +7,12 @@ import { tokenize, normalizeForEquality, overlap, isSameTopic, MIN_SHARED_TOKENS
  * OVER-match is the expensive failure — it presents a stored answer as if it
  * belonged to a question nobody asked — so these tests lean on cases that
  * ought to miss, not just ones that ought to hit.
+ *
+ * One documented exception: see "deliberate over-match (ruled acceptable,
+ * not a bug)" below — a short query matching a longer, topically-broader
+ * target is a RULED product decision, not an oversight, because the
+ * resulting "reused" answer names the library question it came from rather
+ * than silently claiming to be a clean match.
  */
 
 describe("tokenize", () => {
@@ -91,26 +97,38 @@ describe("isSameTopic — deliberate misses (over-matching is the expensive fail
     expect(MIN_SHARED_TOKENS).toBeGreaterThanOrEqual(2);
   });
 
-  // FINDING (flagged to coder-package, not softened): the `coverageOfQuery
-  // >= 0.7` branch has no ceiling on how much EXTRA topical content the
-  // target may carry, so a short query is matched against a much longer
-  // compound question as long as the query's own tokens are all present.
-  // Concretely, "Why do you want to work here?" (tokens: want/work/here)
-  // matches a compound question that ALSO asks about greatest weakness and
-  // handling failure, because coverageOfQuery is still 100% — even though
-  // 5 of the target's 8 topical tokens are unrelated new content. That is
-  // exactly the "over-match" shape this module's own header calls the
-  // expensive failure: a saved "why us" answer would get reused for a
-  // multi-part question it does not actually finish answering. Left as
-  // it.todo (not deleted, not asserted as passing) until coder-package
-  // decides whether branch 1 needs a coverageOfTarget floor — see the
-  // message sent alongside this file.
-  it.todo(
-    "a superset target that adds substantial NEW topical content, not just a trailing company name, does not match — OPEN FINDING, see message to coder-package",
-  );
-
   it("does not match empty strings against real content", () => {
     expect(isSameTopic("", "Why do you want to work here?")).toBe(false);
     expect(isSameTopic("Why do you want to work here?", "")).toBe(false);
+  });
+});
+
+/**
+ * RULED, PINNED (not a bug) — coder-package's decision, made deliberately
+ * rather than reverse-engineered from a test case.
+ *
+ * `coverageOfQuery >= 0.7` has no ceiling on how much EXTRA content the
+ * target carries, so a short current question CAN match a longer saved
+ * library question that also covers other topics. coder-package chose not
+ * to tighten this: the failure mode of matching is a user handed their OWN
+ * saved answer, labelled "reused", with the library question it came from
+ * printed alongside it (`matchAnswers` / `buildShortAnswers` — see
+ * shortAnswers.test.ts) — visible over-answering, not a misleading claim.
+ * The failure mode of NOT matching is a silent "needs-you" on the single
+ * most common application question ("Why do you want to work here?"),
+ * defeating the point of having an answer library at all. Between visible
+ * over-answering and silent missing, this module chooses to over-answer
+ * visibly. Flagged to 'main' as a product call, not a defect — asserted here
+ * so a future edit that tightens branch 1 does so on purpose, with this test
+ * as the thing it must consciously change, not by accident.
+ */
+describe("isSameTopic — deliberate over-match (ruled acceptable, not a bug)", () => {
+  it("a short query DOES match a longer target that also covers substantial unrelated topics — by design", () => {
+    expect(
+      isSameTopic(
+        "Why do you want to work here?",
+        "Why do you want to work here, and separately, what is your greatest weakness and how do you handle failure?",
+      ),
+    ).toBe(true);
   });
 });

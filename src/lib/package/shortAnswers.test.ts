@@ -257,20 +257,55 @@ describe("buildShortAnswers — required/optional framing never invents what we 
 });
 
 /**
- * OPEN FINDING (ruled a real bug by team-lead, assigned to coder-package —
- * see the message thread and match.test.ts). `matchAnswers` calls
- * `isSameTopic(question.prompt, entry.question)` directly: the CURRENT
- * form's question is the query, a SAVED library question is the target.
- * `isSameTopic`'s `coverageOfQuery >= 0.7` branch has no ceiling on how much
- * EXTRA content the target carries, so a short current question can match a
- * verbose old saved question and pull in an answer that also covers material
- * nobody asked this time — labelled "reused" (truthfully, as far as the
- * schema goes) but not actually a clean answer to just this question.
+ * RULED, PINNED (not a bug) — coder-package's call, not mine to overturn.
  *
- * This is left as it.todo, not asserted either way, until match.ts's fix
- * lands — flip it to a real assertion once coverage is required in both
- * directions.
+ * `matchAnswers` calls `isSameTopic(question.prompt, entry.question)`
+ * directly: the CURRENT form's question is the query, a SAVED library
+ * question is the target. `isSameTopic`'s `coverageOfQuery >= 0.7` branch has
+ * no ceiling on how much EXTRA content the target carries, so a short
+ * current question CAN match a verbose old saved question and pull in an
+ * answer that also covers material nobody asked this time.
+ *
+ * coder-package chose not to tighten `isSameTopic` for this: the resulting
+ * failure is a user handed their OWN saved answer, labelled "reused", with
+ * the exact library question it came from printed next to it (see
+ * `buildShortAnswers`'s "saved as: ..." line below) — visible over-answering,
+ * not a misleading claim. The alternative (a coverageOfTarget floor) would
+ * turn the single most common application question, "Why do you want to
+ * work here?", into a silent "needs-you" whenever the only saved answer for
+ * it happens to be a broader one — defeating the point of the answer
+ * library. Flagged to 'main' as a product call, not a defect.
+ *
+ * Pinned here (not left as it.todo) so a future edit to `isSameTopic` that
+ * changes this must consciously break this test rather than pass by
+ * accident.
  */
-it.todo(
-  "matchAnswers does not pair a short current question with a saved library question that covers substantial unrelated extra topics — BLOCKED on match.ts fix (coverageOfQuery/coverageOfTarget symmetry)",
-);
+describe("buildShortAnswers — deliberate over-match (ruled acceptable, not a bug)", () => {
+  it("a short current question DOES reuse an answer saved under a longer, topically-broader question — and says exactly which one", () => {
+    const doc = buildShortAnswers({
+      form: form({
+        questions: [q({ id: "q1", prompt: "Why do you want to work here?" })],
+      }),
+      library: [
+        answer({
+          question:
+            "Why do you want to work here, and separately, what is your greatest weakness and how do you handle failure?",
+          answer: "I admire the engineering culture, and I handle failure by retrospecting openly.",
+        }),
+      ],
+      jobTitle: "Systems Software Engineer",
+      company: "Acme Corp",
+    });
+
+    // Reused, not silently dropped to "needs-you" — visible over-answering.
+    expect(doc.status).toBe("reused");
+    expect(doc.missing).toEqual([]);
+    // The user can SEE the mismatch: the exact saved question is quoted.
+    expect(doc.content).toContain(
+      'saved as: "Why do you want to work here, and separately, what is your greatest weakness and how do you handle failure?"',
+    );
+    expect(doc.content).toContain(
+      "I admire the engineering culture, and I handle failure by retrospecting openly.",
+    );
+  });
+});

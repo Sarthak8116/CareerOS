@@ -588,6 +588,78 @@ describe("buildApplicationPackage — cover-letter 'not-requested' is honored", 
   });
 });
 
+describe("buildApplicationPackage — determinism (no clock, no randomness, anywhere in the call graph)", () => {
+  it("the same campaign, candidate, library, and builtAt produce a byte-identical package across two calls", () => {
+    const input = {
+      campaign: campaign({
+        job: job({
+          requirements: [
+            { id: "req_1", text: "Experience with C and low-level systems programming", kind: "minimum" as const },
+          ],
+        }),
+        applicationForm: form({
+          questions: [
+            {
+              id: "q1",
+              prompt: "Why do you want to work here?",
+              kind: "long-text" as const,
+              category: "motivation" as const,
+              trust: "source-backed" as const,
+            },
+            ...PERSONAL_QUESTIONS_SATISFIABLE,
+          ],
+        }),
+      }),
+      candidate: candidate(),
+      library: [
+        {
+          id: "ans_1",
+          question: "Why do you want to work here?",
+          answer: "Because I admire the engineering culture.",
+          tags: [],
+          updatedAt: "2026-01-01T00:00:00.000Z",
+        },
+      ],
+      builtAt: BUILT_AT,
+    };
+
+    const first = buildApplicationPackage(input);
+    const second = buildApplicationPackage(input);
+
+    // A byte-for-byte comparison catches a Date.now()/Math.random() reaching
+    // into the builder through a DEPENDENCY (coverLetter.ts, resumeDoc.ts,
+    // shortAnswers.ts, personalInfo.ts, match.ts, filenames.ts), not just one
+    // guards.test.ts can see by grepping only files in this directory.
+    expect(JSON.stringify(first)).toBe(JSON.stringify(second));
+  });
+
+  it("still deterministic when a live-model cover letter is supplied instead of the assembled fallback", () => {
+    const liveCoverLetter = {
+      greeting: "Dear Hiring Team,",
+      paragraphs: [
+        {
+          sentences: [
+            { text: "I am excited to apply for this role.", role: "intent" as const },
+          ],
+        },
+      ],
+      closing: "Sincerely,\nJordan Rivera",
+    };
+    const input = {
+      campaign: campaign(),
+      candidate: candidate(),
+      library: [],
+      builtAt: BUILT_AT,
+      coverLetter: liveCoverLetter,
+    };
+
+    const first = buildApplicationPackage(input);
+    const second = buildApplicationPackage(input);
+    expect(JSON.stringify(first)).toBe(JSON.stringify(second));
+    expect(first.coverLetterOrigin).toBe("model");
+  });
+});
+
 describe("buildApplicationPackage — the result is schema-valid by construction", () => {
   it("parses through ApplicationPackage without alteration (the builder validates its own output)", async () => {
     const { ApplicationPackage } = await import("@/lib/types");
