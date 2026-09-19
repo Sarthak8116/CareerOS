@@ -97,10 +97,18 @@ export function detectInjection(text: string): string[] {
     return [];
   }
 
+  // Scan BOTH the raw text and its entity-decoded form. Decoding matters
+  // because "&#73;gnore all previous instructions" reads as an instruction to a
+  // model but matches no literal /\bignore\b/ pattern — scanning only the raw
+  // bytes missed it entirely. Scanning both means an encoded payload is caught
+  // without losing any rule that depends on the original punctuation.
+  const decoded = decodeEntities(text);
+  const haystacks = decoded === text ? [text] : [text, decoded];
+
   const flags: string[] = [];
   for (const rule of INJECTION_RULES) {
     // Non-global patterns: `.test` is stateless, so this is safe to reuse.
-    if (rule.pattern.test(text)) {
+    if (haystacks.some((h) => rule.pattern.test(h))) {
       flags.push(rule.flag);
     }
   }
@@ -130,6 +138,61 @@ function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (ch) => HTML_ESCAPES[ch]);
 }
 
+/** The named entities worth resolving; numeric forms are handled generically. */
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
+  tab: "\t",
+  newline: "\n",
+};
+
+/** Bound the decode loop so nested encoding cannot spin forever. */
+const MAX_DECODE_PASSES = 3;
+
+/**
+ * Decode HTML entities so injection detection sees what a MODEL would read,
+ * not the literal bytes.
+ *
+ * This is a DETECTION aid, not an output transform — {@link sanitizeUntrusted}
+ * still escapes on the way out, so nothing decoded here can render as markup.
+ *
+ * Runs up to {@link MAX_DECODE_PASSES} times because payloads are sometimes
+ * double-encoded ("&amp;#73;gnore"), and stops early once a pass changes
+ * nothing. The cap prevents an adversarial input from causing unbounded work.
+ */
+export function decodeEntities(text: string): string {
+  let out = text;
+  for (let pass = 0; pass < MAX_DECODE_PASSES; pass++) {
+    const next = out
+      // Numeric: &#73; and &#x49;
+      .replace(/&#x([0-9a-f]+);?/gi, (match, hex: string) => {
+        const code = Number.parseInt(hex, 16);
+        return Number.isFinite(code) && code > 0 && code <= 0x10ffff
+          ? String.fromCodePoint(code)
+          : match;
+      })
+      .replace(/&#(\d+);?/g, (match, dec: string) => {
+        const code = Number.parseInt(dec, 10);
+        return Number.isFinite(code) && code > 0 && code <= 0x10ffff
+          ? String.fromCodePoint(code)
+          : match;
+      })
+      // Named: &amp; &lt; &nbsp; …
+      .replace(/&([a-z]+);/gi, (match, name: string) => {
+        const decoded = NAMED_ENTITIES[name.toLowerCase()];
+        return decoded ?? match;
+      });
+
+    if (next === out) break; // nothing left to decode
+    out = next;
+  }
+  return out;
+}
+
 /**
  * Sanitize untrusted text into an inert, safe-to-display DATA string and report
  * any injection signals detected in the ORIGINAL input.
@@ -156,6 +219,8 @@ export function sanitizeUntrusted(text: string): { clean: string; flags: string[
     return { clean: "", flags: [] };
   }
 
+  // `detectInjection` now scans the entity-decoded form as well as the raw
+  // text, so an encoded payload cannot slip past unflagged.
   const flags = detectInjection(text);
 
   const clean = escapeHtml(
