@@ -1,6 +1,9 @@
 import "server-only";
 
-import dns from "node:dns/promises";
+import https from "node:https";
+import dns from "node:dns";
+import dnsPromises from "node:dns/promises";
+import type { LookupAddress, LookupOptions } from "node:dns";
 import { IntakeError } from "@/lib/intake/types";
 
 /**
@@ -12,53 +15,41 @@ import { IntakeError } from "@/lib/intake/types";
  * WHY THIS IS STRICTER THAN THE HARVEST CLIENT: Harvest calls ONE fixed Apify
  * host with our own token. This module fetches a URL A USER TYPED, which makes
  * it a server-side request forgery primitive unless it is guarded. An attacker
- * who can get us to fetch `http://169.254.169.254/` on a cloud host reads the
+ * who can get us to fetch `https://169.254.169.254/` on a cloud host reads the
  * instance's credentials. So:
  *
  *  - https only, and never with credentials in the URL
- *  - the hostname is RESOLVED and every resulting address is checked against
- *    the private/loopback/link-local ranges before we connect
+ *  - THE ADDRESS VALIDATED IS THE ADDRESS CONNECTED TO (see below)
+ *  - the hostname is also resolved and checked up front, as defence in depth
  *  - redirects are followed MANUALLY, at most 3 hops, and the host is
  *    re-validated on EVERY hop — a public host is free to redirect into the
  *    metadata service, so validating only the first URL proves nothing
  *  - the response body is capped, so a hostile server cannot exhaust memory
  *  - no cookies, no Authorization, no caller headers are ever forwarded
  *
- * KNOWN LIMITATION — DNS REBINDING IS NOT CLOSED. This is a TOCTOU window and
- * it is deliberate, not an oversight:
+ * HOW DNS REBINDING IS CLOSED — and why the obvious phrasing is wrong.
  *
- *   we resolve the hostname and validate every address it returns, and then we
- *   hand `fetch` the HOSTNAME, which resolves it a second time independently.
- *   An attacker controlling a DNS record with a very short TTL can answer the
- *   validating lookup with a public address and the connecting lookup with a
- *   private one, and reach an internal host through the guard.
+ * The invariant is: THE ADDRESS VALIDATED MUST BE THE ADDRESS CONNECTED TO.
  *
- * THE FIX IS KNOWN AND TESTED, and is scheduled for P6 alongside the other
- * network-layer work. Do not re-derive it:
+ * It is NOT "re-resolve DNS at connect time". That describes the BUG: two
+ * separate lookups, with a window between them in which an attacker controlling
+ * a short-TTL record answers the first with a public address and the second
+ * with a private one. A second independent lookup is the hole, however
+ * responsible it sounds.
  *
- *   `node:https` accepts a custom `lookup`, and that lookup supplies the address
- *   the socket actually connects to. Doing the private-range check INSIDE it
- *   makes validation and connection share ONE resolution, so no window exists.
- *   Verified against the live network: a public host still returns 200 (we
- *   still connect by hostname, so SNI, certificate validation and virtual
- *   hosting are unaffected), and a rejection inside the lookup surfaces as a
- *   clean request error before any socket gets an address.
+ * So we pass a custom `lookup` to `https.request`. That function is what
+ * supplies the address the socket actually connects to, and it applies the
+ * private/loopback/link-local checks itself — so validation and connection
+ * share ONE resolution and no window exists. Rejecting inside the lookup means
+ * the socket never receives an address at all.
  *
- * Note the distinction, because it is easy to get backwards: re-resolving at
- * connect time is NOT the fix — an independent second lookup IS the hole. The
- * fix is making the validating and connecting lookups the same lookup.
+ * We still connect BY HOSTNAME, so SNI, certificate validation and virtual
+ * hosting are unaffected. That property is load-bearing: "fix" this by
+ * connecting to a raw IP instead and TLS silently stops verifying the host.
  *
- * The undici route (`Agent({ connect: { lookup } })`) is the same idea and also
- * works, but `undici` is not a dependency of this project — only `undici-types`
- * is present, which is declarations with no runtime. It would need adding.
- *
- * What the guard above DOES stop: literal private IPs, localhost/.local, hosts
- * that resolve to private space at validation time, hosts with even one private
- * record among several, and redirects into private space. What it does NOT stop
- * is an attacker who controls DNS for a name they also persuade the user to
- * paste, and who wins a race against a single 15s request.
- *
- * Do not describe this module as rebinding-safe until that lookup lands.
+ * `assertSafeUrl` below is now redundant for security but deliberately kept:
+ * it rejects obviously-bad hosts before a socket is opened, and gives a
+ * clearer failure than a connect-time error.
  *
  * Nothing here logs: a URL can itself carry a secret, so console output in this
  * module would be a leak (`client.test.ts` asserts the same rule for Harvest).
@@ -75,6 +66,12 @@ const MAX_REDIRECTS = 3;
 
 /** A plain, honest UA. We identify ourselves rather than impersonating. */
 const USER_AGENT = "CareerOS/1.0 (job posting intake)";
+
+/** Marks a connection refused by our own guard, not by the network. */
+export const BLOCKED_ADDRESS_CODE = "ECAREEROS_BLOCKED";
+
+/** Marks our own timeout, distinct from a socket-level error. */
+const TIMEOUT_CODE = "ECAREEROS_TIMEOUT";
 
 export interface FetchedResponse {
   status: number;
@@ -121,14 +118,85 @@ function isPrivateIPv6(ip: string): boolean {
   return false;
 }
 
-function isPrivateAddress(address: string, family: number): boolean {
+export function isPrivateAddress(address: string, family: number): boolean {
   return family === 6 ? isPrivateIPv6(address) : isPrivateIPv4(address);
 }
 
+function blockedError(address: string): NodeJS.ErrnoException {
+  // The address is NOT included in the message: it can be attacker-chosen, and
+  // this string may reach a log.
+  const err: NodeJS.ErrnoException = new Error(
+    "Refused to connect to a non-public address.",
+  );
+  err.code = BLOCKED_ADDRESS_CODE;
+  void address;
+  return err;
+}
+
 /**
- * Reject a URL we must not fetch.
+ * The DNS lookup the socket actually uses, with the private-range check inside.
  *
- * Throws rather than returning false so a missed call site fails closed.
+ * THIS is what closes the rebinding window: the address this function returns
+ * is the address the connection uses, so there is no second, unguarded
+ * resolution between the check and the connect. Rejecting here means no socket
+ * is ever opened.
+ *
+ * Node calls it as `(hostname, options, callback)`. With `options.all === true`
+ * the callback receives an ARRAY of `{address, family}`; otherwise a single
+ * address plus family. Both shapes are handled — mishandling the array form
+ * would silently skip the check for every multi-record host.
+ */
+export function guardedLookup(
+  hostname: string,
+  options: LookupOptions,
+  callback: (
+    err: NodeJS.ErrnoException | null,
+    address: string | LookupAddress[],
+    family?: number,
+  ) => void,
+): void {
+  // `dns.lookup` is overloaded on whether `options.all` is set, and the option
+  // comes from Node at call time rather than from us — so the callback is typed
+  // for BOTH result shapes here and narrowed below.
+  const onResolved = (
+    err: NodeJS.ErrnoException | null,
+    address: string | LookupAddress[],
+    family?: number,
+  ): void => {
+    if (err) {
+      callback(err, "");
+      return;
+    }
+    const entries: LookupAddress[] = Array.isArray(address)
+      ? address
+      : [{ address, family: family ?? 4 }];
+
+    for (const entry of entries) {
+      if (isPrivateAddress(entry.address, entry.family)) {
+        callback(blockedError(entry.address), "");
+        return;
+      }
+    }
+    callback(null, address, family);
+  };
+
+  // The cast picks one overload; `onResolved` accepts both result shapes.
+  dns.lookup(
+    hostname,
+    options as dns.LookupAllOptions,
+    onResolved as (
+      err: NodeJS.ErrnoException | null,
+      address: LookupAddress[],
+    ) => void,
+  );
+}
+
+/**
+ * Reject a URL we must not fetch, before a socket is opened.
+ *
+ * Defence in depth: `guardedLookup` is the guarantee, but failing fast here
+ * gives a clearer error and avoids opening a connection for an obviously bad
+ * host. Throws rather than returning false so a missed call site fails closed.
  */
 async function assertSafeUrl(raw: string): Promise<URL> {
   let url: URL;
@@ -168,7 +236,7 @@ async function assertSafeUrl(raw: string): Promise<URL> {
 
   let records: { address: string; family: number }[];
   try {
-    records = await dns.lookup(hostname, { all: true });
+    records = await dnsPromises.lookup(hostname, { all: true });
   } catch {
     throw new IntakeError("upstream", "That host could not be found.");
   }
@@ -186,38 +254,119 @@ async function assertSafeUrl(raw: string): Promise<URL> {
 }
 
 /* ------------------------------------------------------------------ */
-/* Body reading                                                        */
+/* Transport                                                           */
 /* ------------------------------------------------------------------ */
 
-/** Read at most `MAX_BYTES`, so a hostile server cannot exhaust memory. */
-async function readCapped(res: Response): Promise<string> {
-  const body = res.body;
-  if (!body) return "";
-  const reader = body.getReader();
-  const chunks: Uint8Array[] = [];
-  let total = 0;
-  try {
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (!value) continue;
-      total += value.byteLength;
-      if (total > MAX_BYTES) {
-        chunks.push(value.slice(0, value.byteLength - (total - MAX_BYTES)));
-        break;
-      }
-      chunks.push(value);
-    }
-  } finally {
-    await reader.cancel().catch(() => undefined);
+interface RawResponse {
+  status: number;
+  contentType?: string;
+  location?: string;
+  text: string;
+}
+
+/**
+ * One GET, connected through `guardedLookup`.
+ *
+ * Redirects are NOT followed here — `safeFetch` follows them by hand so each
+ * hop is re-validated. The body is capped while it streams, so an oversized
+ * response is abandoned rather than buffered.
+ */
+function httpsGet(url: URL): Promise<RawResponse> {
+  return new Promise<RawResponse>((resolve, reject) => {
+    let settled = false;
+    const finish = (value: RawResponse) => {
+      if (settled) return;
+      settled = true;
+      resolve(value);
+    };
+    const fail = (err: NodeJS.ErrnoException) => {
+      if (settled) return;
+      settled = true;
+      reject(err);
+    };
+
+    const req = https.request(
+      url,
+      {
+        method: "GET",
+        // The guard. Everything else here is ordinary request setup.
+        lookup: guardedLookup,
+        headers: {
+          // Deliberately minimal. No cookies, no Authorization, no caller
+          // headers — we never act with the user's credentials.
+          accept: "application/json, text/html;q=0.9, */*;q=0.5",
+          "user-agent": USER_AGENT,
+        },
+      },
+      (res) => {
+        const chunks: Buffer[] = [];
+        let total = 0;
+
+        const done = () =>
+          finish({
+            status: res.statusCode ?? 0,
+            contentType: res.headers["content-type"] ?? undefined,
+            location: res.headers.location ?? undefined,
+            text: Buffer.concat(chunks).toString("utf8"),
+          });
+
+        /** Abandon the rest of the body and settle with what we have. */
+        const stopReading = () => {
+          // Guarded: a real IncomingMessage is a stream, but settling must not
+          // depend on that — if `destroy` is unavailable we still resolve.
+          if (typeof res.destroy === "function") res.destroy();
+          done();
+        };
+
+        // A redirect's body is never read: we only need the Location header,
+        // and `safeFetch` re-validates the target before connecting to it.
+        // Downloading a body we are about to discard wastes bandwidth.
+        if (REDIRECT_STATUSES.has(res.statusCode ?? 0)) {
+          stopReading();
+          return;
+        }
+
+        res.on("data", (chunk: Buffer) => {
+          const remaining = MAX_BYTES - total;
+          if (remaining <= 0) return;
+          if (chunk.byteLength >= remaining) {
+            chunks.push(chunk.subarray(0, remaining));
+            total = MAX_BYTES;
+            stopReading();
+            return;
+          }
+          chunks.push(chunk);
+          total += chunk.byteLength;
+        });
+
+        res.on("end", done);
+        // Also fires after `res.destroy()`, and on a truncated response.
+        res.on("close", done);
+        res.on("error", fail);
+      },
+    );
+
+    req.setTimeout(TIMEOUT_MS, () => {
+      const err: NodeJS.ErrnoException = new Error("Request timed out.");
+      err.code = TIMEOUT_CODE;
+      req.destroy(err);
+    });
+    req.on("error", fail);
+    req.end();
+  });
+}
+
+/** Map a transport-level failure onto a user-safe IntakeError. */
+function transportError(err: unknown): IntakeError {
+  const code = (err as NodeJS.ErrnoException | undefined)?.code;
+  if (code === BLOCKED_ADDRESS_CODE) {
+    // Our own guard refused the address the socket would have used.
+    return new IntakeError("unsafe-url", "That host is not reachable.");
   }
-  const merged = new Uint8Array(chunks.reduce((n, c) => n + c.byteLength, 0));
-  let offset = 0;
-  for (const chunk of chunks) {
-    merged.set(chunk, offset);
-    offset += chunk.byteLength;
+  if (code === TIMEOUT_CODE || code === "ETIMEDOUT") {
+    return new IntakeError("timeout", "That posting took too long to load.");
   }
-  return new TextDecoder("utf-8").decode(merged);
+  return new IntakeError("upstream", "That posting could not be reached.");
 }
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
@@ -234,60 +383,39 @@ const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
  * exception.
  */
 export async function safeFetch(rawUrl: string): Promise<FetchedResponse> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  let current = rawUrl;
 
-  try {
-    let current = rawUrl;
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    // Pre-check, then connect — and the connection re-checks the address it
+    // actually uses, via `guardedLookup`. Both run on EVERY hop: a public host
+    // is free to redirect into private space.
+    const url = await assertSafeUrl(current);
 
-    for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-      // Re-validated on EVERY hop: a public host may redirect to a private one.
-      const url = await assertSafeUrl(current);
-
-      let res: Response;
-      try {
-        res = await fetch(url, {
-          method: "GET",
-          redirect: "manual",
-          signal: controller.signal,
-          cache: "no-store",
-          headers: {
-            // Deliberately minimal. No cookies, no Authorization, no caller
-            // headers — we never act with the user's credentials.
-            accept: "application/json, text/html;q=0.9, */*;q=0.5",
-            "user-agent": USER_AGENT,
-          },
-        });
-      } catch (err) {
-        if (err instanceof Error && err.name === "AbortError") {
-          throw new IntakeError("timeout", "That posting took too long to load.");
-        }
-        throw new IntakeError("upstream", "That posting could not be reached.");
-      }
-
-      if (REDIRECT_STATUSES.has(res.status)) {
-        const location = res.headers.get("location");
-        if (!location) {
-          throw new IntakeError("upstream", "That posting redirected nowhere.");
-        }
-        // Relative redirects are legal and common.
-        current = new URL(location, url).toString();
-        continue;
-      }
-
-      const text = await readCapped(res);
-      return {
-        status: res.status,
-        contentType: res.headers.get("content-type") ?? undefined,
-        text,
-        finalUrl: url.toString(),
-      };
+    let res: RawResponse;
+    try {
+      res = await httpsGet(url);
+    } catch (err) {
+      throw transportError(err);
     }
 
-    throw new IntakeError("upstream", "That posting redirected too many times.");
-  } finally {
-    clearTimeout(timer);
+    if (REDIRECT_STATUSES.has(res.status)) {
+      if (!res.location) {
+        throw new IntakeError("upstream", "That posting redirected nowhere.");
+      }
+      // Relative redirects are legal and common.
+      current = new URL(res.location, url).toString();
+      continue;
+    }
+
+    return {
+      status: res.status,
+      contentType: res.contentType,
+      text: res.text,
+      finalUrl: url.toString(),
+    };
   }
+
+  throw new IntakeError("upstream", "That posting redirected too many times.");
 }
 
 /**

@@ -4,16 +4,21 @@ import path from "node:path";
 import { Job as JobSchema } from "@/lib/types";
 import greenhouse from "@/lib/intake/__fixtures__/greenhouse.json";
 import greenhouseBroken from "@/lib/intake/__fixtures__/greenhouse-broken.json";
+import https from "node:https";
+import type { Mock } from "vitest";
+import { respondWith } from "@/test/httpsMock";
 
 /**
- * End-to-end orchestration, with DNS and fetch both stubbed.
+ * End-to-end orchestration, with DNS and the transport both stubbed.
  *
  * This covers the glue `adapters.test.ts` cannot reach: HTTP status mapping,
  * the content-type check that keeps a plain-text 404 from crashing a JSON
  * parse, and the promise that `intakeFromUrl` NEVER throws upward.
  *
- * DNS is mocked so the suite runs with no network at all — otherwise every
- * hostname lookup would be a live call and the tests would fail offline.
+ * DNS is mocked so the suite runs with no network at all. The transport is
+ * `node:https`, not global `fetch` — `fetch.ts` connects through
+ * `https.request` because only that accepts the custom `lookup` which closes
+ * the DNS-rebinding window.
  */
 
 vi.mock("node:dns/promises", () => ({
@@ -22,14 +27,23 @@ vi.mock("node:dns/promises", () => ({
   },
 }));
 
+vi.mock("node:https", () => ({ default: { request: vi.fn() } }));
+
 const GH_URL = "https://boards.greenhouse.io/robinhood/jobs/8198153";
 const AS_URL = "https://jobs.ashbyhq.com/ramp/34413f8d-26bf-4bbc-8ade-eb309a0e2245";
 
-/** Stub every outbound fetch with one canned response. */
-function stubFetch(body: string, init: ResponseInit = { status: 200 }) {
-  const spy = vi.fn(async () => new Response(body, init));
-  vi.stubGlobal("fetch", spy);
-  return spy;
+const request = vi.mocked(https.request) as unknown as Mock;
+
+/** Stub the transport with one canned response. */
+function stubFetch(
+  body: string,
+  init: { status?: number; headers?: Record<string, string> } = {},
+) {
+  return respondWith(request, {
+    status: init.status ?? 200,
+    headers: init.headers ?? { "content-type": "text/plain" },
+    body,
+  });
 }
 
 const json = (value: unknown, status = 200) =>
@@ -41,6 +55,7 @@ const json = (value: unknown, status = 200) =>
 describe("intakeFromUrl", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    request.mockReset();
   });
 
   it("reads a real posting end to end and reports which adapter did it", async () => {
@@ -123,7 +138,7 @@ describe("intakeFromUrl", () => {
   });
 
   it("refuses a board listing URL instead of guessing a posting id", async () => {
-    const spy = json(greenhouse);
+    const calls = json(greenhouse);
     const { intakeFromUrl } = await import("@/lib/intake/intake");
 
     // A Lever company board carries no posting id.
@@ -133,16 +148,15 @@ describe("intakeFromUrl", () => {
     // It falls to the generic adapter, which finds no JSON-LD in the JSON body.
     expect(["unsupported-source", "unreadable"]).toContain(result.reason);
     expect(result.fallback).toBe("paste-job");
-    expect(spy).toHaveBeenCalled();
+    expect(calls.length).toBeGreaterThan(0);
   });
 
   it("never throws upward, even when the network itself fails", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => {
-        throw new Error("ECONNREFUSED");
-      }),
-    );
+    request.mockImplementation(() => {
+      const err: NodeJS.ErrnoException = new Error("connect ECONNREFUSED");
+      err.code = "ECONNREFUSED";
+      throw err;
+    });
     const { intakeFromUrl } = await import("@/lib/intake/intake");
 
     const result = await intakeFromUrl(GH_URL);
@@ -153,14 +167,14 @@ describe("intakeFromUrl", () => {
     expect(result.fallback).toBe("paste-job");
   });
 
-  it("rejects an unsafe URL before any fetch is attempted", async () => {
-    const spy = json(greenhouse);
+  it("rejects an unsafe URL before any connection is attempted", async () => {
+    const calls = json(greenhouse);
     const { intakeFromUrl } = await import("@/lib/intake/intake");
 
     const result = await intakeFromUrl("http://boards.greenhouse.io/x/jobs/1");
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.reason).toBe("unsafe-url");
-    expect(spy).not.toHaveBeenCalled();
+    expect(calls).toHaveLength(0);
   });
 });

@@ -1,6 +1,8 @@
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect, afterEach, vi, type Mock } from "vitest";
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import https from "node:https";
+import { respondWith } from "@/test/httpsMock";
 import { ApplicationForm as FormSchema } from "@/lib/types";
 import {
   canonicalPostingUrl,
@@ -26,6 +28,10 @@ import { adapterFor, ADAPTERS } from "@/lib/intake/adapters";
  * No live calls anywhere: the SSRF tests use IP literals (so no DNS is needed)
  * and a stubbed `fetch`, and everything else is pure.
  */
+
+vi.mock("node:https", () => ({ default: { request: vi.fn() } }));
+
+const request = vi.mocked(https.request) as unknown as Mock;
 
 const FETCHED_AT = "2026-09-19T12:00:00.000Z";
 const INTAKE_DIR = path.join(process.cwd(), "src", "lib", "intake");
@@ -326,6 +332,7 @@ describe("paste fallback", () => {
 describe("SSRF guard", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    request.mockReset();
   });
 
   /** IP literals only — no DNS, so these run fully offline. */
@@ -360,24 +367,17 @@ describe("SSRF guard", () => {
   it("re-validates on EVERY redirect hop, not just the first URL", async () => {
     // A public host is free to redirect into the metadata service, so checking
     // only the initial URL proves nothing.
-    const calls: string[] = [];
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async (input: URL | string) => {
-        calls.push(input.toString());
-        return new Response(null, {
-          status: 302,
-          headers: { location: "https://169.254.169.254/latest/meta-data/" },
-        });
-      }),
-    );
+    const calls = respondWith(request, {
+      status: 302,
+      headers: { location: "https://169.254.169.254/latest/meta-data/" },
+    });
 
     const { safeFetch } = await import("@/lib/intake/fetch");
     await expect(safeFetch("https://93.184.216.34/job")).rejects.toMatchObject({
       kind: "unsafe-url",
     });
-    // The first hop was made; the redirect target was never fetched.
+    // The first hop was made; the redirect target was never connected to.
     expect(calls).toHaveLength(1);
-    expect(calls[0]).toContain("93.184.216.34");
+    expect(calls[0].url).toContain("93.184.216.34");
   });
 });

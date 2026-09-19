@@ -1,253 +1,383 @@
 import { describe, it, expect, vi, afterEach, type Mock } from "vitest";
+import { EventEmitter } from "node:events";
 
 /**
  * fetch.ts — the ONLY module in intake that touches the network.
  *
- * These tests cover what src/lib/intake/intake.test.ts's "SSRF guard" block
- * does NOT: every case there uses an IP literal or `localhost`/`.local`, which
- * all take an early-return path in `assertSafeUrl` and never reach
- * `dns.lookup()`. A real posting URL is a HOSTNAME — "boards.greenhouse.io",
- * or an attacker's own domain — so the DNS-resolution branch is the one that
- * actually matters in production, and it had zero coverage before this file.
+ * REWRITTEN for the P1 DNS-rebinding fix: fetch.ts no longer uses global
+ * `fetch()` — it connects via `https.request` with a custom `lookup` option
+ * (`guardedLookup`), which is what makes the validated address and the
+ * connected address the SAME resolution. These tests target that real
+ * mechanism directly:
  *
- * No live network or live DNS anywhere: `node:dns/promises` is mocked so every
- * case runs deterministically offline.
+ *  - `guardedLookup` is unit-tested in isolation (it's exported specifically
+ *    so this is possible) — this is "the connect-time lookup IS our guarded
+ *    lookup" proof, not a structural inference about what fetch() receives.
+ *  - a wiring test confirms `https.request` is actually given `guardedLookup`
+ *    as its `lookup` option, so the unit test above is connected to the real
+ *    request path rather than tested in a vacuum.
+ *  - `safeFetch` is tested against a mocked `https.request` (a fake
+ *    ClientRequest/IncomingMessage pair via node:events), for the properties
+ *    that live above the connect layer: byte cap, timeout, redirects,
+ *    transport-error mapping, and IP-literal fast-path rejection.
+ *
+ * No live network or live DNS anywhere.
  */
 
+vi.mock("node:https", () => ({ default: { request: vi.fn() } }));
+vi.mock("node:dns", () => {
+  const lookup = vi.fn();
+  return { default: { lookup }, lookup };
+});
 vi.mock("node:dns/promises", () => {
   const lookup = vi.fn();
   return { default: { lookup }, lookup };
 });
 
-import dns from "node:dns/promises";
+import https from "node:https";
+import dns from "node:dns";
+import dnsPromises from "node:dns/promises";
 
-/**
- * `dns.lookup` is overloaded, and `vi.mocked` binds to the single-address
- * signature. `fetch.ts` calls it with `{ all: true }`, which resolves to the
- * overload returning an ARRAY, so the mock is widened here to let
- * `mockResolvedValue([...])` typecheck against the signature actually in use.
- */
-const mockedLookup = vi.mocked(dns.lookup) as unknown as Mock;
+const mockedRequest = vi.mocked(https.request) as unknown as Mock;
+const mockedDnsLookup = vi.mocked(dns.lookup) as unknown as Mock;
+// `dnsPromises.lookup` is overloaded; fetch.ts always calls it with
+// `{ all: true }`, which resolves to the array-returning overload.
+const mockedDnsPromisesLookup = vi.mocked(dnsPromises.lookup) as unknown as Mock;
 
 function resetAll() {
-  vi.unstubAllGlobals();
-  mockedLookup.mockReset();
+  mockedRequest.mockReset();
+  mockedDnsLookup.mockReset();
+  mockedDnsPromisesLookup.mockReset();
 }
 
-/**
- * `dns.lookup` is overloaded (single-address vs. `{ all: true }` array-of-
- * addresses forms), which makes the inferred mock type pick the wrong
- * overload. fetch.ts always calls it with `{ all: true }`, so these helpers
- * just pin the mock to the array shape that call site actually gets.
- */
-function mockLookupResolves(records: { address: string; family: number }[]) {
-  mockedLookup.mockResolvedValue(records as never);
-}
-function mockLookupRejects(err: unknown) {
-  mockedLookup.mockRejectedValue(err as never);
+/** `assertSafeUrl`'s pre-check: give it a benign public answer by default. */
+function allowPreCheck() {
+  mockedDnsPromisesLookup.mockResolvedValue([{ address: "93.184.216.34", family: 4 }]);
 }
 
 /* ------------------------------------------------------------------ */
-/* Hostname → DNS → address-safety check                               */
+/* guardedLookup — the actual mechanism that closes DNS rebinding      */
 /* ------------------------------------------------------------------ */
 
-describe("fetch.ts — a HOSTNAME resolved via DNS to a private address is refused", () => {
+describe("guardedLookup — the lookup the SOCKET actually connects through", () => {
+  it("passes through a public address unchanged (array form, options.all)", async () => {
+    const { guardedLookup } = await import("@/lib/intake/fetch");
+    mockedDnsLookup.mockImplementation((_hostname: string, _options: unknown, cb: (...a: unknown[]) => void) => {
+      cb(null, [{ address: "93.184.216.34", family: 4 }]);
+    });
+
+    const callback = vi.fn();
+    guardedLookup("public.example.com", { all: true }, callback);
+
+    expect(callback).toHaveBeenCalledWith(null, [{ address: "93.184.216.34", family: 4 }], undefined);
+  });
+
+  it("BLOCKS a private address (array form) — the callback never receives it", async () => {
+    const { guardedLookup, BLOCKED_ADDRESS_CODE } = await import("@/lib/intake/fetch");
+    mockedDnsLookup.mockImplementation((_hostname: string, _options: unknown, cb: (...a: unknown[]) => void) => {
+      cb(null, [{ address: "169.254.169.254", family: 4 }]);
+    });
+
+    const callback = vi.fn();
+    guardedLookup("evil.example.com", { all: true }, callback);
+
+    expect(callback).toHaveBeenCalledTimes(1);
+    const [err, address] = callback.mock.calls[0];
+    expect((err as NodeJS.ErrnoException)?.code).toBe(BLOCKED_ADDRESS_CODE);
+    expect(address).toBe("");
+  });
+
+  it("BLOCKS when only ONE of several resolved addresses is private", async () => {
+    const { guardedLookup, BLOCKED_ADDRESS_CODE } = await import("@/lib/intake/fetch");
+    mockedDnsLookup.mockImplementation((_hostname: string, _options: unknown, cb: (...a: unknown[]) => void) => {
+      cb(null, [
+        { address: "93.184.216.34", family: 4 },
+        { address: "127.0.0.1", family: 4 },
+      ]);
+    });
+
+    const callback = vi.fn();
+    guardedLookup("evil.example.com", { all: true }, callback);
+
+    const [err] = callback.mock.calls[0];
+    expect((err as NodeJS.ErrnoException)?.code).toBe(BLOCKED_ADDRESS_CODE);
+  });
+
+  it("BLOCKS a private address given in the single-address callback form (options.all falsy)", async () => {
+    // Node calls the lookup differently depending on options.all — mishandling
+    // this shape would silently skip the check for the non-`all` call style.
+    const { guardedLookup, BLOCKED_ADDRESS_CODE } = await import("@/lib/intake/fetch");
+    mockedDnsLookup.mockImplementation((_hostname: string, _options: unknown, cb: (...a: unknown[]) => void) => {
+      cb(null, "127.0.0.1", 4);
+    });
+
+    const callback = vi.fn();
+    guardedLookup("evil.example.com", {}, callback);
+
+    const [err] = callback.mock.calls[0];
+    expect((err as NodeJS.ErrnoException)?.code).toBe(BLOCKED_ADDRESS_CODE);
+  });
+
+  it("passes a DNS-level error straight through rather than swallowing it", async () => {
+    const { guardedLookup } = await import("@/lib/intake/fetch");
+    const dnsError = new Error("ENOTFOUND");
+    mockedDnsLookup.mockImplementation((_hostname: string, _options: unknown, cb: (...a: unknown[]) => void) => {
+      cb(dnsError, "");
+    });
+
+    const callback = vi.fn();
+    guardedLookup("nonexistent.example.invalid", {}, callback);
+
+    expect(callback).toHaveBeenCalledWith(dnsError, "");
+  });
+
+  it("the blocked-address error message never echoes the attacker-chosen address", async () => {
+    const { guardedLookup } = await import("@/lib/intake/fetch");
+    mockedDnsLookup.mockImplementation((_hostname: string, _options: unknown, cb: (...a: unknown[]) => void) => {
+      cb(null, [{ address: "169.254.169.254", family: 4 }]);
+    });
+
+    const callback = vi.fn();
+    guardedLookup("evil.example.com", { all: true }, callback);
+
+    const [err] = callback.mock.calls[0];
+    expect((err as Error).message).not.toContain("169.254.169.254");
+  });
+});
+
+describe("guardedLookup is actually wired into the request — not just tested in isolation", () => {
   afterEach(resetAll);
 
-  it("refuses a hostname whose only DNS answer is cloud metadata", async () => {
-    mockLookupResolves([{ address: "169.254.169.254", family: 4 }]);
-    const { safeFetch } = await import("@/lib/intake/fetch");
-    await expect(safeFetch("https://evil.example.com/job")).rejects.toMatchObject({
-      kind: "unsafe-url",
+  it("https.request is called with { lookup: guardedLookup }", async () => {
+    allowPreCheck();
+    mockedRequest.mockImplementation(() => {
+      const req = fakeRequest();
+      return req;
     });
-  });
 
-  it("refuses a hostname with MULTIPLE A records if even ONE is private", async () => {
-    // A hostname with one public and one private record is a documented way
-    // through a check that only inspects the first answer — this code must
-    // check every resolved address, not just records[0].
-    mockLookupResolves([
-      { address: "93.184.216.34", family: 4 },
-      { address: "127.0.0.1", family: 4 },
-    ]);
-    const { safeFetch } = await import("@/lib/intake/fetch");
-    await expect(safeFetch("https://evil.example.com/job")).rejects.toMatchObject({
-      kind: "unsafe-url",
-    });
-  });
+    const { safeFetch, guardedLookup } = await import("@/lib/intake/fetch");
+    // Fire-and-forget: we only need to inspect the call args, not complete it.
+    void safeFetch("https://wired.example.com/job").catch(() => undefined);
+    // Let assertSafeUrl's DNS mock resolve before https.request is invoked.
+    await Promise.resolve();
+    await Promise.resolve();
 
-  it("refuses a hostname resolving to an IPv6 unique-local or link-local address", async () => {
-    mockLookupResolves([{ address: "fe80::1", family: 6 }]);
-    const { safeFetch } = await import("@/lib/intake/fetch");
-    await expect(safeFetch("https://evil.example.com/job")).rejects.toMatchObject({
-      kind: "unsafe-url",
-    });
+    expect(mockedRequest).toHaveBeenCalled();
+    const [, options] = mockedRequest.mock.calls[0];
+    expect((options as { lookup?: unknown }).lookup).toBe(guardedLookup);
   });
+});
 
-  it("allows a hostname whose DNS answer is entirely public", async () => {
-    mockLookupResolves([{ address: "93.184.216.34", family: 4 }]);
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(
-        async () =>
-          new Response("ok", { status: 200, headers: { "content-type": "text/plain" } }),
-      ),
-    );
+/* ------------------------------------------------------------------ */
+/* Fake https.request plumbing for safeFetch-level tests               */
+/* ------------------------------------------------------------------ */
+
+interface FakeReq extends EventEmitter {
+  setTimeout: Mock;
+  end: Mock;
+  destroy: Mock;
+}
+interface FakeRes extends EventEmitter {
+  statusCode?: number;
+  headers: Record<string, string | undefined>;
+  destroy: Mock;
+}
+
+function fakeRequest(): FakeReq {
+  const req = new EventEmitter() as FakeReq;
+  req.setTimeout = vi.fn();
+  req.end = vi.fn();
+  req.destroy = vi.fn();
+  return req;
+}
+
+function fakeResponse(status: number, headers: Record<string, string | undefined> = {}): FakeRes {
+  const res = new EventEmitter() as FakeRes;
+  res.statusCode = status;
+  res.headers = headers;
+  // A real IncomingMessage's destroy() triggers 'close' once the stream
+  // actually tears down — httpsGet relies on that to settle the promise
+  // when it destroys the response at the byte cap.
+  res.destroy = vi.fn(() => {
+    queueMicrotask(() => res.emit("close"));
+  });
+  return res;
+}
+
+/** Wires a mocked https.request that immediately responds with `body`. */
+function mockSuccessfulRequest(status: number, body: string, headers: Record<string, string | undefined> = {}) {
+  mockedRequest.mockImplementation(
+    (
+      _url: unknown,
+      _options: unknown,
+      callback: (res: FakeRes) => void,
+    ) => {
+      const req = fakeRequest();
+      const res = fakeResponse(status, headers);
+      queueMicrotask(() => {
+        callback(res);
+        if (body) res.emit("data", Buffer.from(body, "utf8"));
+        res.emit("end");
+      });
+      return req;
+    },
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* safeFetch — transport-level behavior above the connect layer        */
+/* ------------------------------------------------------------------ */
+
+describe("safeFetch — basic transport", () => {
+  afterEach(resetAll);
+
+  it("returns status, body and content-type for a normal response", async () => {
+    allowPreCheck();
+    mockSuccessfulRequest(200, '{"title":"Engineer"}', { "content-type": "application/json" });
+
     const { safeFetch } = await import("@/lib/intake/fetch");
-    const res = await safeFetch("https://public.example.com/job");
+    const res = await safeFetch("https://normal.example.com/job");
+
     expect(res.status).toBe(200);
+    expect(res.text).toBe('{"title":"Engineer"}');
+    expect(res.contentType).toBe("application/json");
+    expect(res.finalUrl).toContain("normal.example.com");
   });
 
-  it("fails CLOSED (as 'upstream', not a silent pass-through) when DNS lookup itself errors", async () => {
-    mockLookupRejects(new Error("ENOTFOUND"));
+  it("rejects a private IP LITERAL before ever calling https.request (no DNS/network needed)", async () => {
     const { safeFetch } = await import("@/lib/intake/fetch");
-    await expect(safeFetch("https://nonexistent.example.invalid/job")).rejects.toMatchObject({
-      kind: "upstream",
+    await expect(safeFetch("https://169.254.169.254/latest/meta-data/")).rejects.toMatchObject({
+      kind: "unsafe-url",
     });
+    expect(mockedRequest).not.toHaveBeenCalled();
   });
 
-  it("fails CLOSED when DNS returns zero records", async () => {
-    mockLookupResolves([]);
-    const { safeFetch } = await import("@/lib/intake/fetch");
-    await expect(safeFetch("https://empty-answer.example.com/job")).rejects.toMatchObject({
-      kind: "upstream",
+  it("re-validates the hostname on every redirect hop before connecting again", async () => {
+    const seenHostnames: string[] = [];
+    mockedDnsPromisesLookup.mockImplementation(async (hostname: string) => {
+      seenHostnames.push(hostname);
+      return [{ address: "93.184.216.34", family: 4 }];
     });
-  });
-});
 
-/* ------------------------------------------------------------------ */
-/* DNS-rebinding TOCTOU: is the validated address ever pinned?         */
-/* ------------------------------------------------------------------ */
-
-describe("fetch.ts — the validated DNS answer is never pinned for the actual connection", () => {
-  afterEach(resetAll);
-
-  it("calls fetch() with the ORIGINAL HOSTNAME, never the resolved IP — so a second, independent DNS lookup happens at connect time", async () => {
-    // This does NOT simulate a live rebinding attack — doing that would
-    // require controlling what Node's own resolver returns when undici opens
-    // the TCP connection, which is outside what a mocked `fetch()` can
-    // observe. What this DOES prove, structurally and deterministically: the
-    // IP address `assertSafeUrl` validated via `dns.lookup()` is discarded
-    // after the check. `fetch()` is invoked with the hostname, not with an IP
-    // substituted in, and there is no custom Agent/dispatcher anywhere in
-    // fetch.ts that would pin the TCP connection to that specific address.
-    // That gap is exactly what makes DNS rebinding possible: the runtime's
-    // own resolver — not this check — decides what address the request
-    // actually connects to, and it is free to answer differently the second
-    // time (attacker-controlled DNS with TTL=0 is the standard technique).
-    mockLookupResolves([{ address: "93.184.216.34", family: 4 }]);
-    let fetchedUrl: string | undefined;
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async (input: URL | string) => {
-        fetchedUrl = input.toString();
-        return new Response("ok", { status: 200, headers: { "content-type": "text/plain" } });
-      }),
+    let requestCall = 0;
+    mockedRequest.mockImplementation(
+      (_url: unknown, _options: unknown, callback: (res: FakeRes) => void) => {
+        requestCall += 1;
+        const req = fakeRequest();
+        queueMicrotask(() => {
+          if (requestCall === 1) {
+            const res = fakeResponse(302, { location: "https://b.example.com/job" });
+            callback(res);
+            // A real redirect response still ends its (empty) body.
+            res.emit("end");
+          } else {
+            const res = fakeResponse(200, { "content-type": "text/plain" });
+            callback(res);
+            res.emit("data", Buffer.from("ok"));
+            res.emit("end");
+          }
+        });
+        return req;
+      },
     );
 
     const { safeFetch } = await import("@/lib/intake/fetch");
-    await safeFetch("https://rebind.example.com/job");
+    const res = await safeFetch("https://a.example.com/job");
 
-    expect(mockedLookup).toHaveBeenCalledWith("rebind.example.com", expect.anything());
-    expect(fetchedUrl).toContain("rebind.example.com");
-    expect(fetchedUrl).not.toContain("93.184.216.34");
+    expect(seenHostnames).toEqual(["a.example.com", "b.example.com"]);
+    expect(mockedRequest).toHaveBeenCalledTimes(2);
+    expect(res.finalUrl).toContain("b.example.com");
   });
 
-  it("re-resolves DNS independently on every redirect hop (not just re-checking the same cached answer)", async () => {
-    // Confirms the per-hop revalidation intake.test.ts already tests actually
-    // goes back to DNS each time, rather than trusting a memoized result from
-    // hop 1 — a stale cache would reopen the same rebinding window.
-    mockLookupResolves([{ address: "93.184.216.34", family: 4 }]);
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => new Response(null, { status: 200, headers: { "content-type": "text/plain" } })),
-    );
-    const { safeFetch } = await import("@/lib/intake/fetch");
-    await safeFetch("https://a.example.com/job");
-    await safeFetch("https://b.example.com/job");
-
-    expect(mockedLookup).toHaveBeenCalledWith("a.example.com", expect.anything());
-    expect(mockedLookup).toHaveBeenCalledWith("b.example.com", expect.anything());
-    expect(mockedLookup).toHaveBeenCalledTimes(2);
-  });
-});
-
-/* ------------------------------------------------------------------ */
-/* Response body cap                                                   */
-/* ------------------------------------------------------------------ */
-
-describe("fetch.ts — the response body is capped", () => {
-  afterEach(resetAll);
-
-  it("truncates a body larger than the documented 2 MiB cap instead of buffering all of it", async () => {
-    mockLookupResolves([{ address: "93.184.216.34", family: 4 }]);
+  it("truncates a response larger than the documented 2 MiB cap", async () => {
+    allowPreCheck();
     const CAP = 2 * 1024 * 1024;
-    const oversized = "a".repeat(CAP + 1024 * 1024); // 1 MiB past the cap
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(
-        async () =>
-          new Response(oversized, { status: 200, headers: { "content-type": "text/plain" } }),
-      ),
+    mockedRequest.mockImplementation(
+      (_url: unknown, _options: unknown, callback: (res: FakeRes) => void) => {
+        const req = fakeRequest();
+        const res = fakeResponse(200, { "content-type": "text/plain" });
+        queueMicrotask(() => {
+          callback(res);
+          // Two chunks that together exceed the cap. httpsGet calls
+          // res.destroy() once the cap is hit, and our fake destroy()
+          // schedules the 'close' that settles the promise, matching a real
+          // destroyed stream.
+          res.emit("data", Buffer.alloc(CAP, "a"));
+          res.emit("data", Buffer.alloc(1024 * 1024, "a"));
+        });
+        return req;
+      },
     );
+
     const { safeFetch } = await import("@/lib/intake/fetch");
     const res = await safeFetch("https://big.example.com/job");
     expect(res.text.length).toBeLessThanOrEqual(CAP);
     expect(res.text.length).toBeGreaterThan(0);
   });
 
-  it("returns a small body unmodified — the cap must not truncate normal postings", async () => {
-    mockLookupResolves([{ address: "93.184.216.34", family: 4 }]);
-    const body = JSON.stringify({ title: "Engineer" });
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(
-        async () =>
-          new Response(body, { status: 200, headers: { "content-type": "application/json" } }),
-      ),
-    );
+  it("maps a connect-time block (guardedLookup firing on the real request) onto 'unsafe-url'", async () => {
+    // Defense-in-depth check: even if assertSafeUrl's pre-check somehow let a
+    // bad host through, the connect-time guard independently blocks it, and
+    // that failure is what safeFetch must surface — not a generic upstream
+    // error that would obscure what actually happened.
+    allowPreCheck();
+    mockedRequest.mockImplementation(() => {
+      const req = fakeRequest();
+      queueMicrotask(() => {
+        const err: NodeJS.ErrnoException = new Error("Refused to connect to a non-public address.");
+        err.code = "ECAREEROS_BLOCKED";
+        req.emit("error", err);
+      });
+      return req;
+    });
+
     const { safeFetch } = await import("@/lib/intake/fetch");
-    const res = await safeFetch("https://normal.example.com/job");
-    expect(res.text).toBe(body);
+    await expect(safeFetch("https://looks-public-but-isnt.example.com/job")).rejects.toMatchObject({
+      kind: "unsafe-url",
+    });
+  });
+
+  it("maps a socket-level error onto 'upstream'", async () => {
+    allowPreCheck();
+    mockedRequest.mockImplementation(() => {
+      const req = fakeRequest();
+      queueMicrotask(() => {
+        req.emit("error", new Error("ECONNREFUSED"));
+      });
+      return req;
+    });
+
+    const { safeFetch } = await import("@/lib/intake/fetch");
+    await expect(safeFetch("https://unreachable.example.com/job")).rejects.toMatchObject({
+      kind: "upstream",
+    });
   });
 });
 
-/* ------------------------------------------------------------------ */
-/* Timeout                                                             */
-/* ------------------------------------------------------------------ */
-
-describe("fetch.ts — a slow upstream times out rather than hanging the request forever", () => {
+describe("safeFetch — a slow upstream times out rather than hanging forever", () => {
   afterEach(() => {
     resetAll();
-    vi.useRealTimers();
   });
 
-  it("aborts and reports 'timeout' when the upstream never responds", async () => {
-    vi.useFakeTimers();
-    mockLookupResolves([{ address: "93.184.216.34", family: 4 }]);
-    vi.stubGlobal(
-      "fetch",
-      vi.fn((_input: URL | string, init?: RequestInit) => {
-        return new Promise((_resolve, reject) => {
-          init?.signal?.addEventListener("abort", () => {
-            const err = new Error("aborted");
-            err.name = "AbortError";
-            reject(err);
-          });
-        });
-      }),
-    );
+  it("aborts via req.destroy() and reports 'timeout' when setTimeout's callback fires", async () => {
+    allowPreCheck();
+    mockedRequest.mockImplementation(() => {
+      const req = fakeRequest();
+      req.setTimeout = vi.fn((_ms: number, cb: () => void) => {
+        // Fire the timeout callback immediately, as fetch.ts's own handler
+        // would once TIMEOUT_MS elapses — deterministic, no fake-timer/event
+        // loop interplay with the mocked EventEmitter needed.
+        cb();
+      });
+      req.destroy = vi.fn((err: NodeJS.ErrnoException) => {
+        req.emit("error", err);
+      });
+      return req;
+    });
 
     const { safeFetch } = await import("@/lib/intake/fetch");
-    const promise = safeFetch("https://slow.example.com/job");
-    // Attach a handler immediately so advancing the fake timer below can't
-    // create a window where the rejection is momentarily unhandled — the real
-    // assertion against the same promise still runs afterwards.
-    promise.catch(() => undefined);
-    // Let assertSafeUrl's async DNS mock resolve before advancing the timer.
-    await Promise.resolve();
-    await Promise.resolve();
-    await vi.advanceTimersByTimeAsync(15_000);
-    await expect(promise).rejects.toMatchObject({ kind: "timeout" });
+    await expect(safeFetch("https://slow.example.com/job")).rejects.toMatchObject({
+      kind: "timeout",
+    });
   });
 });
