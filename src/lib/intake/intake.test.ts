@@ -372,12 +372,18 @@ describe("SSRF guard", () => {
       headers: { location: "https://169.254.169.254/latest/meta-data/" },
     });
 
-    const { safeFetch } = await import("@/lib/intake/fetch");
+    const { safeFetch, guardedLookup } = await import("@/lib/intake/fetch");
     await expect(safeFetch("https://93.184.216.34/job")).rejects.toMatchObject({
       kind: "unsafe-url",
     });
     // The first hop was made; the redirect target was never connected to.
     expect(calls).toHaveLength(1);
     expect(calls[0].url).toContain("93.184.216.34");
+    // Stronger than "the loop re-entered": the hop that WAS made carried the
+    // connect-time guard, so every connection this loop opens is guarded — not
+    // just the ones the pre-check happens to catch first.
+    expect(calls[0].lookup).toBe(guardedLookup);
+    // And nothing ever reached the metadata service, by URL, not by inference.
+    expect(calls.some((c) => c.url.includes("169.254.169.254"))).toBe(false);
   });
 });
