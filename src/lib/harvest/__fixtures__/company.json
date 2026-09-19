@@ -1,0 +1,33 @@
+[
+  {
+    "id": "1728",
+    "universalName": "nvidia",
+    "linkedinUrl": "https://www.linkedin.com/company/nvidia",
+    "name": "NVIDIA",
+    "tagline": "The engine of AI computing.",
+    "website": "https://www.nvidia.com",
+    "foundedOn": { "year": 1993 },
+    "employeeCount": 31000,
+    "employeeCountRange": { "start": 10001 },
+    "followerCount": 6100000,
+    "description": "NVIDIA builds accelerated computing platforms for AI, graphics, and simulation.",
+    "companyType": "Public Company",
+    "locations": [
+      {
+        "country": "US",
+        "city": "Santa Clara",
+        "line1": "2788 San Tomas Expressway",
+        "postalCode": "95051",
+        "headquarter": true
+      },
+      { "country": "IN", "city": "Bengaluru", "headquarter": false }
+    ],
+    "specialities": ["GPU", "Accelerated Computing", "AI", "Deep Learning"],
+    "industries": ["Semiconductors", "Computer Hardware"],
+    "phone": null
+  },
+  {
+    "universalName": "broken-company",
+    "name": "No URL Co"
+  }
+]

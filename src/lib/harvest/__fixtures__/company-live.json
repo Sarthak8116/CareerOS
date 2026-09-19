@@ -1,0 +1,168 @@
+[
+  {
+    "id": "3608",
+    "universalName": "nvidia",
+    "linkedinUrl": "https://www.linkedin.com/company/nvidia/",
+    "name": "NVIDIA",
+    "tagline": "",
+    "website": "http://www.nvidia.com",
+    "foundedOn": {
+      "month": null,
+      "year": 1993,
+      "day": null
+    },
+    "employeeCount": 51954,
+    "employeeCountRange": {
+      "start": 10001,
+      "end": null
+    },
+    "followerCount": 6569077,
+    "description": "Since its founding in 1993, NVIDIA (NASDAQ: NVDA) has been a pioneer in accelerated computing. The company\u2019s invention of the GPU in 1999 sparked the growth of the PC gaming market, redefined computer graphics, ignited the era of modern AI and is fueling the creation of the metaverse. NVIDIA is now a full-stack computing company with data-center-scale offerings that are reshaping industry.",
+    "companyType": "Public Company",
+    "locations": [
+      {
+        "country": "JP",
+        "city": "Tokyo",
+        "geographicArea": "Minato-ku",
+        "line1": "2-11-7 Akasaka",
+        "line2": " 13th Floor",
+        "postalCode": "107-0052",
+        "headquarter": false,
+        "description": "ATT New Tower ",
+        "parsed": {
+          "text": "Tokyo, Japan",
+          "countryCode": "JP",
+          "regionCode": null,
+          "country": "Japan",
+          "countryFull": "Japan",
+          "state": "Tokyo",
+          "city": "Tokyo"
+        }
+      },
+      {
+        "country": "US",
+        "city": "Santa Clara",
+        "geographicArea": "CA",
+        "line1": "2701 San Tomas Expressway",
+        "line2": null,
+        "postalCode": "95050",
+        "headquarter": true,
+        "description": null,
+        "parsed": {
+          "text": "Santa Clara, CA, United States",
+          "countryCode": "US",
+          "regionCode": null,
+          "country": "United States",
+          "countryFull": "United States of America",
+          "state": "California",
+          "city": "Santa Clara"
+        }
+      },
+      {
+        "country": "TW",
+        "city": "Taipei City",
+        "geographicArea": "Taipei City",
+        "line1": "No. 8, Ji Hu Rd.",
+        "line2": null,
+        "postalCode": "114",
+        "headquarter": false,
+        "description": "NVIDIA BVI Holdings Limited, Taiwan Branch",
+        "parsed": {
+          "text": "Taipei, Taiwan, Province of China",
+          "countryCode": "TW",
+          "regionCode": null,
+          "country": "Taiwan",
+          "countryFull": "Taiwan, Province of China",
+          "state": "Taipei",
+          "city": "Taipei"
+        }
+      },
+      {
+        "country": "IN",
+        "city": "Mumbai",
+        "geographicArea": "Village Chakala, Andheri East",
+        "line1": "No. 127 Andheri Kurla Road",
+        "line2": "CNB Square",
+        "postalCode": "400 093",
+        "headquarter": false,
+        "description": "NVIDIA Graphics Pvt. Ltd. ",
+        "parsed": {
+          "text": "Mumbai, India",
+          "countryCode": "IN",
+          "regionCode": null,
+          "country": "India",
+          "countryFull": "India",
+          "state": "Maharashtra",
+          "city": "Mumbai"
+        }
+      },
+      {
+        "country": "IN",
+        "city": "Hyderabad",
+        "geographicArea": "Telangana",
+        "line1": "Nanakramguda, Serilingampally Mandal",
+        "line2": "Plot # 6A&B, IT Park Layout, RR District",
+        "postalCode": "500046",
+        "headquarter": false,
+        "description": "NVIDIA Graphics Pvt. Ltd.",
+        "parsed": {
+          "text": "Hyder\u0101b\u0101d, India",
+          "countryCode": "IN",
+          "regionCode": null,
+          "country": "India",
+          "countryFull": "India",
+          "state": "Telangana",
+          "city": "Hyder\u0101b\u0101d"
+        }
+      },
+      {
+        "country": "IN",
+        "city": "Pune",
+        "geographicArea": "Yerwada",
+        "line1": "Survey No. 144/145, Samrat Ashok Path",
+        "line2": "Off Airport Road",
+        "postalCode": "411 006",
+        "headquarter": false,
+        "description": "Commerzone, Building No. 5",
+        "parsed": {
+          "text": "Pune, India",
+          "countryCode": "IN",
+          "regionCode": null,
+          "country": "India",
+          "countryFull": "India",
+          "state": "Maharashtra",
+          "city": "Pune"
+        }
+      }
+    ],
+    "specialities": [
+      "GPU-accelerated computing",
+      "artificial intelligence",
+      "deep learning",
+      "virtual reality",
+      "gaming",
+      "self-driving cars",
+      "supercomputing",
+      "robotics",
+      "virtualization",
+      "parallel computing",
+      "professional graphics",
+      "automotive technology"
+    ],
+    "industries": [
+      {
+        "id": "3",
+        "name": "Computer Hardware Manufacturing",
+        "urn": "urn:li:fsd_industryV2:3",
+        "title": "Computer Hardware Manufacturing",
+        "hierarchy": "Manufacturing > Computers and Electronics Manufacturing > Computer Hardware Manufacturing"
+      }
+    ],
+    "active": true,
+    "pageVerified": true,
+    "pageType": "COMPANY",
+    "showcase": false,
+    "paidCompany": true,
+    "autoGenerated": false
+  }
+]
