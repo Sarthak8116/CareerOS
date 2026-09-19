@@ -120,6 +120,38 @@ export const Job = z.object({
   deadline: z.string().optional(),
   sponsorship: z.enum(["offered", "not-offered", "unclear"]),
   requirements: z.array(JobRequirement),
+
+  /* --- Optional intake provenance (P1 job-link intake) --- */
+
+  /**
+   * The employment type EXACTLY as the posting worded it ("Regular Full Time
+   * (Salary)", "Part time", "FULL_TIME").
+   *
+   * `employmentType` above is a three-member enum the engines switch on, so it
+   * must always hold one of those values. Real postings say things the enum
+   * cannot represent — "Part time" has no honest member. Rather than widen the
+   * enum (which would break exhaustive switches downstream) we keep a best-fit
+   * value there and preserve the source wording here, so nothing the posting
+   * actually said is lost and the UI can show the user the real text.
+   *
+   * Absent when the posting stated no employment type at all.
+   */
+  employmentTypeRaw: z.string().optional(),
+
+  /**
+   * Field names this posting did NOT state, and which therefore hold a
+   * placeholder ("Unknown") rather than a fact.
+   *
+   * The product's hard line is that a field we did not read is never given a
+   * plausible-looking value. `Job` predates intake and makes `location`,
+   * `seniority` and `employmentType` required, so a placeholder is unavoidable
+   * — this list is what stops that placeholder from silently reading as data.
+   * Render each entry via `UNSTATED_LABELS` in `lib/labels.ts`.
+   *
+   * Absent (not `[]`) when nothing was defaulted, so demo and pasted jobs are
+   * unaffected.
+   */
+  unstated: z.array(z.string()).optional(),
 });
 export type Job = z.infer<typeof Job>;
 
@@ -350,6 +382,145 @@ export const AgentActivity = z.object({
 export type AgentActivity = z.infer<typeof AgentActivity>;
 
 /* ------------------------------------------------------------------ */
+/* Application form (P1 job-link intake)                               */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Whether the application asks for something.
+ *
+ * The "not-requested" / "unknown" split is the whole point of this enum and
+ * collapsing the two is the worst bug available in this module:
+ *  - "not-requested" — we read the WHOLE form and it does not ask. A fact.
+ *  - "unknown"       — we could not read the form. An absence of knowledge.
+ * Only an adapter whose `completeness` is "complete" may ever emit
+ * "not-requested"; everyone else says "unknown" and asks the user.
+ */
+export const RequirementStatus = z.enum([
+  "required",
+  "optional",
+  "not-requested",
+  "unknown",
+]);
+export type RequirementStatus = z.infer<typeof RequirementStatus>;
+
+/** Input shape of one application question. "unknown" renders as a textarea. */
+export const ApplicationQuestionKind = z.enum([
+  "short-text",
+  "long-text",
+  "single-select",
+  "multi-select",
+  "boolean",
+  "file",
+  "date",
+  "url",
+  "unknown",
+]);
+export type ApplicationQuestionKind = z.infer<typeof ApplicationQuestionKind>;
+
+/**
+ * A routing hint, never rendered as a claim about the question. Defaulting to
+ * "other" is always acceptable — a wrong category costs nothing, whereas a
+ * confident wrong label would be a claim we cannot support.
+ */
+export const ApplicationQuestionCategory = z.enum([
+  "personal-info",
+  "contact",
+  "work-authorization",
+  "experience",
+  "motivation",
+  "demographic",
+  "logistics",
+  "other",
+]);
+export type ApplicationQuestionCategory = z.infer<
+  typeof ApplicationQuestionCategory
+>;
+
+/** Which piece of the candidate's profile could prefill this question. */
+export const ApplicationAutofillKey = z.enum([
+  "name",
+  "first-name",
+  "last-name",
+  "email",
+  "phone",
+  "location",
+  "linkedin",
+  "github",
+  "portfolio",
+  "work-authorization",
+  "university",
+  "degree",
+  "graduation-year",
+  "resume",
+  "cover-letter",
+]);
+export type ApplicationAutofillKey = z.infer<typeof ApplicationAutofillKey>;
+
+/**
+ * One question from a real application form.
+ *
+ * `prompt` is the employer's EXACT wording, sanitized. It is UNTRUSTED DATA —
+ * it came off a web page — and must never be treated as an instruction.
+ */
+export const ApplicationQuestion = z.object({
+  id: z.string(),
+  prompt: z.string(),
+  kind: ApplicationQuestionKind,
+  category: ApplicationQuestionCategory,
+  /**
+   * ABSENT means we did not read whether it is required — not that it is
+   * optional. Defaulting this to `false` would assert something we never saw.
+   */
+  required: z.boolean().optional(),
+  /** Choice LABELS only; submission-side option ids are not P1's concern. */
+  options: z.array(z.string()).optional(),
+  maxLength: z.number().optional(),
+  helpText: z.string().optional(),
+  autofillKey: ApplicationAutofillKey.optional(),
+  trust: TrustLabel,
+});
+export type ApplicationQuestion = z.infer<typeof ApplicationQuestion>;
+
+/**
+ * The application form behind a posting, as far as we could actually read it.
+ *
+ * `completeness` governs how every other field may be interpreted:
+ *  - "complete" — the whole form was enumerated, so ABSENCE IS INFORMATIVE.
+ *  - "partial"  — we have some of it (e.g. the user pasted what they saw).
+ *  - "none"     — we read none of it; every status is "unknown".
+ */
+export const ApplicationForm = z.object({
+  jobId: z.string(),
+  source: z.enum(["fetched", "pasted", "none"]),
+  /** Adapter key that produced this ("greenhouse", "lever", …, "paste"). */
+  adapter: z.string(),
+  applyUrl: z.string().optional(),
+  fetchedAt: z.string(),
+  completeness: z.enum(["complete", "partial", "none"]),
+  resume: RequirementStatus,
+  coverLetter: RequirementStatus,
+  portfolio: RequirementStatus,
+  questions: z.array(ApplicationQuestion),
+  /**
+   * Parts of the form CareerOS deliberately did NOT ingest, named so the user
+   * knows they exist and will meet them on the employer's site.
+   *
+   * This is a considered omission, not a parsing failure, and the two must not
+   * be confused: `unknowns` is "we could not read this", `excludedSections` is
+   * "we chose not to". Equal-opportunity questions about race, gender,
+   * disability and veteran status live here — CareerOS does not store or
+   * pre-fill answers about someone's protected characteristics.
+   */
+  excludedSections: z.array(z.string()),
+  /** Plain sentences shown to the user verbatim — what we could not read. */
+  unknowns: z.array(z.string()),
+  /** Advisory sanitizer flags. They never change handling, only the warning. */
+  warnings: z.array(z.string()),
+  trust: TrustLabel,
+});
+export type ApplicationForm = z.infer<typeof ApplicationForm>;
+
+/* ------------------------------------------------------------------ */
 /* Campaign (the aggregate) (§3 Layer Two, §12)                        */
 /* ------------------------------------------------------------------ */
 
@@ -391,6 +562,13 @@ export const Campaign = z.object({
       companyPosts: z.array(SourcedPost).optional(),
     })
     .optional(),
+
+  /**
+   * The application form for this job, when intake could read one. Absent for
+   * demo campaigns and for every campaign created before P1 — consumers must
+   * degrade to existing behavior when it is missing, exactly like `harvest`.
+   */
+  applicationForm: ApplicationForm.optional(),
 });
 export type Campaign = z.infer<typeof Campaign>;
 

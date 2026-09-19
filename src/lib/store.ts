@@ -1,6 +1,6 @@
 "use client";
 
-import type { Campaign, CampaignTask, Job } from "@/lib/types";
+import type { ApplicationForm, Campaign, CampaignTask, Job } from "@/lib/types";
 import { Campaign as CampaignSchema } from "@/lib/types";
 import { demoCandidate } from "@/lib/demo/candidate";
 import { demoJob } from "@/lib/demo/job";
@@ -79,17 +79,27 @@ export async function getCampaign(id: string): Promise<Campaign | undefined> {
 }
 
 /** Create a campaign from a job (uses the provider) and persist it. */
-export async function createCampaignFromJob(job: Job): Promise<Campaign> {
+export async function createCampaignFromJob(
+  job: Job,
+  /**
+   * Optional application requirements parsed from the posting (P1 job-link
+   * intake). Additive: every existing call site passes only `job` and behaves
+   * exactly as before. When present it is stored on the campaign so P2 can
+   * build the application package from what the posting actually asks for.
+   */
+  form?: ApplicationForm,
+): Promise<Campaign> {
   const provider = getCampaignProvider();
   const campaign = await provider.buildCampaign({
     candidate: demoCandidate,
     job,
     createdAt: SEED_STAMP,
   });
+  const withForm: Campaign = form ? { ...campaign, applicationForm: form } : campaign;
   const all = readRaw();
-  const deduped = all.filter((c) => c.id !== campaign.id);
-  writeRaw([campaign, ...deduped]);
-  return campaign;
+  const deduped = all.filter((c) => c.id !== withForm.id);
+  writeRaw([withForm, ...deduped]);
+  return withForm;
 }
 
 export function saveCampaign(campaign: Campaign) {

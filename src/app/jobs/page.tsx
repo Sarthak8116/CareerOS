@@ -6,7 +6,6 @@ import {
   ArrowRight,
   Building2,
   CalendarClock,
-  Loader2,
   MapPin,
   Users,
 } from "lucide-react";
@@ -17,6 +16,8 @@ import {
   DEMO_JOB,
 } from "@/lib/store";
 import { Shell } from "@/components/Shell";
+import { BuildingState } from "@/components/BuildingState";
+import { JobLinkIntake } from "@/components/JobLinkIntake";
 import {
   Button,
   Card,
@@ -25,20 +26,15 @@ import {
   SectionTitle,
 } from "@/components/ui/primitives";
 
-/* The six agents that assemble a campaign — shown while building. */
-const BUILD_AGENTS = [
-  "Job Parser",
-  "Company Researcher",
-  "Candidate Analyst",
-  "Team Mapper",
-  "People Researcher",
-  "Campaign Planner",
-];
+/** What a failed link parse managed to salvage, for the paste form to prefill. */
+type Prefill = { url?: string; title?: string; company?: string; nonce: number };
 
 export default function JobsPage() {
   const router = useRouter();
   // Which job (if any) is currently building, so we can show per-card state.
   const [building, setBuilding] = useState<string | null>(null);
+  // Set when a link parse falls back to paste; remounts the form with values.
+  const [prefill, setPrefill] = useState<Prefill | null>(null);
 
   async function build(job: Job) {
     if (building) return;
@@ -58,10 +54,29 @@ export default function JobsPage() {
           Find a job
         </h1>
         <p className="mt-1 text-sm text-slate-500">
-          Start from the sample role or paste any job description — CareerOS
-          builds a full, evidence-backed campaign around it.
+          Paste one job link and CareerOS does the rest — or start from the
+          sample role, or paste a description by hand. Every path builds the
+          same full, evidence-backed campaign.
         </p>
       </div>
+
+      {/* Section 0 — the headline flow: one link in, a campaign out */}
+      <section className="mt-6">
+        <SectionTitle>Start from a job link</SectionTitle>
+        <JobLinkIntake
+          disabled={building !== null}
+          onBuildingChange={(b) => setBuilding(b ? "link" : null)}
+          onFallbackToPaste={({ url, title, company }) => {
+            setPrefill({ url, title, company, nonce: Date.now() });
+            // Put the fallback in front of the user rather than making them hunt.
+            requestAnimationFrame(() => {
+              document
+                .getElementById("paste-fallback")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+            });
+          }}
+        />
+      </section>
 
       {/* Live mode entry point */}
       <a
@@ -91,19 +106,27 @@ export default function JobsPage() {
         />
       </section>
 
-      {/* Section B — import a job */}
-      <section className="mt-10">
+      {/* Section B — import a job. The fallback when a link can't be parsed,
+          and the only route into a login-walled portal. Always available. */}
+      <section className="mt-10" id="paste-fallback">
         <SectionTitle>Import a job</SectionTitle>
         <ImportJobForm
+          // Remount when a failed parse hands us values to prefill.
+          key={prefill?.nonce ?? "blank"}
           disabled={building !== null}
           building={building === "import"}
+          initialTitle={prefill?.title ?? ""}
+          initialCompany={prefill?.company ?? ""}
+          unverified={!!(prefill?.title || prefill?.company)}
           onSubmit={(title, company, text) => {
             setBuilding("import");
             const job = jobFromPastedText(title, company, text);
+            // Keep the link the user gave us — they supplied it, so it's theirs.
+            const withUrl = prefill?.url ? { ...job, url: prefill.url } : job;
             // Reuse the same build path; swap the sentinel id for the real one.
             void (async () => {
               try {
-                const campaign = await createCampaignFromJob(job);
+                const campaign = await createCampaignFromJob(withUrl);
                 router.push(`/campaigns/${campaign.id}`);
               } catch {
                 setBuilding(null);
@@ -188,29 +211,6 @@ function SampleJobCard({
   );
 }
 
-/* Animated "agents are working" state shown while a campaign builds. */
-function BuildingState() {
-  return (
-    <div className="mt-5 rounded-xl border border-brand-100 bg-brand-50/60 p-4">
-      <p className="flex items-center gap-2 text-sm font-medium text-brand-900">
-        <Loader2 className="h-4 w-4 animate-spin text-brand-600" />
-        Agents are building your campaign…
-      </p>
-      <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Agents at work">
-        {BUILD_AGENTS.map((agent, i) => (
-          <li
-            key={agent}
-            className="animate-pulse rounded-full bg-white px-2.5 py-1 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-200"
-            style={{ animationDelay: `${i * 120}ms` }}
-          >
-            {agent}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 /* ---------------------------------------------------------------- */
 /* Import job form                                                   */
 /* ---------------------------------------------------------------- */
@@ -218,14 +218,21 @@ function BuildingState() {
 function ImportJobForm({
   disabled,
   building,
+  initialTitle = "",
+  initialCompany = "",
+  unverified = false,
   onSubmit,
 }: {
   disabled: boolean;
   building: boolean;
+  /** Prefilled from a failed link parse — a guess for the user to confirm. */
+  initialTitle?: string;
+  initialCompany?: string;
+  unverified?: boolean;
   onSubmit: (title: string, company: string, text: string) => void;
 }) {
-  const [title, setTitle] = useState("");
-  const [company, setCompany] = useState("");
+  const [title, setTitle] = useState(initialTitle);
+  const [company, setCompany] = useState(initialCompany);
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -242,6 +249,13 @@ function ImportJobForm({
   return (
     <Card className="mt-3">
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
+        {unverified && (
+          <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            We guessed the title and company from the link you pasted — check
+            them before you build. Nothing here is saved until you do.
+          </p>
+        )}
+
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label

@@ -59,3 +59,36 @@ export const effortText: Record<string, string> = {
   moderate: "Moderate effort",
   significant: "Significant effort",
 };
+
+/**
+ * Human labels for the field names carried in `Job.unstated` (P1 job-link
+ * intake).
+ *
+ * `unstated` holds raw `Job` field names because it is data, not presentation.
+ * This is the one place that turns them into something a person can read, so
+ * the phrasing stays consistent everywhere it is rendered. Every entry reads
+ * as a NEUTRAL field name, never as a claim — the surrounding UI supplies the
+ * "not stated in the posting" framing.
+ *
+ * `unstatedLabel()` falls back to the raw key rather than hiding an entry: a
+ * field we forgot to label is still a field the user deserves to see.
+ */
+export const UNSTATED_LABELS: Record<string, string> = {
+  location: "Location",
+  remote: "Remote / on-site",
+  employmentType: "Employment type",
+  seniority: "Seniority",
+  sponsorship: "Visa sponsorship",
+  postedAt: "Date posted",
+  deadline: "Application deadline",
+  team: "Team",
+  company: "Company",
+  title: "Job title",
+  description: "Job description",
+  requirements: "Requirements",
+};
+
+/** Display text for one `Job.unstated` entry; unknown keys pass through. */
+export function unstatedLabel(field: string): string {
+  return UNSTATED_LABELS[field] ?? field;
+}
