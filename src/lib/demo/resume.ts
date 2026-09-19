@@ -43,9 +43,14 @@ export const INVENTED_METRIC_PATTERNS: readonly RegExp[] = [
   /\bby\s+\d+(\.\d+)?\s?(%|x|ms|s|percent)\b/i, // "by 200ms", "by 30%"
 ];
 
-/** Canonical resume section labels used by the recommendation engine. */
+/**
+ * Canonical resume section labels used by the recommendation engine.
+ *
+ * There is deliberately NO "Summary" member. Recommendations are derived from
+ * the category of the evidence they reframe, and no evidence row is a summary
+ * — a member for a section nothing can emit is an invitation to fabricate one.
+ */
 export const RESUME_SECTIONS = {
-  summary: "Summary",
   skills: "Technical Skills",
   projects: "Projects",
   education: "Education & Coursework",

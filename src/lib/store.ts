@@ -1,6 +1,12 @@
 "use client";
 
-import type { ApplicationForm, Campaign, CampaignTask, Job } from "@/lib/types";
+import type {
+  ApplicationForm,
+  Campaign,
+  CampaignTask,
+  Job,
+  ResumeRecommendation,
+} from "@/lib/types";
 import { Campaign as CampaignSchema } from "@/lib/types";
 import { demoCandidate } from "@/lib/demo/candidate";
 import { getProfile } from "@/lib/profileStore";
@@ -139,6 +145,38 @@ export async function setTaskStatus(
       t.id === taskId ? { ...t, status } : t,
     ),
   };
+  saveCampaign(updated);
+  return updated;
+}
+
+/**
+ * Record the user's accept/reject decision on one resume rewrite (persists).
+ * Returns the updated campaign.
+ *
+ * "You approve or deny each one" is only true if the answer survives a reload,
+ * so the decision lives on the campaign rather than in component state. The
+ * recommendation itself is not stored — it is recomputed from the candidate's
+ * evidence, and only the decision is the user's.
+ *
+ * Setting a recommendation back to "pending" REMOVES it from the map: pending
+ * is the absence of a decision, not a decision to do nothing.
+ */
+export async function setResumeRecommendationStatus(
+  campaignId: string,
+  recommendationId: string,
+  status: ResumeRecommendation["status"],
+): Promise<Campaign | undefined> {
+  const all = await ensureSeededCampaigns();
+  const campaign = all.find((c) => c.id === campaignId);
+  if (!campaign) return undefined;
+
+  const decisions: NonNullable<Campaign["resumeDecisions"]> = {
+    ...(campaign.resumeDecisions ?? {}),
+  };
+  if (status === "pending") delete decisions[recommendationId];
+  else decisions[recommendationId] = status;
+
+  const updated: Campaign = { ...campaign, resumeDecisions: decisions };
   saveCampaign(updated);
   return updated;
 }

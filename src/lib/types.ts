@@ -600,6 +600,24 @@ export const Campaign = z.object({
    * degrade to existing behavior when it is missing, exactly like `harvest`.
    */
   applicationForm: ApplicationForm.optional(),
+
+  /**
+   * The user's decision on each resume rewrite, keyed by
+   * `ResumeRecommendation.id`.
+   *
+   * Recommendations themselves are DERIVED (recomputed from the candidate's
+   * evidence graph and this job's requirements on every render), so only the
+   * decision is stored — storing the generated prose would let a stale rewrite
+   * about an older version of the profile outlive the evidence behind it.
+   *
+   * Only a real decision is recorded: "pending" is the absence of a key, not a
+   * stored value, so a rewrite the user has not looked at is never mistaken
+   * for one they considered and left alone.
+   *
+   * Absent for every campaign created before P3 — consumers must treat a
+   * missing map exactly like an empty one.
+   */
+  resumeDecisions: z.record(z.enum(["accepted", "rejected"])).optional(),
 });
 export type Campaign = z.infer<typeof Campaign>;
 

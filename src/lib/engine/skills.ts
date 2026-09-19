@@ -92,4 +92,9 @@ export function matchAll(
   return out;
 }
 
-export { LEVEL_RANK };
+/**
+ * Exported so other engines can grade a set of evidence the SAME way this one
+ * does instead of keeping a second copy of the rules (engine/keywords.ts).
+ * `confidenceFor` is re-exported under a clearer name for external callers.
+ */
+export { LEVEL_RANK, bestLevel, confidenceFor as evidenceConfidence };

@@ -2,7 +2,12 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { demoCandidate } from "@/lib/demo/candidate";
 import { demoJobsPool } from "@/lib/demo/jobsPool";
 import { resetProfile, saveProfile } from "@/lib/profileStore";
-import { createCampaignFromJob, ensureSeededCampaigns } from "@/lib/store";
+import {
+  createCampaignFromJob,
+  ensureSeededCampaigns,
+  getCampaign,
+  setResumeRecommendationStatus,
+} from "@/lib/store";
 
 /**
  * THE CAMPAIGN MUST BE GROUNDED IN THE USER'S OWN PROFILE.
@@ -74,5 +79,46 @@ describe("ensureSeededCampaigns — the fixed demo seed stays the demo candidate
     const demo = campaigns.find((c) => c.isDemo);
     expect(demo).toBeDefined();
     expect(demo!.candidateId).toBe(demoCandidate.id);
+  });
+});
+
+/**
+ * ACCEPT/REJECT MUST SURVIVE A RELOAD.
+ *
+ * ResumeStudio used to hold the decision in component state, so "you approve
+ * or deny each one" lasted exactly as long as the render. The decision is the
+ * user's contribution to the document — losing it silently is the same class
+ * of failure as showing them someone else's recommendations.
+ */
+describe("setResumeRecommendationStatus — the decision persists", () => {
+  it("stores accept and reject on the campaign, and reads back after a fresh load", async () => {
+    const campaigns = await ensureSeededCampaigns();
+    const id = campaigns[0].id;
+
+    await setResumeRecommendationStatus(id, "rec_req_debug", "accepted");
+    await setResumeRecommendationStatus(id, "rec_req_c", "rejected");
+
+    const reloaded = await getCampaign(id);
+    expect(reloaded?.resumeDecisions).toEqual({
+      rec_req_debug: "accepted",
+      rec_req_c: "rejected",
+    });
+  });
+
+  it("removes the entry when a decision is taken back, because pending is not a decision", async () => {
+    const campaigns = await ensureSeededCampaigns();
+    const id = campaigns[0].id;
+
+    await setResumeRecommendationStatus(id, "rec_req_debug", "accepted");
+    await setResumeRecommendationStatus(id, "rec_req_debug", "pending");
+
+    const reloaded = await getCampaign(id);
+    expect(reloaded?.resumeDecisions).toEqual({});
+  });
+
+  it("returns undefined for a campaign that does not exist", async () => {
+    expect(
+      await setResumeRecommendationStatus("camp_nope", "rec_req_debug", "accepted"),
+    ).toBeUndefined();
   });
 });

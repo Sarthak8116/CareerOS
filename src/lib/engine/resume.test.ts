@@ -55,18 +55,88 @@ describe("getResumeRecommendations", () => {
       // A real recommendation also carries its rewrite and the requirement it addresses.
       expect(rec.suggested.trim().length).toBeGreaterThan(0);
       expect(rec.requirementAddressed.trim().length).toBeGreaterThan(0);
+      // Before -> after, and they actually differ.
+      expect(rec.original.trim().length).toBeGreaterThan(0);
+      expect(rec.suggested).not.toBe(rec.original);
     }
   });
 
-  it("cites actual candidate evidence ids in the citation string", () => {
-    // Every candidate evidence id referenced in a rec must exist on the candidate.
-    const knownIds = new Set(demoCandidate.evidence.map((e) => e.id));
-    const summary = recs.find((r) => r.id === "rec_summary");
-    expect(summary).toBeDefined();
-    // rec_summary cites ev_cachesim, ev_c, ev_nn — all real ids on the candidate.
-    for (const id of ["ev_cachesim", "ev_c", "ev_nn"]) {
-      expect(knownIds.has(id)).toBe(true);
-      expect(summary!.evidenceUsed).toContain(id);
+  it("addresses a requirement this job actually lists", () => {
+    const listed = new Set(demoJob.requirements.map((r) => r.text));
+    for (const rec of recs) expect(listed.has(rec.requirementAddressed)).toBe(true);
+  });
+
+  it("cites evidence ids that exist on the candidate it was given", () => {
+    const knownIds = demoCandidate.evidence.map((e) => e.id);
+    for (const rec of recs) {
+      const cited = knownIds.filter((id) => rec.evidenceUsed.includes(`${id}:`));
+      expect(cited.length).toBeGreaterThan(0);
     }
+  });
+
+  /**
+   * THE REGRESSION THIS PHASE EXISTS FOR.
+   *
+   * The recommendations used to be a hardcoded bank of prose keyed to the demo
+   * candidate's evidence ids, and `citeEvidence` degraded SILENTLY to raw ids
+   * for anyone else — it did not fail, it emitted confident sentences about a
+   * different person. The failure is invisible unless a test names a different
+   * candidate and checks whose evidence came back.
+   */
+  it("for a DIFFERENT candidate, never cites the demo candidate's evidence", () => {
+    const other = {
+      ...demoCandidate,
+      id: "cand_other",
+      name: "Rosalind Ashgrove",
+      evidence: [
+        {
+          id: "ev_other_c",
+          claim: "Strong programming work in C on an embedded flight controller",
+          category: "experience" as const,
+          sourceType: "github" as const,
+          sourceReference: "github.com/rashgrove/fc",
+          strength: "strong" as const,
+          recency: "current" as const,
+          publicProof: true,
+          trust: "source-backed" as const,
+        },
+      ],
+    };
+
+    const otherRecs = getResumeRecommendations(other, demoJob);
+    const otherIds = new Set(other.evidence.map((e) => e.id));
+
+    for (const rec of otherRecs) {
+      for (const demoId of demoCandidate.evidence.map((e) => e.id)) {
+        expect(rec.evidenceUsed).not.toContain(demoId);
+      }
+      const cited = [...otherIds].filter((id) => rec.evidenceUsed.includes(`${id}:`));
+      expect(cited.length).toBeGreaterThan(0);
+      // The rewrite is built from that candidate's own claim, verbatim.
+      expect(rec.suggested).toContain(other.evidence[0].claim);
+    }
+  });
+
+  it("returns an empty list rather than prose when no evidence supports a rewrite", () => {
+    const empty = { ...demoCandidate, id: "cand_empty", evidence: [] };
+    expect(getResumeRecommendations(empty, demoJob)).toEqual([]);
+  });
+
+  it("adds no digit the cited evidence does not already contain", () => {
+    for (const rec of recs) {
+      const cited = demoCandidate.evidence.filter((e) =>
+        rec.evidenceUsed.includes(`${e.id}:`),
+      );
+      const source = cited.map((e) => e.claim).join(" ");
+      for (const run of rec.suggested.match(/\d+/g) ?? []) {
+        expect(source).toContain(run);
+      }
+    }
+  });
+
+  it("never offers a rewrite built on weak-inference evidence", () => {
+    // ev_gpu is a stated interest with no shipped artifact. verifyClaims calls
+    // that unsupported, and the rewrite gate reuses it rather than a softer rule.
+    for (const rec of recs) expect(rec.evidenceUsed).not.toContain("ev_gpu:");
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Check, X, ArrowRight, ShieldCheck, FileText } from "lucide-react";
 import type { ResumeRecommendation, ClaimFlag, Level } from "@/lib/types";
 import { Card, CardHeader, Button, Pill, SectionTitle } from "@/components/ui/primitives";
@@ -16,8 +16,11 @@ import { cn } from "@/lib/utils";
  *  2. Claim verification — the honesty pass. Flags risky claims so the
  *     candidate fixes them first; CareerOS never fabricates experience.
  *
- * All local state (accept/reject) is per-render — nothing is persisted, and
- * nothing here invents metrics or upgrades a claim beyond its evidence.
+ * Accept/reject is CONTROLLED: the status shown is the one on the
+ * recommendation, and every decision is handed to `onDecide` so the owner can
+ * persist it. This component holds no decision state of its own — it used to,
+ * which meant "you approve or deny each one" lasted until the next render.
+ * Nothing here invents metrics or upgrades a claim beyond its evidence.
  */
 
 type RecStatus = ResumeRecommendation["status"]; // pending | accepted | rejected
@@ -194,17 +197,16 @@ function ClaimFlagRow({ flag }: { flag: ClaimFlag }) {
 export function ResumeStudio({
   recommendations,
   flags,
+  onDecide,
 }: {
   recommendations: ResumeRecommendation[];
   flags: ClaimFlag[];
+  /** Called with the user's decision. The owner persists it and re-renders. */
+  onDecide: (recommendationId: string, status: RecStatus) => void;
 }) {
-  const [statuses, setStatuses] = useState<Record<string, RecStatus>>(() =>
-    Object.fromEntries(recommendations.map((r) => [r.id, r.status])),
-  );
-
   const acceptedCount = useMemo(
-    () => Object.values(statuses).filter((s) => s === "accepted").length,
-    [statuses],
+    () => recommendations.filter((r) => r.status === "accepted").length,
+    [recommendations],
   );
 
   return (
@@ -236,10 +238,8 @@ export function ResumeStudio({
               <RecommendationCard
                 key={rec.id}
                 rec={rec}
-                status={statuses[rec.id] ?? "pending"}
-                onDecide={(next) =>
-                  setStatuses((prev) => ({ ...prev, [rec.id]: next }))
-                }
+                status={rec.status}
+                onDecide={(next) => onDecide(rec.id, next)}
               />
             ))}
           </div>

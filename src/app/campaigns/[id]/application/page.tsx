@@ -3,8 +3,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { Package, Sparkles } from "lucide-react";
-import type { ApplicationPackage, Campaign, Candidate } from "@/lib/types";
-import { getCampaign } from "@/lib/store";
+import type {
+  ApplicationPackage,
+  Campaign,
+  Candidate,
+  ResumeRecommendation,
+} from "@/lib/types";
+import { getCampaign, setResumeRecommendationStatus } from "@/lib/store";
 import { getAnswers } from "@/lib/answers";
 import { getProfile } from "@/lib/profileStore";
 import { getResumeRecommendations, verifyClaims } from "@/lib/engine/resume";
@@ -78,12 +83,33 @@ export default function ApplicationStudioPage() {
     };
   }, [id]);
 
-  const recommendations = useMemo(
-    () =>
-      campaign && candidate
-        ? getResumeRecommendations(candidate, campaign.job)
-        : [],
-    [campaign, candidate],
+  /**
+   * Rewrites are DERIVED from the candidate's evidence and this job, then
+   * carry the user's PERSISTED decision. Only the decision is stored (see
+   * `Campaign.resumeDecisions`): a rewrite saved as prose would outlive the
+   * evidence it was generated from.
+   */
+  const recommendations = useMemo(() => {
+    if (!campaign || !candidate) return [];
+    const decisions = campaign.resumeDecisions ?? {};
+    return getResumeRecommendations(candidate, campaign.job).map((rec) => ({
+      ...rec,
+      status: decisions[rec.id] ?? rec.status,
+    }));
+  }, [campaign, candidate]);
+
+  const decideRecommendation = useCallback(
+    (recommendationId: string, status: ResumeRecommendation["status"]) => {
+      void (async () => {
+        const updated = await setResumeRecommendationStatus(
+          id,
+          recommendationId,
+          status,
+        );
+        if (updated) setCampaign(updated);
+      })();
+    },
+    [id],
   );
   const flags = useMemo(
     () => (candidate ? verifyClaims(candidate) : []),
@@ -226,7 +252,11 @@ export default function ApplicationStudioPage() {
       </header>
 
       <div className="mt-8">
-        <ResumeStudio recommendations={recommendations} flags={flags} />
+        <ResumeStudio
+          recommendations={recommendations}
+          flags={flags}
+          onDecide={decideRecommendation}
+        />
       </div>
 
       <div className="mt-10">
