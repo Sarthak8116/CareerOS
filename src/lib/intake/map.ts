@@ -348,8 +348,20 @@ export function buildJob(draft: JobDraft): BuiltJob | undefined {
     );
   }
 
-  if (!draft.postedAt) unstated.push("postedAt");
-  if (draft.postedAt) origins.postedAt = "stated";
+  if (draft.postedAt) {
+    origins.postedAt = "stated";
+  } else {
+    // Recorded through the same helper as every other gap, so `fieldOrigins`
+    // and `unstated` can never disagree — a consumer reading one must never
+    // see a stated value where the other sees a gap. `postedAt` is optional on
+    // `Job` so there is no placeholder to flag, but how old a posting is
+    // changes whether it is worth applying to, so its absence is worth saying.
+    defaulted("postedAt", "This posting does not state when it was published.");
+  }
+
+  // `deadline` is deliberately NOT recorded when absent. Unlike a posting date,
+  // most jobs genuinely have no deadline, so flagging every one would be noise
+  // rather than information.
   if (draft.deadline) origins.deadline = "stated";
 
   const job: Job = {

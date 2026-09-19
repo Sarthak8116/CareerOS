@@ -428,7 +428,16 @@ export const ApplicationQuestionCategory = z.enum([
   "work-authorization",
   "experience",
   "motivation",
-  "demographic",
+  // NOTE: there is deliberately no "demographic" member. EEO self-identification
+  // questions (gender, race, veteran and disability status) are never parsed into
+  // an ApplicationForm — they are voluntary by law, exist for aggregate compliance
+  // reporting rather than evaluation, and a tool that pre-fills them has no
+  // business doing so. They are recorded in `ApplicationForm.excludedSections`
+  // and disclosed to the user instead of being silently dropped.
+  //
+  // The member is REMOVED rather than left unused on purpose: a dangling enum
+  // value for something we never emit is an invitation for someone later to
+  // wire it up. `honesty.test.ts` asserts its absence so it cannot come back.
   "logistics",
   "other",
 ]);

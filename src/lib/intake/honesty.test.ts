@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Job, Campaign, ApplicationForm } from "@/lib/types";
+import { Job, Campaign, ApplicationForm, ApplicationQuestionCategory } from "@/lib/types";
 import { Campaign as CampaignSchema } from "@/lib/types";
 import { buildJob } from "@/lib/intake/map";
 import type { FieldOrigins } from "@/lib/intake/types";
@@ -102,6 +102,99 @@ describe("no persisted Job or Campaign ever carries a fieldOrigins key", () => {
 });
 
 /* ------------------------------------------------------------------ */
+/* fieldOrigins and Job.unstated must never disagree.                  */
+/*                                                                      */
+/* Two representations of the same fact travel through intake:         */
+/*   - fieldOrigins  (transport, to the pre-build review step)         */
+/*   - Job.unstated  (persisted, reaches the Campaign and P2)          */
+/* If a field is "defaulted" in one but not reflected in the other, a  */
+/* consumer of ONE of the two representations sees the wrong answer —  */
+/* invisibly, since nothing throws. The invariant: for every field,    */
+/* origin === "defaulted"  IFF  that field is in Job.unstated.         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Assert the two representations of "we didn't get this from the posting"
+ * agree on every field, in both directions.
+ */
+function assertOriginsAgreeWithUnstated(
+  origins: FieldOrigins,
+  unstated: string[] | undefined,
+) {
+  const unstatedSet = new Set(unstated ?? []);
+
+  for (const [field, origin] of Object.entries(origins)) {
+    if (origin !== "defaulted") continue;
+    expect(
+      unstatedSet.has(field),
+      `origin["${field}"] is "defaulted" but "${field}" is missing from Job.unstated — ` +
+        `a consumer reading fieldOrigins sees a placeholder while a consumer reading ` +
+        `Job.unstated sees nothing wrong`,
+    ).toBe(true);
+  }
+
+  for (const field of unstatedSet) {
+    const origin = origins[field as keyof FieldOrigins];
+    expect(
+      origin,
+      `"${field}" is in Job.unstated but origins["${field}"] is ${JSON.stringify(origin)}, ` +
+        `not "defaulted" — a consumer reading Job.unstated sees a placeholder while a ` +
+        `consumer reading fieldOrigins sees a real, stated value`,
+    ).toBe("defaulted");
+  }
+}
+
+describe("fieldOrigins and Job.unstated agree on every field (no silent drift)", () => {
+  const minimalDraft = {
+    source: "test-adapter",
+    title: "Engineer",
+    company: "Acme",
+    description: "A real job description.",
+    requirements: [],
+    origins: {},
+  };
+
+  it("a posting that states almost nothing — every defaulted field agrees with unstated", () => {
+    const built = buildJob(minimalDraft);
+    expect(built).toBeDefined();
+    assertOriginsAgreeWithUnstated(built!.fieldOrigins, built!.job.unstated);
+  });
+
+  it("a posting that states everything — nothing is defaulted, nothing is unstated", () => {
+    const built = buildJob({
+      ...minimalDraft,
+      location: "Remote",
+      remote: "remote" as const,
+      employmentType: "full-time" as const,
+      seniority: "Senior",
+      postedAt: "2026-06-01T00:00:00.000Z",
+      deadline: "2026-08-01T00:00:00.000Z",
+      sponsorship: "offered" as const,
+      origins: {
+        location: "stated" as const,
+        remote: "stated" as const,
+        employmentType: "stated" as const,
+      },
+    });
+    expect(built).toBeDefined();
+    assertOriginsAgreeWithUnstated(built!.fieldOrigins, built!.job.unstated);
+    expect(built!.job.unstated ?? []).toEqual([]);
+  });
+
+  it("postedAt specifically: absent posting date must be 'defaulted' in origins, not just pushed to unstated", () => {
+    // src/lib/intake/map.ts: `if (!draft.postedAt) unstated.push("postedAt")`
+    // pushes to unstated but never sets origins.postedAt — confirmed live bug.
+    const built = buildJob(minimalDraft);
+    expect(built).toBeDefined();
+    expect(built!.job.unstated ?? []).toContain("postedAt");
+    expect(
+      built!.fieldOrigins.postedAt,
+      "origins.postedAt must be \"defaulted\" whenever postedAt is absent and therefore in Job.unstated",
+    ).toBe("defaulted");
+  });
+});
+
+/* ------------------------------------------------------------------ */
 /* employmentTypeRaw — present only when the posting actually said something */
 /* ------------------------------------------------------------------ */
 
@@ -179,6 +272,41 @@ describe("demographic/EEO questions never reach ApplicationForm output", () => {
         `question "${q.prompt}" must not be categorized/exposed as demographic — CareerOS must never surface or answer protected-characteristic questions on the candidate's behalf`,
       ).not.toBe("demographic");
     }
+  });
+
+  it("excludedSections names the section but never carries the actual EEO question wording or options", () => {
+    // The exclusion is only as strong as what it DOESN'T copy — naming the
+    // section ("Equal employment opportunity questions") is fine; leaking the
+    // individual prompts ("What is your gender identity?") or their answer
+    // options back out through excludedSections would defeat the whole point.
+    const output = parseGreenhouse();
+    const raw = greenhouseJobDetail as {
+      demographic_questions?: { questions?: { label?: string }[] };
+    };
+    const demographicPrompts = (raw.demographic_questions?.questions ?? [])
+      .map((q) => q.label)
+      .filter((label): label is string => !!label);
+    expect(demographicPrompts.length).toBeGreaterThan(0);
+
+    const excludedText = output.form.excludedSections.join(" ").toLowerCase();
+    for (const prompt of demographicPrompts) {
+      expect(
+        excludedText,
+        `excludedSections must not contain the verbatim EEO question "${prompt}"`,
+      ).not.toContain(prompt.toLowerCase());
+    }
+  });
+
+  it("ApplicationQuestionCategory no longer offers \"demographic\" as a value a question can be tagged with", () => {
+    // ApplicationQuestionCategory is NEW in P1 — nothing pre-existing depends
+    // on it, so dropping a member is not an additive-only violation the way it
+    // would be for Job/Campaign. Keeping the value around is what let the leak
+    // above happen in the first place; this stops it being reintroduced by
+    // someone reaching for the "obvious" category name later.
+    expect(
+      ApplicationQuestionCategory.options,
+      '"demographic" must be removed from ApplicationQuestionCategory now that demographic questions are excluded rather than categorized',
+    ).not.toContain("demographic");
   });
 
   // Lever's public postings API never exposes application questions at all —

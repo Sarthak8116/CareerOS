@@ -150,7 +150,12 @@ describe("greenhouse", () => {
     const serialized = JSON.stringify(out.form.questions);
     expect(serialized).not.toMatch(/gender identity/i);
     expect(serialized).not.toMatch(/transgender/i);
-    expect(out.form.questions.some((q) => q.category === "demographic")).toBe(false);
+    expect(serialized).not.toMatch(/veteran|disability/i);
+    // Every EEO prompt in the fixture is absent from the output by wording, not
+    // merely by category — the category for them no longer exists at all.
+    for (const dq of demographic) {
+      expect(serialized).not.toContain(dq.label);
+    }
 
     // But the user is told the section exists.
     expect(out.form.excludedSections.length).toBe(1);
