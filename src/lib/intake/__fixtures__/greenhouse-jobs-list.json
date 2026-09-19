@@ -1,0 +1,107 @@
+{
+  "jobs": [
+    {
+      "absolute_url": "https://boards.greenhouse.io/robinhood/jobs/8198153?t=gh_src=&gh_jid=8198153",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": true
+        }
+      ],
+      "education": "education_required",
+      "internal_job_id": 3547966,
+      "location": {
+        "name": "New York, NY"
+      },
+      "metadata": [
+        {
+          "id": 4288026,
+          "name": "Careers Page Bucket",
+          "value": "EARLY TALENT AND INTERNSHIPS",
+          "value_type": "single_select"
+        }
+      ],
+      "id": 8198153,
+      "updated_at": "2026-09-14T08:00:08-04:00",
+      "requisition_id": "1928",
+      "title": "Accounting Intern (Summer 2027)",
+      "company_name": "Robinhood",
+      "first_published": "2026-09-14T08:00:08-04:00",
+      "language": "en",
+      "application_deadline": null
+    },
+    {
+      "absolute_url": "https://boards.greenhouse.io/robinhood/jobs/8162157?t=gh_src=&gh_jid=8162157",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": true
+        }
+      ],
+      "internal_job_id": 3532498,
+      "location": {
+        "name": "Denver, CO; New York, NY; Westlake, TX"
+      },
+      "metadata": [
+        {
+          "id": 4288026,
+          "name": "Careers Page Bucket",
+          "value": "COMPLIANCE, RISK, & FRAUD",
+          "value_type": "single_select"
+        }
+      ],
+      "id": 8162157,
+      "updated_at": "2026-09-14T11:17:20-04:00",
+      "requisition_id": "JR109304",
+      "title": "AML Investigator",
+      "company_name": "Robinhood",
+      "first_published": "2026-09-03T11:43:18-04:00",
+      "language": "en",
+      "application_deadline": "2026-10-03T11:43:17-04:00"
+    },
+    {
+      "absolute_url": "https://boards.greenhouse.io/robinhood/jobs/6669758?t=gh_src=&gh_jid=6669758",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": true
+        }
+      ],
+      "internal_job_id": 3085172,
+      "location": {
+        "name": "New York, NY"
+      },
+      "metadata": [
+        {
+          "id": 4288026,
+          "name": "Careers Page Bucket",
+          "value": "SOFTWARE ENGINEERING",
+          "value_type": "single_select"
+        }
+      ],
+      "id": 6669758,
+      "updated_at": "2026-08-25T14:36:41-04:00",
+      "requisition_id": "1683",
+      "title": "Android Engineer, Government Products",
+      "company_name": "Robinhood",
+      "first_published": "2025-05-08T14:52:01-04:00",
+      "language": "en",
+      "application_deadline": null
+    }
+  ],
+  "meta": {
+    "total": 155
+  }
+}
