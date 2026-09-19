@@ -1,6 +1,12 @@
 import { describe, it, expect } from "vitest";
 import type { z } from "zod";
-import { Job, Campaign } from "@/lib/types";
+import {
+  Job,
+  Campaign,
+  ApplicationPackage,
+  PackageDocument,
+  PackageClaim,
+} from "@/lib/types";
 import { demoJob } from "@/lib/demo/job";
 import { demoJobsPool } from "@/lib/demo/jobsPool";
 import { demoCandidate } from "@/lib/demo/candidate";
@@ -160,6 +166,86 @@ describe("Campaign schema — additivity baseline (frozen from today's types.ts)
 
   it("every existing field is unchanged; any new field is optional", () => {
     assertAdditiveOnly(campaignBaseline, describeShape(Campaign.shape));
+  });
+});
+
+/**
+ * P2 APPLICATION PACKAGE — additivity baseline, frozen from the shape landed
+ * for P2 (see `careeros/contract/p2-application-package`). `ApplicationPackage`,
+ * `PackageDocument`, and `PackageClaim` are brand new in this phase, so there
+ * is nothing from an EARLIER phase to protect here — this baseline instead
+ * protects P3 and onward from silently renaming, retyping, or narrowing what
+ * P2 shipped. The same additive-only rule applies: a new top-level field must
+ * be optional; nothing already here may be renamed, removed, or retyped.
+ */
+describe("PackageClaim schema — additivity baseline (frozen from P2)", () => {
+  const packageClaimBaseline: Record<string, FieldShape> = {
+    text: { optional: false, typeName: "ZodString" },
+    support: {
+      optional: false,
+      typeName: "ZodEnum",
+      enumValues: ["evidenced", "unsupported", "user-provided"],
+    },
+    evidenceId: { optional: true, typeName: "ZodString" },
+  };
+
+  it("every existing field is unchanged; any new field is optional", () => {
+    assertAdditiveOnly(packageClaimBaseline, describeShape(PackageClaim.shape));
+  });
+});
+
+describe("PackageDocument schema — additivity baseline (frozen from P2)", () => {
+  const packageDocumentBaseline: Record<string, FieldShape> = {
+    kind: {
+      optional: false,
+      typeName: "ZodEnum",
+      enumValues: ["cover-letter", "personal-info", "resume", "short-answers"],
+    },
+    fileName: { optional: false, typeName: "ZodString" },
+    status: {
+      optional: false,
+      typeName: "ZodEnum",
+      enumValues: ["drafted", "needs-you", "not-requested", "reused"],
+    },
+    content: { optional: false, typeName: "ZodString" },
+    claims: { optional: false, typeName: "ZodArray" },
+  };
+
+  it("every existing field is unchanged; any new field is optional", () => {
+    assertAdditiveOnly(packageDocumentBaseline, describeShape(PackageDocument.shape));
+  });
+});
+
+describe("ApplicationPackage schema — additivity baseline (frozen from P2)", () => {
+  const applicationPackageBaseline: Record<string, FieldShape> = {
+    campaignId: { optional: false, typeName: "ZodString" },
+    jobId: { optional: false, typeName: "ZodString" },
+    builtAt: { optional: false, typeName: "ZodString" },
+    folderName: { optional: false, typeName: "ZodString" },
+    documents: { optional: false, typeName: "ZodArray" },
+    completeness: {
+      optional: false,
+      typeName: "ZodEnum",
+      enumValues: ["complete", "partial"],
+    },
+    missing: { optional: false, typeName: "ZodArray" },
+    excludedSections: { optional: false, typeName: "ZodArray" },
+  };
+
+  it("every existing field is unchanged; any new field is optional", () => {
+    assertAdditiveOnly(applicationPackageBaseline, describeShape(ApplicationPackage.shape));
+  });
+
+  it("completeness is restricted to 'complete' | 'partial' — never a broader label", () => {
+    // `completeness` is DERIVED (see the P2 contract) and must never widen to
+    // include e.g. an asserted "done" state that bypasses derivation. Locking
+    // the enum here means a loosened definition fails this file, not silently
+    // ships.
+    expect(ApplicationPackage.shape.completeness._def.typeName).toBe("ZodEnum");
+    expect([...ApplicationPackage.shape.completeness._def.values].sort()).toEqual([
+      "complete",
+      "partial",
+    ]);
   });
 });
 
