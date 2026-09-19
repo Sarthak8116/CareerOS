@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { Candidate, Job } from "@/lib/types";
-import { liveModeAvailable } from "@/lib/live/anthropic";
+import { liveModeAvailable } from "@/lib/live/nemotron";
 import { generateCoverLetterLive } from "@/lib/package/live";
 
 export const runtime = "nodejs";
@@ -55,8 +55,8 @@ export async function POST(req: Request) {
   } catch (err) {
     // Never leak internals (or the key) into a client-visible message.
     const message = err instanceof Error ? err.message : "";
-    const safe = /api key|401|authentication/i.test(message)
-      ? "Authentication failed — check ANTHROPIC_API_KEY."
+    const safe = /api key|401|403|authentication/i.test(message)
+      ? "Authentication failed — check your NVIDIA API key."
       : /rate|429/i.test(message)
         ? "Rate limited by the model API — try again shortly."
         : "The model did not return a usable draft. CareerOS can assemble one from your evidence instead.";

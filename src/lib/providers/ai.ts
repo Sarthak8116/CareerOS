@@ -7,7 +7,7 @@ import { slugId } from "@/lib/utils";
 
 /**
  * Provider abstraction (build directive §10 "provider abstraction for future
- * models", §11). The app depends only on this interface, so a real Claude-API
+ * models", §11). The app depends only on this interface, so a real Nemotron-API
  * campaign builder can replace the deterministic demo one with no UI changes.
  */
 export interface CampaignProvider {

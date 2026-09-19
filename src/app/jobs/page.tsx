@@ -88,8 +88,8 @@ export default function JobsPage() {
             Run a real job with your own résumé →
           </p>
           <p className="mt-0.5 text-sm text-slate-600">
-            Live mode uses Claude to analyze any real posting against your real
-            profile. Requires an Anthropic API key.
+            Live mode uses NVIDIA Nemotron to analyze any real posting against
+            your real profile. Requires an NVIDIA API key.
           </p>
         </div>
         <Pill className="shrink-0 bg-brand-600 text-white ring-brand-700/20">Live</Pill>

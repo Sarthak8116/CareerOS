@@ -1,7 +1,11 @@
 import "server-only";
-import type { Campaign, Candidate } from "@/lib/types";
+import type { AgentActivity, Campaign, Candidate } from "@/lib/types";
 import { Campaign as CampaignSchema } from "@/lib/types";
-import { parseStructured } from "@/lib/live/anthropic";
+import {
+  parseStructured,
+  readDocumentPages,
+  RESUME_SHAPER,
+} from "@/lib/live/nemotron";
 import { LiveCandidate, LiveJob, LiveAnalysis } from "@/lib/live/schemas";
 import { sanitizeUntrusted } from "@/lib/security/untrusted";
 import { slugId } from "@/lib/utils";
@@ -10,8 +14,14 @@ import { enrichWithLinkedIn } from "@/lib/live/enrich";
 
 /**
  * Live campaign builder — the real-provider counterpart to DemoCampaignProvider.
- * Runs three structured Claude calls (parse résumé → parse job → analyze) and
- * assembles a Campaign in the SAME schema the whole UI already renders.
+ * Runs structured Nemotron calls (read résumé → shape candidate → parse job →
+ * analyze) and assembles a Campaign in the SAME schema the whole UI renders.
+ *
+ * Model per step (each is the model the frozen provider contract assigns):
+ *  - nemotron-parse            reads the rasterised résumé pages
+ *  - nemotron-3-nano (omni)    shapes that transcript into candidate+evidence
+ *  - nemotron-3.5-lightning    parses the job posting
+ *  - nemotron-3-super          produces the campaign analysis
  *
  * Trust rules baked into every prompt (build directive §16):
  *  - Ground every claim in the provided evidence; never invent experience.
@@ -29,30 +39,89 @@ const HONESTY = [
 ].join("\n");
 
 export async function buildLiveCampaign(input: {
-  resumePdfBase64: string;
+  resume: {
+    /** The résumé rasterised page-by-page IN THE BROWSER: image data URLs. */
+    pages: string[];
+    /** Pages in the user's actual PDF, which may exceed `pages.length`. */
+    totalPages: number;
+    /** True when fewer pages were sent than the PDF has. */
+    truncated: boolean;
+  };
   jobText: string;
   createdAt: string;
 }): Promise<Campaign> {
   const job = sanitizeUntrusted(input.jobText).clean;
 
-  // 1) Parse the résumé PDF into a structured candidate + evidence graph.
-  //    The PDF is sent to Claude as a document block (native PDF reading).
+  // 1a) Read the résumé pages. nemotron-parse is a document model: it takes
+  //     page images and returns their text, and cannot be handed a schema.
+  const resume = await readDocumentPages({
+    label: "resume",
+    pages: input.resume.pages,
+  });
+  // The transcript is the user's own file, but it is still text of unknown
+  // content reaching a model — fence it like any other untrusted input (§15).
+  const resumeText = sanitizeUntrusted(resume.text).clean;
+
+  // What the models were NOT given. A campaign built on part of a résumé that
+  // reads as if it saw all of it is exactly the quiet dishonesty §16 forbids,
+  // so the limits travel with the campaign (in the activity feed the UI already
+  // renders) AND are stated to the analyst model, which must not treat a page
+  // it never saw as evidence of absence.
+  const limits: string[] = [];
+  const provenance: AgentActivity[] = [];
+  if (input.resume.truncated) {
+    const note =
+      `Read ${input.resume.pages.length} of ${input.resume.totalPages} résumé pages. ` +
+      "Everything below is based on those pages only.";
+    limits.push(note);
+    provenance.push({
+      agent: "Résumé Reader",
+      message: note,
+      kind: "conflict",
+      confidence: "high",
+    });
+  }
+  if (resume.unreadablePages.length > 0) {
+    const note =
+      `Could not read page ${resume.unreadablePages.join(", ")} of the résumé. ` +
+      "Those pages contributed nothing; they are missing, not empty.";
+    limits.push(note);
+    provenance.push({
+      agent: "Résumé Reader",
+      message: note,
+      kind: "conflict",
+      confidence: "high",
+    });
+  }
+  // Trusted instructions go in the TASK, never inside the untrusted fence.
+  const limitsNote = limits.length
+    ? "\n\nLIMITS ON WHAT YOU WERE GIVEN (state nothing that contradicts these, " +
+      "and never treat an unread page as evidence something is absent):\n- " +
+      limits.join("\n- ")
+    : "";
+
+  // 1b) Shape that transcript into a structured candidate + evidence graph.
   const candidate = await parseStructured({
     schema: LiveCandidate,
     schemaName: "candidate",
+    model: RESUME_SHAPER,
     system:
-      "You extract a structured candidate profile and evidence graph from a résumé PDF. " +
+      "You extract a structured candidate profile and evidence graph from the text of a résumé. " +
       "Every skill/project/experience becomes an Evidence item with a source, strength, recency, " +
       "publicProof flag, and trust label. Give each evidence item a short stable id like 'ev_python'. " +
+      "A page marked '[this page could not be read]' is missing, not empty: never invent its contents. " +
       HONESTY,
-    task: "Extract the candidate profile and evidence graph from the attached résumé PDF.",
-    documents: [{ label: "resume", base64: input.resumePdfBase64 }],
+    task:
+      "Extract the candidate profile and evidence graph from this résumé." +
+      limitsNote,
+    untrusted: [{ label: "resume", text: resumeText }],
   });
 
   // 2) Parse the job posting into structured requirements.
   const parsedJob = await parseStructured({
     schema: LiveJob,
     schemaName: "job",
+    model: "lightning",
     system:
       "You parse a job posting into structured fields and a requirements list. " +
       "Classify each requirement as minimum, preferred, or responsibility, and give each a short id like 'req_c'. " +
@@ -69,6 +138,7 @@ export async function buildLiveCampaign(input: {
   const analysis = await parseStructured({
     schema: LiveAnalysis,
     schemaName: "analysis",
+    model: "super",
     maxTokens: 16000,
     system:
       "You are CareerOS's campaign analyst. Given a candidate evidence graph and a parsed job, produce: " +
@@ -83,7 +153,8 @@ export async function buildLiveCampaign(input: {
       "CANDIDATE (structured):\n" +
       JSON.stringify(candidate) +
       "\n\nJOB (structured):\n" +
-      JSON.stringify(parsedJob),
+      JSON.stringify(parsedJob) +
+      limitsNote,
   });
 
   const campaign: Campaign = {
@@ -98,7 +169,8 @@ export async function buildLiveCampaign(input: {
     gaps: analysis.gaps,
     tasks: analysis.tasks,
     people: analysis.people,
-    activity: analysis.activity,
+    // Provenance first: what was read, and what was not, before any conclusion.
+    activity: [...provenance, ...analysis.activity],
     nextAction: analysis.nextAction,
   };
 

@@ -15,18 +15,34 @@ import type { Campaign } from "@/lib/types";
 import { saveCampaign } from "@/lib/store";
 import { Shell } from "@/components/Shell";
 import { Button, Card, CardHeader, Pill } from "@/components/ui/primitives";
+import {
+  rasterizeResumePdf,
+  truncationNotice,
+  ResumeRasterizeError,
+  type RasterizedResume,
+} from "@/lib/resume/rasterize";
 
 export default function LiveJobPage() {
   const router = useRouter();
   const [live, setLive] = useState<boolean | null>(null);
   const [model, setModel] = useState<string>("");
-  const [resumeBase64, setResumeBase64] = useState("");
+  const [resume, setResume] = useState<RasterizedResume | null>(null);
   const [resumeName, setResumeName] = useState("");
+  const [reading, setReading] = useState(false);
   const [jobText, setJobText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function onResumeFile(e: React.ChangeEvent<HTMLInputElement>) {
+  /**
+   * The résumé is rendered to page images HERE, in the browser, and only the
+   * rendered pages are ever uploaded — the PDF itself never leaves the user's
+   * machine. See `@/lib/resume/rasterize` for why that must stay true.
+   *
+   * Rendering happens on selection rather than on submit so the user learns
+   * what CareerOS will actually read — how many pages, and whether any were
+   * left out — before they commit to the analysis, not after.
+   */
+  async function onResumeFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = ""; // allow re-selecting the same file
     if (!file) return;
@@ -38,20 +54,29 @@ export default function LiveJobPage() {
       setError("That PDF is too large (max 8 MB).");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = typeof reader.result === "string" ? reader.result : "";
-      const base64 = result.split(",")[1] ?? "";
-      setResumeBase64(base64);
-      setResumeName(file.name);
-      setError(null);
-    };
-    reader.onerror = () => setError("Could not read that file.");
-    reader.readAsDataURL(file);
+
+    setError(null);
+    setResume(null);
+    setResumeName(file.name);
+    setReading(true);
+    try {
+      setResume(await rasterizeResumePdf(file));
+    } catch (err) {
+      setResumeName("");
+      // ResumeRasterizeError messages are written for the user and say what to
+      // do next. Anything else is a bug, and is not dressed up as a result.
+      setError(
+        err instanceof ResumeRasterizeError
+          ? err.message
+          : "Could not read that PDF. Try re-exporting it and uploading again.",
+      );
+    } finally {
+      setReading(false);
+    }
   }
 
   function clearResume() {
-    setResumeBase64("");
+    setResume(null);
     setResumeName("");
   }
 
@@ -72,13 +97,22 @@ export default function LiveJobPage() {
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
+    if (!resume) return;
     setError(null);
     setBusy(true);
     try {
       const res = await fetch("/api/campaign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resumePdfBase64: resumeBase64, jobText }),
+        body: JSON.stringify({
+          jobText,
+          resume: {
+            pages: resume.pages,
+            totalPages: resume.totalPages,
+            truncated: resume.truncated,
+            truncatedReason: resume.truncatedReason,
+          },
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -95,6 +129,8 @@ export default function LiveJobPage() {
     }
   }
 
+  const notice = resume ? truncationNotice(resume) : null;
+
   return (
     <Shell>
       <div>
@@ -105,9 +141,11 @@ export default function LiveJobPage() {
           <Pill className="bg-brand-50 text-brand-700 ring-brand-600/20">Live</Pill>
         </div>
         <p className="mt-1 text-sm text-slate-500">
-          Upload your résumé (PDF) and paste a real job posting. CareerOS runs
-          the full analysis with Claude and builds a live campaign — grounded in
-          your evidence, with no fabricated people or numbers.
+          Upload your résumé (PDF) and paste a real job posting. Your résumé is
+          rendered to page images in your browser — the PDF itself never leaves
+          your machine. CareerOS then runs the full analysis and builds a live
+          campaign, grounded in your evidence, with no fabricated people or
+          numbers.
         </p>
       </div>
 
@@ -118,11 +156,12 @@ export default function LiveJobPage() {
           <div className="text-sm text-amber-900">
             <p className="font-medium">Live mode is off.</p>
             <p className="mt-1 leading-relaxed text-amber-800">
-              Add your Anthropic API key to a <code className="rounded bg-amber-100 px-1">.env.local</code>{" "}
-              file at the project root as{" "}
-              <code className="rounded bg-amber-100 px-1">ANTHROPIC_API_KEY=sk-ant-...</code>{" "}
-              and restart the dev server. Your key stays on the server and is
-              never sent to the browser. Meanwhile, the{" "}
+              Add your NVIDIA API key to a{" "}
+              <code className="rounded bg-amber-100 px-1">.env.local</code>{" "}
+              file at the project root and restart the dev server. The exact
+              variable name is in the server&apos;s startup error. Your key
+              stays on the server and is never sent to the browser — which is
+              also why this page does not name it. Meanwhile, the{" "}
               <a href="/demo" className="font-medium underline">demo campaign</a>{" "}
               works with no key.
             </p>
@@ -139,21 +178,48 @@ export default function LiveJobPage() {
       <form onSubmit={run} className="mt-6 space-y-5">
         <div className="grid gap-5 lg:grid-cols-2">
           <Card>
-            <CardHeader title="Your résumé" subtitle="Upload a PDF." />
-            {resumeBase64 ? (
-              <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <span className="inline-flex min-w-0 items-center gap-2 text-sm font-medium text-slate-800">
-                  <FileText className="h-5 w-5 shrink-0 text-brand-600" />
-                  <span className="truncate">{resumeName}</span>
-                </span>
-                <button
-                  type="button"
-                  onClick={clearResume}
-                  aria-label="Remove résumé"
-                  className="shrink-0 text-slate-400 transition-colors hover:text-slate-700"
-                >
-                  <X className="h-4 w-4" />
-                </button>
+            <CardHeader
+              title="Your résumé"
+              subtitle="Upload a PDF. It's read in your browser, not uploaded."
+            />
+            {reading ? (
+              <div className="flex h-[19rem] flex-col items-center justify-center gap-3 rounded-xl border border-slate-200 bg-slate-50 text-center">
+                <Loader2 className="h-6 w-6 animate-spin text-brand-600" />
+                <p className="text-sm font-medium text-slate-700">
+                  Reading {resumeName}…
+                </p>
+                <p className="text-xs text-slate-400">
+                  Rendering its pages here on your machine
+                </p>
+              </div>
+            ) : resume ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <span className="inline-flex min-w-0 items-center gap-2 text-sm font-medium text-slate-800">
+                    <FileText className="h-5 w-5 shrink-0 text-brand-600" />
+                    <span className="truncate">{resumeName}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={clearResume}
+                    aria-label="Remove résumé"
+                    className="shrink-0 text-slate-400 transition-colors hover:text-slate-700"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <p className="text-xs text-slate-500">
+                  {resume.pages.length} of {resume.totalPages}{" "}
+                  {resume.totalPages === 1 ? "page" : "pages"} will be analysed.
+                </p>
+                {notice && (
+                  <p
+                    role="status"
+                    className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900"
+                  >
+                    {notice}
+                  </p>
+                )}
               </div>
             ) : (
               <label className="flex h-[19rem] cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/60 text-center transition-colors hover:border-brand-300 hover:bg-brand-50/50">
@@ -198,16 +264,21 @@ export default function LiveJobPage() {
               Running the live analysis…
             </p>
             <p className="mt-1 text-sm text-slate-600">
-              Parsing your résumé, parsing the job, and building the campaign.
-              This can take up to a minute or two — the model reasons through the
-              fit, gaps, and outreach before returning.
+              Reading your résumé pages, parsing the job, and building the
+              campaign. This can take up to a minute or two — the model reasons
+              through the fit, gaps, and outreach before returning.
             </p>
           </div>
         ) : (
           <div className="flex items-center gap-3">
             <Button
               type="submit"
-              disabled={live === false || !resumeBase64 || jobText.trim().length < 40}
+              disabled={
+                live === false ||
+                reading ||
+                !resume ||
+                jobText.trim().length < 40
+              }
             >
               <Sparkles className="h-4 w-4" /> Build live campaign
               <ArrowRight className="h-4 w-4" />

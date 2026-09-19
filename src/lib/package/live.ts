@@ -1,6 +1,6 @@
 import "server-only";
 import type { Candidate, Job } from "@/lib/types";
-import { parseStructured } from "@/lib/live/anthropic";
+import { parseStructured } from "@/lib/live/nemotron";
 import { sanitizeUntrusted } from "@/lib/security/untrusted";
 import { CoverLetterDraft } from "@/lib/package/coverLetter";
 
@@ -9,7 +9,7 @@ import { CoverLetterDraft } from "@/lib/package/coverLetter";
  *
  * Runs through the same `parseStructured` path as the rest of live mode:
  * schema-constrained, Zod-validated, with one corrective retry. The API key is
- * read from the environment inside `lib/live/anthropic.ts` and never reaches
+ * read from the environment inside `lib/live/nemotron.ts` and never reaches
  * the browser (`server-only` throws if this module is pulled into a client
  * bundle).
  *
@@ -76,6 +76,7 @@ export async function generateCoverLetterLive(input: {
   return parseStructured({
     schema: CoverLetterDraft,
     schemaName: "coverLetter",
+    model: "super",
     maxTokens: 8000,
     system: SYSTEM,
     task:

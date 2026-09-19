@@ -3,7 +3,7 @@ import "server-only";
 /**
  * SERVER-ONLY HarvestAPI (Apify) access.
  *
- * Mirrors the guard on `lib/live/anthropic.ts`: `APIFY_TOKEN` is read from the
+ * Mirrors the guard on `lib/live/nemotron.ts`: `APIFY_TOKEN` is read from the
  * environment and NEVER reaches the browser (`server-only` throws if this
  * module is pulled into a client bundle). The token is never logged and is
  * scrubbed from any error text before it can propagate.
