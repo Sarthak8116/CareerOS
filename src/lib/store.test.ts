@@ -1,0 +1,78 @@
+import { beforeEach, describe, expect, it } from "vitest";
+import { demoCandidate } from "@/lib/demo/candidate";
+import { demoJobsPool } from "@/lib/demo/jobsPool";
+import { resetProfile, saveProfile } from "@/lib/profileStore";
+import { createCampaignFromJob, ensureSeededCampaigns } from "@/lib/store";
+
+/**
+ * THE CAMPAIGN MUST BE GROUNDED IN THE USER'S OWN PROFILE.
+ *
+ * `createCampaignFromJob` used to build every fit dimension, gap, task, and
+ * readiness level from `demoCandidate`. For a real user that meant their
+ * campaign — the surface that exists to say "here's how YOUR evidence stacks
+ * up against this job" — was actually analysing someone else's evidence and
+ * presenting the result as theirs. Same failure class as the application
+ * page's regression (src/app/campaigns/[id]/application/page.test.tsx),
+ * one layer up: the page consumes the campaign this module builds, so a
+ * silent revert here would resurface there even with the page's own guard
+ * intact.
+ *
+ * The regression is silent by construction — nothing errors, the campaign
+ * renders fine, it's just about the wrong person — so the guard has to name
+ * a stored profile and confirm the campaign is actually built from it.
+ */
+
+function distinctiveProfile() {
+  return {
+    ...demoCandidate,
+    id: "cand_stored_test",
+    name: "Rosalind Ashgrove",
+  };
+}
+
+beforeEach(() => {
+  resetProfile();
+  window.localStorage.removeItem("careeros:campaigns:v1");
+});
+
+describe("createCampaignFromJob — whose evidence is this?", () => {
+  it("builds the campaign from the STORED profile, not the demo candidate", async () => {
+    const stored = distinctiveProfile();
+    saveProfile(stored);
+
+    const campaign = await createCampaignFromJob(demoJobsPool[1]);
+
+    expect(campaign.candidateId).toBe(stored.id);
+    expect(campaign.candidateId).not.toBe(demoCandidate.id);
+  });
+
+  it("falls back to the demo candidate only when nothing has been imported", async () => {
+    // getProfile() owns the fallback in one place — this module must not
+    // carry a second copy of that decision.
+    const campaign = await createCampaignFromJob(demoJobsPool[1]);
+    expect(campaign.candidateId).toBe(demoCandidate.id);
+  });
+
+  it("two different stored profiles produce campaigns grounded in each, independently", async () => {
+    saveProfile(distinctiveProfile());
+    const first = await createCampaignFromJob(demoJobsPool[1]);
+    expect(first.candidateId).toBe("cand_stored_test");
+
+    saveProfile({ ...demoCandidate, id: "cand_second_test", name: "Kai Nakamura" });
+    const second = await createCampaignFromJob(demoJobsPool[2]);
+    expect(second.candidateId).toBe("cand_second_test");
+  });
+});
+
+describe("ensureSeededCampaigns — the fixed demo seed stays the demo candidate, on purpose", () => {
+  it("the seeded demo campaign is grounded in demoCandidate regardless of what's stored in the profile", async () => {
+    // The seed is a deterministic showcase, not a real user's campaign — it
+    // must NOT start reflecting whatever profile happens to be stored, which
+    // would be the same bug in the opposite direction.
+    saveProfile(distinctiveProfile());
+    const campaigns = await ensureSeededCampaigns();
+    const demo = campaigns.find((c) => c.isDemo);
+    expect(demo).toBeDefined();
+    expect(demo!.candidateId).toBe(demoCandidate.id);
+  });
+});

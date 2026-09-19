@@ -110,6 +110,43 @@ describe("Application studio page — whose evidence is this?", () => {
 });
 
 /* ------------------------------------------------------------------ */
+/* Build state machine — the transient "Assembling…" state             */
+/* ------------------------------------------------------------------ */
+
+describe("Application studio page — build is on request, and shows it's working", () => {
+  it("disables the button and reads 'Assembling…' while the build is in flight, then returns to the built state", async () => {
+    let resolveFetch!: (res: Response) => void;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        () =>
+          new Promise<Response>((resolve) => {
+            resolveFetch = resolve;
+          }),
+      ),
+    );
+
+    render(<ApplicationStudioPage />);
+    const button = await screen.findByRole("button", {
+      name: /build the application package/i,
+    });
+    fireEvent.click(button);
+
+    // Real state machine, real code path — the fetch inside `build()` is
+    // deliberately left unresolved so the page sits in "building" the same
+    // way it would waiting on a slow model call.
+    const assembling = await screen.findByRole("button", { name: /assembling/i });
+    expect((assembling as HTMLButtonElement).disabled).toBe(true);
+
+    resolveFetch(new Response("{}", { status: 503 }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /download \.zip/i })).toBeTruthy(),
+    );
+    expect(screen.queryByRole("button", { name: /assembling/i })).toBeNull();
+  });
+});
+
+/* ------------------------------------------------------------------ */
 /* coverLetterOrigin disclosure                                        */
 /* ------------------------------------------------------------------ */
 
@@ -268,5 +305,43 @@ describe("Application studio page — download", () => {
     expect(
       await screen.findByText(/archive could not be created\. nothing was downloaded/i, {}, { timeout: 8000 }),
     ).toBeTruthy();
+  }, 15000);
+
+  it("REGRESSION CHECK: does not leak the object URL when a failure happens AFTER it was created", async () => {
+    // The two tests above don't cover this window: the first succeeds all
+    // the way through (revoke runs), the second fails INSIDE
+    // URL.createObjectURL itself (no URL is ever created, so there's nothing
+    // to leak). This isolates the narrower, real gap: exportZip's `url` is
+    // scoped inside the try block, so if anything BETWEEN createObjectURL
+    // succeeding and revokeObjectURL running throws, the catch block has no
+    // reference to `url` and can never revoke it — a blob holding the user's
+    // own cover letter and personal information stays alive in memory for
+    // the rest of the page's life. Forcing the failure at `a.click()`
+    // isolates exactly that window.
+    const createSpy = vi.fn(() => "blob:mock-leaked-url");
+    const revokeSpy = vi.fn();
+    URL.createObjectURL = createSpy as unknown as typeof URL.createObjectURL;
+    URL.revokeObjectURL = revokeSpy as unknown as typeof URL.revokeObjectURL;
+    const clickSpy = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(() => {
+        throw new Error("click failed");
+      });
+
+    await buildPackage();
+    resolveAllUnsupportedClaims();
+    const downloadButton = screen.getByRole("button", { name: /download \.zip/i });
+    fireEvent.click(downloadButton);
+
+    await screen.findByText(/archive could not be created\. nothing was downloaded/i, {}, { timeout: 8000 });
+    expect(createSpy).toHaveBeenCalledTimes(1);
+    // THE ASSERTION THAT MATTERS: the URL that WAS created must still be
+    // revoked even though the flow failed after creating it.
+    expect(
+      revokeSpy,
+      "exportZip's catch block cannot reach `url` to revoke it — the object URL leaks for the life of the page",
+    ).toHaveBeenCalledWith("blob:mock-leaked-url");
+
+    clickSpy.mockRestore();
   }, 15000);
 });

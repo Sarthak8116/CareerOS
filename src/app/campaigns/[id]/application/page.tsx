@@ -152,24 +152,29 @@ export default function ApplicationStudioPage() {
     if (!pkg) return;
     setExporting(true);
     setExportError(undefined);
+    /* Declared OUT here on purpose. Held inside the try, a failure anywhere
+       after createObjectURL — the anchor click, the DOM insert — would skip
+       the revoke and leak the blob for the life of the page. That blob holds
+       the user's cover letter and personal information, so it is their data
+       left in memory, not just a handle. `finally` revokes it on every path. */
+    let url: string | undefined;
     try {
       const bytes = await buildPackageZip(pkg);
-      const url = URL.createObjectURL(
-        new Blob([bytes], { type: "application/zip" }),
-      );
+      url = URL.createObjectURL(new Blob([bytes], { type: "application/zip" }));
       const a = document.createElement("a");
       a.href = url;
       a.download = packageZipName(pkg);
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URL.revokeObjectURL(url);
     } catch {
       setExportError(
         "The archive could not be created. Nothing was downloaded.",
       );
+    } finally {
+      if (url) URL.revokeObjectURL(url);
+      setExporting(false);
     }
-    setExporting(false);
   }, [pkg]);
 
   /* Loading + not-found guards (no hydration flash). */
