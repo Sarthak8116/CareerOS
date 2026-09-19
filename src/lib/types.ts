@@ -148,6 +148,28 @@ export const Job = z.object({
    * — this list is what stops that placeholder from silently reading as data.
    * Render each entry via `UNSTATED_LABELS` in `lib/labels.ts`.
    *
+   * Only fields that HOLD a substituted value appear here. `postedAt` and
+   * `deadline` are optional and simply absent when unstated, so nothing renders
+   * for them and there is no false impression to correct — they are
+   * deliberately excluded. An absent date that genuinely matters (Workday's
+   * relative "Posted Today", which we refuse to turn into a real date) is
+   * reported through `IntakeResult.assumptions` instead.
+   *
+   * READ WITH `employmentTypeRaw` — together they distinguish two cases that
+   * mean different things to the user, and the UI shows different copy for each:
+   *
+   *   in `unstated` + NO  `employmentTypeRaw`  →  the posting was SILENT
+   *   in `unstated` + HAS `employmentTypeRaw`  →  the posting SPOKE, but said
+   *                                               something our enum cannot
+   *                                               represent (e.g. "Part time")
+   *
+   * That inference is TOTAL today because `employmentType` is the only field
+   * whose enum lacks an unknown member — `location` and `seniority` are free
+   * strings, so they are either stated or the literal "Unknown", and `remote`
+   * and `sponsorship` have real "unknown"/"unclear" members. If a SECOND
+   * unrepresentable-enum field is ever added, this inference stops being total
+   * and a full per-field origins map earns its keep.
+   *
    * Absent (not `[]`) when nothing was defaulted, so demo and pasted jobs are
    * unaffected.
    */

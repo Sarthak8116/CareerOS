@@ -24,6 +24,24 @@ import { IntakeError } from "@/lib/intake/types";
  *  - the response body is capped, so a hostile server cannot exhaust memory
  *  - no cookies, no Authorization, no caller headers are ever forwarded
  *
+ * KNOWN LIMITATION — DNS REBINDING IS NOT CLOSED. This is a TOCTOU window and
+ * it is deliberate, not an oversight:
+ *
+ *   we resolve the hostname and validate every address it returns, and then we
+ *   hand `fetch` the HOSTNAME, which resolves it a second time independently.
+ *   An attacker controlling a DNS record with a very short TTL can answer the
+ *   validating lookup with a public address and the connecting lookup with a
+ *   private one, and reach an internal host through the guard.
+ *
+ * Closing it properly means connecting to a PINNED address while preserving SNI
+ * and the Host header — a custom agent, not a flag. That was judged beyond P1.
+ * What the guard above does stop: literal private IPs, localhost/.local, hosts
+ * that resolve to private space at validation time, and redirects into private
+ * space. What it does not stop is an attacker who controls DNS for a name they
+ * also persuade the user to paste.
+ *
+ * Do not describe this module as rebinding-safe until a pinned-IP agent lands.
+ *
  * Nothing here logs: a URL can itself carry a secret, so console output in this
  * module would be a leak (`client.test.ts` asserts the same rule for Harvest).
  */

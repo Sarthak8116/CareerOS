@@ -281,12 +281,18 @@ export function buildJob(draft: JobDraft): BuiltJob | undefined {
 
   const origins: FieldOrigins = { ...draft.origins };
   const assumptions = [...(draft.assumptions ?? [])];
-  const unstated: string[] = [];
 
-  /** Record a field we could not read, with the sentence the UI will show. */
+  /**
+   * Record a field we could not read, with the sentence the UI will show.
+   *
+   * This is the ONLY way a field becomes "defaulted". `Job.unstated` is derived
+   * from `origins` at the end of this function rather than pushed to
+   * separately, so the two representations cannot drift: any field marked
+   * "defaulted" is in `unstated` by construction, and nothing else can be.
+   * An earlier version maintained both by hand and they desynced within a day.
+   */
   const defaulted = (field: keyof Job, note: string) => {
     origins[field] = "defaulted";
-    unstated.push(field);
     assumptions.push(note);
   };
 
@@ -340,29 +346,34 @@ export function buildJob(draft: JobDraft): BuiltJob | undefined {
   }
 
   const sponsorship = draft.sponsorship ?? "unclear";
-  origins.sponsorship = sponsorship === "unclear" ? "defaulted" : "derived";
   if (sponsorship === "unclear") {
-    unstated.push("sponsorship");
-    assumptions.push(
+    defaulted(
+      "sponsorship",
       "This posting does not state whether visa sponsorship is available.",
     );
-  }
-
-  if (draft.postedAt) {
-    origins.postedAt = "stated";
   } else {
-    // Recorded through the same helper as every other gap, so `fieldOrigins`
-    // and `unstated` can never disagree — a consumer reading one must never
-    // see a stated value where the other sees a gap. `postedAt` is optional on
-    // `Job` so there is no placeholder to flag, but how old a posting is
-    // changes whether it is worth applying to, so its absence is worth saying.
-    defaulted("postedAt", "This posting does not state when it was published.");
+    origins.sponsorship = "derived";
   }
 
-  // `deadline` is deliberately NOT recorded when absent. Unlike a posting date,
-  // most jobs genuinely have no deadline, so flagging every one would be noise
-  // rather than information.
+  // `postedAt` and `deadline` are OPTIONAL on `Job` and simply absent when the
+  // posting does not state them — they hold no placeholder, so there is no
+  // false impression to correct and they are marked in neither map. That is
+  // what `unstated` is for: stopping a substituted value ("Unknown", a best-fit
+  // enum) from reading as fact. Nothing renders for an absent date at all.
+  //
+  // The one case where an absent date genuinely matters — Workday reporting
+  // "Posted Today", which we refuse to convert into a real date using our own
+  // clock — is carried by `assumptions`, which is the channel for notes that
+  // are not about a placeholder.
+  if (draft.postedAt) origins.postedAt = "stated";
   if (draft.deadline) origins.deadline = "stated";
+
+  // Derived, never maintained by hand: exactly the fields we substituted a
+  // value for. This is what makes "defaulted iff unstated" true by
+  // construction rather than by everyone remembering to write both lines.
+  const unstated = Object.keys(origins).filter(
+    (key) => origins[key as keyof Job] === "defaulted",
+  );
 
   const job: Job = {
     id: slugId("job", draft.url ?? `${company}:${title}`),
