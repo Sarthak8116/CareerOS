@@ -17,6 +17,7 @@ import { Button, ButtonLink, Card, Pill } from "@/components/ui/primitives";
 import { demoCandidate } from "@/lib/demo/candidate";
 import type { Evidence } from "@/lib/types";
 import { isLinkedInProfileUrl } from "@/lib/harvest/urls";
+import { addEvidence, fillProfileFields } from "@/lib/profileStore";
 
 /**
  * Onboarding · Import LinkedIn.
@@ -80,6 +81,8 @@ export default function ImportLinkedin() {
   const [error, setError] = useState<string | null>(null);
   const [liveProfile, setLiveProfile] = useState<LiveProfile | null>(null);
   const [liveEvidence, setLiveEvidence] = useState<Evidence[]>([]);
+  /** What actually persisted — reported honestly, not as "imported everything". */
+  const [saved, setSaved] = useState<{ added: number; updated: number } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -113,7 +116,19 @@ export default function ImportLinkedin() {
         return;
       }
       setLiveProfile(data.profile);
-      setLiveEvidence(Array.isArray(data.evidence) ? data.evidence : []);
+      const evidence: Evidence[] = Array.isArray(data.evidence) ? data.evidence : [];
+      setLiveEvidence(evidence);
+
+      // PERSIST it. Without this the import is display-only and evaporates on
+      // reload — the profile store exists precisely to stop that.
+      const merged = addEvidence(evidence);
+      fillProfileFields({
+        name: data.profile?.name,
+        headline: data.profile?.headline,
+        location: data.profile?.location,
+        linkedin: data.profile?.linkedinUrl,
+      });
+      setSaved({ added: merged.added, updated: merged.updated });
     } catch {
       setError("Could not reach the import service.");
     } finally {
@@ -126,7 +141,12 @@ export default function ImportLinkedin() {
         { label: "Name", value: liveProfile.name || "—" },
         { label: "Headline", value: liveProfile.headline || "—" },
         { label: "Location", value: liveProfile.location || "—" },
-        { label: "Evidence found", value: `${liveEvidence.length} records` },
+        {
+          label: "Saved to profile",
+          value: saved
+            ? `${saved.added} new, ${saved.updated} updated (of ${liveEvidence.length} found)`
+            : `${liveEvidence.length} records`,
+        },
         { label: "LinkedIn", value: liveProfile.linkedinUrl },
       ]
     : [
@@ -208,6 +228,7 @@ export default function ImportLinkedin() {
                   setMethod(m.id);
                   setImported(false);
                   setLiveProfile(null);
+                  setSaved(null);
                   setError(null);
                 }}
                 aria-pressed={active}
