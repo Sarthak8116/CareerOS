@@ -20,6 +20,7 @@ import {
   HarvestPost,
   HarvestProfile,
   parseItems,
+  topSkillsList,
 } from "@/lib/harvest/schemas";
 import {
   companyToFacts,
@@ -78,11 +79,9 @@ function contactWarmthProfile(profile: HarvestProfile): WarmthProfile {
     ...(profile.skills ?? [])
       .map((s) => s.name)
       .filter((s): s is string => !!s),
-    // `topSkills` is a single comma-joined string in the actor's output.
-    ...(profile.topSkills ?? "")
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0),
+    // `topSkills` is an array in the live actor and a string in the docs —
+    // `topSkillsList` normalises both.
+    ...topSkillsList(profile.topSkills),
   ];
   return {
     schools,

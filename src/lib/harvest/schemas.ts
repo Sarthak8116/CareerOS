@@ -86,7 +86,11 @@ export const HarvestProfile = z.object({
   hiring: z.boolean().nullish(),
   photo: z.string().nullish(),
   location: HarvestLocation.nullish(),
-  topSkills: z.string().nullish(),
+  /**
+   * Docs say a comma-joined string; the live actor returns an ARRAY.
+   * Accept both — callers normalise via `topSkillsList()`.
+   */
+  topSkills: z.union([z.string(), z.array(z.string())]).nullish(),
   connectionsCount: z.number().nullish(),
   currentPosition: z
     .array(z.object({ companyName: z.string().nullish() }))
@@ -177,6 +181,18 @@ export const HarvestPost = z.object({
     .nullish(),
 });
 export type HarvestPost = z.infer<typeof HarvestPost>;
+
+/**
+ * Normalise `topSkills` to a list regardless of which shape the actor sent.
+ * Returns `[]` when absent, so callers never branch on the representation.
+ */
+export function topSkillsList(
+  value: string | string[] | null | undefined,
+): string[] {
+  if (!value) return [];
+  const parts = Array.isArray(value) ? value : value.split(",");
+  return parts.map((s) => s.trim()).filter((s) => s.length > 0);
+}
 
 /* ------------------------------------------------------------------ */
 /* Boundary parser                                                     */

@@ -61,11 +61,38 @@ function fullName(profile: HarvestProfile): string | undefined {
   return clean(name, 120);
 }
 
-/** The person's current job title, from their headline or newest experience. */
+/**
+ * Is this role still current?
+ *
+ * The live actor sends `endDate: { text: "Present" }` for ongoing roles — the
+ * key EXISTS but carries no month/year. Treating "has an endDate" as "ended"
+ * silently pushed every current role aside and fell back to the headline,
+ * producing titles like "Passionate about micro-services…" instead of
+ * "Director of Engineering". A role has ended only when it has a real end year.
+ */
+function isCurrentRole(exp: { endDate?: { year?: unknown } | null }): boolean {
+  const year = exp.endDate?.year;
+  return year === undefined || year === null || year === "";
+}
+
+/**
+ * The person's current job title.
+ *
+ * Prefers a real position from their experience; falls back to the headline
+ * only when there is no usable position at all. A headline is marketing prose,
+ * so it is a last resort, never the default.
+ */
 function currentTitle(profile: HarvestProfile): string | undefined {
-  const fromExperience = profile.experience?.find((e) => e.position && !e.endDate);
+  const experience = profile.experience ?? [];
+  const current = experience.find((e) => e.position && isCurrentRole(e));
+  // If nothing reads as current, the most recent listed position still beats a
+  // headline — LinkedIn orders experience newest-first.
+  const mostRecent = experience.find((e) => e.position);
+
   return (
-    clean(fromExperience?.position, 140) ?? clean(profile.headline, 140)
+    clean(current?.position, 140) ??
+    clean(mostRecent?.position, 140) ??
+    clean(profile.headline, 140)
   );
 }
 

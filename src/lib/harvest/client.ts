@@ -22,8 +22,14 @@ export const MAX_EMPLOYEES_PER_CAMPAIGN = 25;
  * Employee-list scraper mode. "Full" is required (not "Short") because the
  * warmth engine scores on `experience[]` and `education[]`, which the short
  * mode does not return. 25 profiles ≈ $0.20 per campaign.
+ *
+ * EXACT STRING MATTERS. The actor validates this against a fixed enum and
+ * rejects anything else with a 400. The published docs write it as
+ * "$8 per 1000"; the live actor only accepts "$8 per 1k". Verified against the
+ * real API — do not "tidy" this string.
+ * Allowed: "Short ($4 per 1k)" | "Full ($8 per 1k)" | "Full + email search ($12 per 1k)"
  */
-export const EMPLOYEE_SCRAPER_MODE = "Full ($8 per 1000)";
+export const EMPLOYEE_SCRAPER_MODE = "Full ($8 per 1k)";
 
 /** Profile scraper modes. Email mode is opt-in, per-contact, never a default. */
 export const PROFILE_MODE_NO_EMAIL = "Profile details no email ($4 per 1k)";

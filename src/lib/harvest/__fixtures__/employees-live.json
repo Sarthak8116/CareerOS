@@ -1,0 +1,1134 @@
+[
+  {
+    "id": "ACoAAACQL7sBdlmFTmuLcO6MkTA0VaiCle5lsT8",
+    "publicIdentifier": "person-1-example",
+    "linkedinUrl": "https://www.linkedin.com/in/person-1-example",
+    "firstName": "Person1",
+    "lastName": "Example",
+    "emails": [],
+    "headline": "Associate Professor at Stanford University and Senior Director of AI at NVIDIA",
+    "openToWork": false,
+    "hiring": false,
+    "premium": false,
+    "influencer": false,
+    "memorialized": false,
+    "creator": false,
+    "location": {
+      "linkedinText": "Stanford, California, United States",
+      "countryCode": "US",
+      "parsed": {
+        "text": "Stanford, CA, United States",
+        "countryCode": "US",
+        "regionCode": null,
+        "country": "United States",
+        "countryFull": "United States of America",
+        "state": "California",
+        "city": "Stanford"
+      }
+    },
+    "objectUrn": "9449403",
+    "registeredAt": "2007-01-16T08:35:25.000Z",
+    "topSkills": [],
+    "connectionsCount": 17130,
+    "followerCount": 22297,
+    "verified": true,
+    "currentPosition": [
+      {
+        "position": "Senior Director and Distinguished Research Scientist",
+        "location": "Santa Clara, California, United States",
+        "employmentType": null,
+        "workplaceType": null,
+        "companyName": "NVIDIA",
+        "companyUniversalName": "nvidia",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/nvidia/",
+        "companyId": "3608",
+        "duration": "5 yrs 8 mos",
+        "description": "Advancing Physical AI:\n- Leading autonomous vehicle (AV) research: https://research.nvidia.com/labs/avg/\n- Founded and leading research program on reasoning models for AV: https://developer.nvidia.com/blog/building-autonomous-vehicles-that-reason-with-nvidia-alpamayo/\n- Co-founded and co-leading NVIDIA Halos, NVIDIA's program on Physical AI Safety: https://www.nvidia.com/en-us/ai-trust-center/halos/autonomous-vehicles/",
+        "skills": null,
+        "startDate": {
+          "month": "Feb",
+          "year": 2021,
+          "text": "Feb 2021"
+        },
+        "endDate": {
+          "text": "Present"
+        }
+      }
+    ],
+    "profileTopEducation": [
+      {
+        "schoolName": "Massachusetts Institute of Technology",
+        "description": null,
+        "insights": null,
+        "skills": null,
+        "schoolLinkedinUrl": "https://www.linkedin.com/company/1503/",
+        "schoolId": "1503",
+        "degree": "Ph.D.",
+        "fieldOfStudy": "Aeronautics and Astronautics",
+        "period": "2006 - 2010",
+        "startDate": {
+          "year": 2006,
+          "text": "2006"
+        },
+        "endDate": {
+          "year": 2010,
+          "text": "2010"
+        }
+      }
+    ],
+    "primaryLocale": {
+      "country": "US",
+      "language": "en"
+    },
+    "experience": [
+      {
+        "position": "Senior Director and Distinguished Research Scientist",
+        "location": "Santa Clara, California, United States",
+        "employmentType": null,
+        "workplaceType": null,
+        "companyName": "NVIDIA",
+        "companyUniversalName": "nvidia",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/nvidia/",
+        "companyId": "3608",
+        "duration": "5 yrs 8 mos",
+        "description": "Advancing Physical AI:\n- Leading autonomous vehicle (AV) research: https://research.nvidia.com/labs/avg/\n- Founded and leading research program on reasoning models for AV: https://developer.nvidia.com/blog/building-autonomous-vehicles-that-reason-with-nvidia-alpamayo/\n- Co-founded and co-leading NVIDIA Halos, NVIDIA's program on Physical AI Safety: https://www.nvidia.com/en-us/ai-trust-center/halos/autonomous-vehicles/",
+        "skills": null,
+        "startDate": {
+          "month": "Feb",
+          "year": 2021,
+          "text": "Feb 2021"
+        },
+        "endDate": {
+          "text": "Present"
+        }
+      },
+      {
+        "position": "Associate Professor",
+        "location": "Palo Alto, CA",
+        "employmentType": null,
+        "workplaceType": null,
+        "companyName": "Stanford University",
+        "companyUniversalName": null,
+        "companyLinkedinUrl": "https://www.linkedin.com/school/stanford-university/",
+        "companyId": "1792",
+        "duration": "7 yrs 8 mos",
+        "description": "- Faculty in the Department of Aeronautics and Astronautics\n- Founder and director of Autonomous Systems Lab: https://stanfordasl.github.io/",
+        "skills": null,
+        "startDate": {
+          "month": "Feb",
+          "year": 2019,
+          "text": "Feb 2019"
+        },
+        "endDate": {
+          "text": "Present"
+        }
+      },
+      {
+        "position": "Assistant Professor",
+        "location": "Palo Alto, CA",
+        "employmentType": null,
+        "workplaceType": null,
+        "companyName": "Stanford University",
+        "companyUniversalName": null,
+        "companyLinkedinUrl": "https://www.linkedin.com/school/stanford-university/",
+        "companyId": "1792",
+        "duration": "6 yrs 9 mos",
+        "description": "- Faculty in the Department of Aeronautics and Astronautics\n- Founder and director of Autonomous Systems Lab: https://stanfordasl.github.io/",
+        "skills": null,
+        "startDate": {
+          "month": "Feb",
+          "year": 2012,
+          "text": "Feb 2012"
+        },
+        "endDate": {
+          "month": "Oct",
+          "year": 2018,
+          "text": "Oct 2018"
+        }
+      },
+      {
+        "position": "Research Technologist",
+        "location": "Pasadena, CA",
+        "employmentType": null,
+        "workplaceType": null,
+        "companyName": "NASA Jet Propulsion Laboratory",
+        "companyUniversalName": "jet-propulsion-laboratory",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/jet-propulsion-laboratory/",
+        "companyId": "2004",
+        "duration": "1 yr 4 mos",
+        "description": null,
+        "skills": null,
+        "startDate": {
+          "month": "Oct",
+          "year": 2010,
+          "text": "Oct 2010"
+        },
+        "endDate": {
+          "month": "Jan",
+          "year": 2012,
+          "text": "Jan 2012"
+        }
+      },
+      {
+        "position": "Research Assistant",
+        "location": null,
+        "employmentType": null,
+        "workplaceType": null,
+        "companyName": "Massachusetts Institute of Technology",
+        "companyUniversalName": null,
+        "companyLinkedinUrl": "https://www.linkedin.com/school/mit/",
+        "companyId": "1503",
+        "duration": "3 yrs 10 mos",
+        "description": null,
+        "skills": null,
+        "startDate": {
+          "month": "Sep",
+          "year": 2006,
+          "text": "Sep 2006"
+        },
+        "endDate": {
+          "month": "Jun",
+          "year": 2010,
+          "text": "Jun 2010"
+        }
+      },
+      {
+        "position": "Analyst",
+        "location": "Milano, Italy",
+        "employmentType": null,
+        "workplaceType": null,
+        "companyName": "Accenture",
+        "companyUniversalName": "accenture",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/accenture/",
+        "companyId": "1033",
+        "duration": "3 mos",
+        "description": null,
+        "skills": null,
+        "startDate": {
+          "month": "Nov",
+          "year": 2005,
+          "text": "Nov 2005"
+        },
+        "endDate": {
+          "month": "Jan",
+          "year": 2006,
+          "text": "Jan 2006"
+        }
+      }
+    ],
+    "education": [
+      {
+        "schoolName": "Massachusetts Institute of Technology",
+        "description": null,
+        "insights": null,
+        "skills": null,
+        "schoolLinkedinUrl": "https://www.linkedin.com/company/1503/",
+        "schoolId": "1503",
+        "degree": "Ph.D.",
+        "fieldOfStudy": "Aeronautics and Astronautics",
+        "period": "2006 - 2010",
+        "startDate": {
+          "year": 2006,
+          "text": "2006"
+        },
+        "endDate": {
+          "year": 2010,
+          "text": "2010"
+        }
+      },
+      {
+        "schoolName": "Universit\u00e0 di Catania",
+        "description": null,
+        "insights": null,
+        "skills": null,
+        "schoolLinkedinUrl": "https://www.linkedin.com/company/19611/",
+        "schoolId": "19611",
+        "degree": "Master",
+        "fieldOfStudy": "Electrical Engineering",
+        "period": "1999 - 2004",
+        "startDate": {
+          "year": 1999,
+          "text": "1999"
+        },
+        "endDate": {
+          "year": 2004,
+          "text": "2004"
+        }
+      }
+    ],
+    "projects": [
+      {
+        "title": "Smart America Challenge",
+        "duration": "Jan 2014 - Present",
+        "startDate": {
+          "month": "Jan",
+          "year": 2014,
+          "text": "Jan 2014"
+        },
+        "endDate": {
+          "text": "Present"
+        },
+        "description": "Collaboration Scout - Finding and teaming with the right sites, research and technology development partners."
+      }
+    ],
+    "skills": [
+      {
+        "name": "LaTeX",
+        "positions": [
+          "Endorsed by Torsten Kroeger and 2 others who are highly skilled at this",
+          "Endorsed by 4 colleagues at Stanford University"
+        ],
+        "endorsements": "28 endorsements"
+      },
+      {
+        "name": "Mathematical Modeling",
+        "positions": [
+          "Endorsed by 5 colleagues at Stanford University",
+          "Endorsed by 3 people in the last 6 months"
+        ],
+        "endorsements": "40 endorsements"
+      },
+      {
+        "name": "Matlab",
+        "positions": [
+          "Endorsed by Majid Mazouchi, PhD and 1 other who is highly skilled at this",
+          "Endorsed by 2 colleagues at Stanford University"
+        ],
+        "endorsements": "22 endorsements"
+      },
+      {
+        "name": "Numerical Simulation",
+        "endorsements": "13 endorsements"
+      },
+      {
+        "name": "Physics",
+        "endorsements": "14 endorsements"
+      },
+      {
+        "name": "Characterization",
+        "endorsements": "8 endorsements"
+      },
+      {
+        "name": "Algorithms",
+        "endorsements": "16 endorsements"
+      },
+      {
+        "name": "Science",
+        "endorsements": "11 endorsements"
+      },
+      {
+        "name": "Statistics",
+        "endorsements": "9 endorsements"
+      },
+      {
+        "name": "Machine Learning",
+        "endorsements": "15 endorsements"
+      },
+      {
+        "name": "Fortran",
+        "endorsements": "5 endorsements"
+      },
+      {
+        "name": "Research",
+        "endorsements": "10 endorsements"
+      }
+    ],
+    "composeOptionType": "UPSELL"
+  },
+  {
+    "id": "ACoAAAJpnt0B7HIXKIEiQ5EOoSmM-9wvwbBKnq4",
+    "publicIdentifier": "person-2-example",
+    "linkedinUrl": "https://www.linkedin.com/in/person-2-example",
+    "firstName": "Person2",
+    "lastName": "Example",
+    "emails": [],
+    "headline": "Technical Director & Distinguished Engineer at NVIDIA",
+    "openToWork": false,
+    "hiring": false,
+    "premium": false,
+    "influencer": false,
+    "memorialized": false,
+    "creator": true,
+    "location": {
+      "linkedinText": "Albany, California, United States",
+      "countryCode": "US",
+      "parsed": {
+        "text": "Albany, CA, United States",
+        "countryCode": "US",
+        "regionCode": null,
+        "country": "United States",
+        "countryFull": "United States of America",
+        "state": "California",
+        "city": "Albany"
+      }
+    },
+    "objectUrn": "40476381",
+    "registeredAt": "2009-02-12T20:24:14.437Z",
+    "topSkills": [],
+    "connectionsCount": 12556,
+    "followerCount": 18254,
+    "verified": true,
+    "currentPosition": [
+      {
+        "position": "Director of Technical Design",
+        "location": "Santa Clara, California, United States",
+        "employmentType": "Full-time",
+        "workplaceType": "Hybrid",
+        "companyName": "NVIDIA",
+        "companyUniversalName": "nvidia",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/nvidia/",
+        "companyId": "3608",
+        "duration": "7 yrs",
+        "description": "Developing data center and infrastructure cooling solutions to enable AI technology deployment at scale",
+        "skills": [
+          "Design Leadership",
+          "Director level"
+        ],
+        "experienceGroupId": "dd615e4acd39ae61ed5ad3f8b06036f8b44e9c2d",
+        "startDate": {
+          "month": "Oct",
+          "year": 2019,
+          "text": "Oct 2019"
+        },
+        "endDate": {
+          "text": "Present"
+        }
+      }
+    ],
+    "profileTopEducation": [
+      {
+        "schoolName": "University of California, Berkeley",
+        "description": null,
+        "insights": null,
+        "skills": null,
+        "schoolLinkedinUrl": "https://www.linkedin.com/company/2517/",
+        "schoolId": "2517",
+        "degree": "PhD",
+        "fieldOfStudy": "Mechanical Engineering",
+        "period": "1981 - 1989",
+        "startDate": {
+          "year": 1981,
+          "text": "1981"
+        },
+        "endDate": {
+          "year": 1989,
+          "text": "1989"
+        }
+      }
+    ],
+    "primaryLocale": {
+      "country": "US",
+      "language": "en"
+    },
+    "experience": [
+      {
+        "position": "Director of Technical Design",
+        "location": "Santa Clara, California, United States",
+        "employmentType": "Full-time",
+        "workplaceType": "Hybrid",
+        "companyName": "NVIDIA",
+        "companyUniversalName": "nvidia",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/nvidia/",
+        "companyId": "3608",
+        "duration": "7 yrs",
+        "description": "Developing data center and infrastructure cooling solutions to enable AI technology deployment at scale",
+        "skills": [
+          "Design Leadership",
+          "Director level"
+        ],
+        "experienceGroupId": "dd615e4acd39ae61ed5ad3f8b06036f8b44e9c2d",
+        "startDate": {
+          "month": "Oct",
+          "year": 2019,
+          "text": "Oct 2019"
+        },
+        "endDate": {
+          "text": "Present"
+        }
+      },
+      {
+        "position": "Data Center Technologist",
+        "location": "Santa Clara, CA",
+        "employmentType": "Full-time",
+        "workplaceType": null,
+        "companyName": "NVIDIA",
+        "companyUniversalName": "nvidia",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/nvidia/",
+        "companyId": "3608",
+        "duration": "4 yrs 3 mos",
+        "description": "From CPUs to QPUs and now GPUs, they all fit in the data centers I design and build.",
+        "skills": null,
+        "experienceGroupId": "dd615e4acd39ae61ed5ad3f8b06036f8b44e9c2d",
+        "startDate": {
+          "month": "Oct",
+          "year": 2019,
+          "text": "Oct 2019"
+        },
+        "endDate": {
+          "month": "Dec",
+          "year": 2023,
+          "text": "Dec 2023"
+        }
+      },
+      {
+        "position": "Director Of Technical Operations",
+        "location": "Berkeley, California",
+        "employmentType": null,
+        "workplaceType": null,
+        "companyName": "Rigetti Computing",
+        "companyUniversalName": "rigetti-computing",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/rigetti-computing/",
+        "companyId": "3524822",
+        "duration": "1 yr 7 mos",
+        "description": "Building the first quantum compute data center.",
+        "skills": null,
+        "startDate": {
+          "month": "Apr",
+          "year": 2018,
+          "text": "Apr 2018"
+        },
+        "endDate": {
+          "month": "Oct",
+          "year": 2019,
+          "text": "Oct 2019"
+        }
+      },
+      {
+        "position": "Senior Technical Director, Chief Architect",
+        "location": "sunnyvale, ca",
+        "employmentType": null,
+        "workplaceType": null,
+        "companyName": "Baidu USA",
+        "companyUniversalName": "baidu-usa",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/baidu-usa/",
+        "companyId": "9373027",
+        "duration": "3 yrs 8 mos",
+        "description": "\u2022\tServer and data center architect in charge of hardware and data center design, development and deployment in China\u2019s largest data center search company. Accomplishments include setting up a US-based hardware design R&D organization team, development of hardware design and validation labs, design of next generation of Baidu\u2019s servers, design and deployment of rack and server liquid cooling, free air cooling and IDEC deployment at data centers, 48VDC conversion of servers and racks, selection of hardware deployed and establishment of product life-cycle for all hardware deployed at Baidu with emphasis on integrating effectively with software, and reducing failures through creating a comprehensive TCO analysis tool. \n\u2022\tDevelopment of cutting edge data center and server hardware technology for deployment at Baidu\u2019s data centers in China, such as CPU/GPU liquid cooling, IDEC and air washer cooling and compliant coated and highly resilient servers for free air cooling in highly air polluted Chinese data centers, online/offline HVDC and 48VDC hardware design for rack power efficient design, overhead and bottom liquid cooled heat exchanger solution for achieving extremely low data center PUEs and rack and pod level fuel cell power utilization for energy efficient and green data center designs at Baidu\u2019s data centers in China.\n\u2022\tMechanical, thermal and reliability design of compute and sensor boxes of Baidu\u2019s self-driving autonomous vehicle. Duties include mechanical and thermal designs of IO and compute boxes, rack design and assembly as well as reliability study of the designed systems for extreme temperature, air pollution and mechanical shock and vibration road conditions.",
+        "skills": null,
+        "startDate": {
+          "month": "Sep",
+          "year": 2014,
+          "text": "Sep 2014"
+        },
+        "endDate": {
+          "month": "Apr",
+          "year": 2018,
+          "text": "Apr 2018"
+        }
+      },
+      {
+        "position": "Senior Hardware Engineer",
+        "location": null,
+        "employmentType": null,
+        "workplaceType": null,
+        "companyName": "Twitter",
+        "companyUniversalName": "twitter",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/twitter/",
+        "companyId": "96622",
+        "duration": "3 yrs 11 mos",
+        "description": "\u2022\tSenior mechanical hardware design engineer at Twitter responsible for grounds up development of Twitter\u2019s data center OEM hardware selection, custom design ODM server development and data center deployment. As Twitter\u2019s first hardware design engineer, duties included OEM hardware specifications, RFI release, server selection & qualifications, custom integration, server rack production and quality monitoring of the entire Twitter data center IT. Performed thermal & mechanical design analysis of custom server, developed hardware reliability test spec and developed spec and managed manufacturing process of server builds at ODMs.",
+        "skills": null,
+        "startDate": {
+          "month": "Jan",
+          "year": 2011,
+          "text": "Jan 2011"
+        },
+        "endDate": {
+          "month": "Nov",
+          "year": 2014,
+          "text": "Nov 2014"
+        }
+      },
+      {
+        "position": "Senior Hardware Engineer",
+        "location": null,
+        "employmentType": null,
+        "workplaceType": null,
+        "companyName": "Facebook",
+        "companyUniversalName": "facebook",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/facebook/",
+        "companyId": "76987811",
+        "duration": "2 yrs 1 mo",
+        "description": "Responsible for technical program development of Facebook\u2019s customized servers at various ODMs, including initial custom thermal/mechanical design, RFP release, ODMs audit and selection, EVT/DVP/PVT product release and debug, EM selection for rack assembly and cost negotiations. Customized server thermal development to take advantage of data center house fans for cooling of servers with no or minimal server fan utilization, fan speed control algorithm development with emphasis on utilizing the most efficient and cost effective thermal components to achieve the lowest TCO ever recorded at Facebook. Mechanical sheet metal development of chassis and custom rack structural design and analysis. \u2022\tDesign and development of Facebook\u2019s first customized data center using free air cooling and evaporative air conditioning targeted for achieving one of the lowest recorded data center PUE values. Performed energy efficiency audit of the Facebook\u2019s collocation data centers, developed a containment scheme along with a simple and cost effective data collection hardware, used CFD tools for performing analysis leading to optimized data center cooling performance, worked with OEMs to custom design their hardware for optimized performance, performed air and water side economization.",
+        "skills": null,
+        "startDate": {
+          "year": 2009,
+          "text": "2009"
+        },
+        "endDate": {
+          "month": "Jan",
+          "year": 2011,
+          "text": "Jan 2011"
+        }
+      },
+      {
+        "position": "Thermal & Mechanical Quality Manager",
+        "location": null,
+        "employmentType": null,
+        "workplaceType": null,
+        "companyName": "Sun Microsystems",
+        "companyUniversalName": "sun-microsystems_1062",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/sun-microsystems_1062/",
+        "companyId": "1062",
+        "duration": "9 yrs",
+        "description": "Managed engineering developments in 4 generation of Sun\u2019s SPARC, ASIC, FPGA and ASSP products packaging and assembly in 135nm, 90nm, 65nm and 40nm technology nodes. Developed component, board, system level and SMT & interconnect reliability & rework qualification plans, prepared business and legal documents for products\u2019 qualifications, packaging/ bumping/ interconnect/ assembly, ORT, EFR for the entire line of SPARC processors manufactured by Texas Instruments, TSMC and several other of Sun\u2019s component suppliers. Monitored and maintained over 99% yield for parts in manufacturing in bumping, packaging and assembly using FMEA & SPC tools. Performed failure analysis, drove and resolved all mechanical, thermal, material and electrical packaging issues resulting from manufacturing issues at suppliers such as TI/UMC/TSMC/ASC/AMKOR/ SEMITOOL/Kyocera/NTK and board/systems assembly issues at electronics manufacturing services such as Celestica, Quanta, Synnex, Flextronics, Benchmark, MiTAC, Samsumg and Foxconn.",
+        "skills": null,
+        "experienceGroupId": "1c9394107c75436d54f81ec1a959b7719b12c535",
+        "startDate": {
+          "year": 2000,
+          "text": "2000"
+        },
+        "endDate": {
+          "year": 2009,
+          "text": "2009"
+        }
+      },
+      {
+        "position": "Quality Manager",
+        "location": null,
+        "employmentType": null,
+        "workplaceType": null,
+        "companyName": "Sun Microsystems",
+        "companyUniversalName": "sun-microsystems_1062",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/sun-microsystems_1062/",
+        "companyId": "1062",
+        "duration": "9 yrs",
+        "description": null,
+        "skills": null,
+        "experienceGroupId": "1c9394107c75436d54f81ec1a959b7719b12c535",
+        "startDate": {
+          "year": 2000,
+          "text": "2000"
+        },
+        "endDate": {
+          "year": 2009,
+          "text": "2009"
+        }
+      },
+      {
+        "position": "MTS, HW",
+        "location": null,
+        "employmentType": null,
+        "workplaceType": null,
+        "companyName": "Sun Microsystems",
+        "companyUniversalName": "sun-microsystems_1062",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/sun-microsystems_1062/",
+        "companyId": "1062",
+        "duration": "9 yrs",
+        "description": "Successfully managed various research initiatives at Sun Labs, launched research laboratories and carried from small ($10M) to larger scale projects ($450M) with exceptional execution time and successful just-in-time results Initiated Sun\u2019s solid-state and vapor-compression refrigeration and liquid cooling lab. Assisted in design of Sun\u2019s highly energy-efficient data center using localized refrigeration cooling in Santa Clara, CA. Successfully developed refrigeration cooling apparatus using miniature compressors for cooling of high-power processors and servers. Initiated a consortium of compressor, pump and heat exchanger manufacturers for development of server to data-center active liquid and refrigeration cooling systems.",
+        "skills": null,
+        "experienceGroupId": "1c9394107c75436d54f81ec1a959b7719b12c535",
+        "startDate": {
+          "year": 2000,
+          "text": "2000"
+        },
+        "endDate": {
+          "year": 2009,
+          "text": "2009"
+        }
+      },
+      {
+        "position": "Energy Efficiency Spcialist",
+        "location": null,
+        "employmentType": null,
+        "workplaceType": null,
+        "companyName": "Lawrence Berkeley National Laboratory",
+        "companyUniversalName": "lawrence-berkeley-national-laboratory",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/lawrence-berkeley-national-laboratory/",
+        "companyId": "164691",
+        "duration": "3 yrs",
+        "description": null,
+        "skills": null,
+        "startDate": {
+          "year": 1986,
+          "text": "1986"
+        },
+        "endDate": {
+          "year": 1989,
+          "text": "1989"
+        }
+      }
+    ],
+    "education": [
+      {
+        "schoolName": "University of California, Berkeley",
+        "description": null,
+        "insights": null,
+        "skills": null,
+        "schoolLinkedinUrl": "https://www.linkedin.com/company/2517/",
+        "schoolId": "2517",
+        "degree": "PhD",
+        "fieldOfStudy": "Mechanical Engineering",
+        "period": "1981 - 1989",
+        "startDate": {
+          "year": 1981,
+          "text": "1981"
+        },
+        "endDate": {
+          "year": 1989,
+          "text": "1989"
+        }
+      },
+      {
+        "schoolName": "University of California, Berkeley",
+        "description": null,
+        "insights": null,
+        "skills": null,
+        "schoolLinkedinUrl": "https://www.linkedin.com/company/2517/",
+        "schoolId": "2517",
+        "degree": "MS",
+        "fieldOfStudy": "Mechanical Engineering",
+        "period": "1981 - 1984",
+        "startDate": {
+          "year": 1981,
+          "text": "1981"
+        },
+        "endDate": {
+          "year": 1984,
+          "text": "1984"
+        }
+      },
+      {
+        "schoolName": "University of California, Berkeley",
+        "description": null,
+        "insights": null,
+        "skills": null,
+        "schoolLinkedinUrl": "https://www.linkedin.com/company/2517/",
+        "schoolId": "2517",
+        "degree": "MA",
+        "fieldOfStudy": "Applied Mathematics",
+        "period": "1987 - 1989",
+        "startDate": {
+          "year": 1987,
+          "text": "1987"
+        },
+        "endDate": {
+          "year": 1989,
+          "text": "1989"
+        }
+      },
+      {
+        "schoolName": "University of Illinois Urbana-Champaign",
+        "description": null,
+        "insights": null,
+        "skills": null,
+        "schoolLinkedinUrl": "https://www.linkedin.com/company/2650/",
+        "schoolId": "2650",
+        "degree": "BS",
+        "fieldOfStudy": "Mechanical Engineering",
+        "period": "1979 - 1981",
+        "startDate": {
+          "year": 1979,
+          "text": "1979"
+        },
+        "endDate": {
+          "year": 1981,
+          "text": "1981"
+        }
+      }
+    ],
+    "projects": [],
+    "skills": [
+      {
+        "name": "Director level",
+        "positions": [
+          "Director of Technical Design at NVIDIA",
+          "Endorsed by 3 people in the last 6 months"
+        ],
+        "endorsements": "9 endorsements"
+      },
+      {
+        "name": "Design Leadership",
+        "positions": [
+          "Director of Technical Design at NVIDIA",
+          "Endorsed by 3 people in the last 6 months"
+        ],
+        "endorsements": "9 endorsements"
+      },
+      {
+        "name": "Reliability",
+        "positions": [
+          "Endorsed by 2 colleagues at Baidu USA",
+          "Endorsed by 1 person in the last 6 months"
+        ],
+        "endorsements": "33 endorsements"
+      },
+      {
+        "name": "Hardware",
+        "positions": [
+          "99+ endorsements"
+        ]
+      },
+      {
+        "name": "Data Center",
+        "positions": [
+          "99+ endorsements"
+        ]
+      },
+      {
+        "name": "Servers",
+        "endorsements": "56 endorsements"
+      },
+      {
+        "name": "SPC",
+        "endorsements": "25 endorsements"
+      },
+      {
+        "name": "Thermal Analysis",
+        "endorsements": "25 endorsements"
+      },
+      {
+        "name": "Server Architecture",
+        "endorsements": "9 endorsements"
+      },
+      {
+        "name": "Thermodynamics",
+        "endorsements": "9 endorsements"
+      },
+      {
+        "name": "HVAC",
+        "endorsements": "12 endorsements"
+      },
+      {
+        "name": "Manufacturing Operations",
+        "endorsements": "5 endorsements"
+      },
+      {
+        "name": "Design of Experiments",
+        "endorsements": "23 endorsements"
+      },
+      {
+        "name": "Engineering",
+        "endorsements": "89 endorsements"
+      },
+      {
+        "name": "Hardware Architecture",
+        "endorsements": "11 endorsements"
+      },
+      {
+        "name": "Mechanical Engineering",
+        "endorsements": "62 endorsements"
+      },
+      {
+        "name": "Manufacturing",
+        "endorsements": "59 endorsements"
+      },
+      {
+        "name": "Product Development",
+        "endorsements": "18 endorsements"
+      },
+      {
+        "name": "Debugging",
+        "endorsements": "5 endorsements"
+      },
+      {
+        "name": "Cross-functional Team Leadership",
+        "endorsements": "34 endorsements"
+      }
+    ],
+    "composeOptionType": "UPSELL"
+  },
+  {
+    "id": "ACoAAAC4wxkBI2TDTgMbBMN3nBl5rfxcGkRSRko",
+    "publicIdentifier": "person-3-example",
+    "linkedinUrl": "https://www.linkedin.com/in/person-3-example",
+    "firstName": "Person3",
+    "lastName": "Example",
+    "emails": [],
+    "headline": "Passionate about micro-services, distributed systems, & forward deployed engineering enabling the next wave of foundational model in AI, ML, robotics, automation, and agentic workflow",
+    "openToWork": false,
+    "hiring": false,
+    "premium": false,
+    "influencer": false,
+    "memorialized": false,
+    "creator": false,
+    "location": {
+      "linkedinText": "San Francisco Bay Area",
+      "countryCode": "US",
+      "parsed": {
+        "text": "San Francisco, CA, United States",
+        "countryCode": "US",
+        "regionCode": null,
+        "country": "United States",
+        "countryFull": "United States of America",
+        "state": "California",
+        "city": "San Francisco"
+      }
+    },
+    "objectUrn": "12108569",
+    "registeredAt": "2007-05-15T14:25:01.000Z",
+    "topSkills": [],
+    "connectionsCount": 3037,
+    "followerCount": 3075,
+    "verified": true,
+    "currentPosition": [
+      {
+        "position": "Director of Engineering",
+        "location": null,
+        "employmentType": "Full-time",
+        "workplaceType": null,
+        "companyName": "NVIDIA",
+        "companyUniversalName": "nvidia",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/nvidia/",
+        "companyId": "3608",
+        "duration": "1 yr 7 mos",
+        "description": null,
+        "skills": null,
+        "startDate": {
+          "month": "Mar",
+          "year": 2025,
+          "text": "Mar 2025"
+        },
+        "endDate": {
+          "text": "Present"
+        }
+      }
+    ],
+    "profileTopEducation": [
+      {
+        "schoolName": "University of Cincinnati - College of Engineering and Applied Science",
+        "description": "PhD Candidate",
+        "insights": null,
+        "skills": null,
+        "schoolLinkedinUrl": "https://www.linkedin.com/company/15130121/",
+        "schoolId": "15130121",
+        "degree": "Doctor of Philosophy - PhD",
+        "fieldOfStudy": "Computer Science",
+        "period": null,
+        "startDate": null,
+        "endDate": null
+      }
+    ],
+    "primaryLocale": {
+      "country": "US",
+      "language": "en"
+    },
+    "experience": [
+      {
+        "position": "Director of Engineering",
+        "location": null,
+        "employmentType": "Full-time",
+        "workplaceType": null,
+        "companyName": "NVIDIA",
+        "companyUniversalName": "nvidia",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/nvidia/",
+        "companyId": "3608",
+        "duration": "1 yr 7 mos",
+        "description": null,
+        "skills": null,
+        "startDate": {
+          "month": "Mar",
+          "year": 2025,
+          "text": "Mar 2025"
+        },
+        "endDate": {
+          "text": "Present"
+        }
+      },
+      {
+        "position": "Board Member",
+        "location": null,
+        "employmentType": "Full-time",
+        "workplaceType": null,
+        "companyName": "LF AI & Data Foundation",
+        "companyUniversalName": "lfai",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/lfai/",
+        "companyId": "20545329",
+        "duration": "2 yrs 2 mos",
+        "description": null,
+        "skills": null,
+        "startDate": {
+          "month": "Aug",
+          "year": 2024,
+          "text": "Aug 2024"
+        },
+        "endDate": {
+          "text": "Present"
+        }
+      },
+      {
+        "position": "Open Source Maintainer",
+        "location": "San Francisco Bay Area",
+        "employmentType": null,
+        "workplaceType": null,
+        "companyName": "Docker, Inc",
+        "companyUniversalName": "docker",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/docker/",
+        "companyId": "1301808",
+        "duration": "11 yrs 9 mos",
+        "description": null,
+        "skills": null,
+        "experienceGroupId": null,
+        "startDate": {
+          "month": "Jan",
+          "year": 2015,
+          "text": "Jan 2015"
+        },
+        "endDate": {
+          "text": "Present"
+        }
+      },
+      {
+        "position": "Member of Technical Staff",
+        "location": "San Francisco Bay Area",
+        "employmentType": null,
+        "workplaceType": null,
+        "companyName": "Docker, Inc",
+        "companyUniversalName": "docker",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/docker/",
+        "companyId": "1301808",
+        "duration": "2 yrs 8 mos",
+        "description": "Working directly with leadership to prototype and incept strategic product lines with high performing teams to deliver a whole product. \n\nIncepted and implemented Docker desktop products: Docker for Mac and Docker for Windows.\n\nCurrently responsible for strategic planning and execution of Docker infra products: Docker for AWS and Docker for Azure.",
+        "skills": null,
+        "experienceGroupId": null,
+        "startDate": {
+          "month": "Oct",
+          "year": 2015,
+          "text": "Oct 2015"
+        },
+        "endDate": {
+          "month": "May",
+          "year": 2018,
+          "text": "May 2018"
+        }
+      },
+      {
+        "position": "Senior Engineering Manager",
+        "location": "San Francisco Bay Area",
+        "employmentType": null,
+        "workplaceType": null,
+        "companyName": "Apple",
+        "companyUniversalName": "apple",
+        "companyLinkedinUrl": "https://www.linkedin.com/company/apple/",
+        "companyId": "162479",
+        "duration": "6 yrs 11 mos",
+        "description": "DevOps Software Engineering Manager leading the mobile apps team. The Mobile Apps team is responsible for delivering iOS apps that globally set the standard for customer experience and showcase Apple's revolutionary hardware and iOS technologies.",
+        "skills": null,
+        "startDate": {
+          "month": "May",
+          "year": 2018,
+          "text": "May 2018"
+        },
+        "endDate": {
+          "month": "Mar",
+          "year": 2025,
+          "text": "Mar 2025"
+        }
+      }
+    ],
+    "education": [
+      {
+        "schoolName": "University of Cincinnati - College of Engineering and Applied Science",
+        "description": "PhD Candidate",
+        "insights": null,
+        "skills": null,
+        "schoolLinkedinUrl": "https://www.linkedin.com/company/15130121/",
+        "schoolId": "15130121",
+        "degree": "Doctor of Philosophy - PhD",
+        "fieldOfStudy": "Computer Science",
+        "period": null,
+        "startDate": null,
+        "endDate": null
+      },
+      {
+        "schoolName": "University of Cincinnati",
+        "description": "BS Computer Engineer with a Minor in Mathematics",
+        "insights": null,
+        "skills": null,
+        "schoolLinkedinUrl": "https://www.linkedin.com/company/157339/",
+        "schoolId": "157339",
+        "degree": "Bachelor\u2019s Degree",
+        "fieldOfStudy": "Computer Engineering",
+        "period": null,
+        "startDate": null,
+        "endDate": null
+      }
+    ],
+    "projects": [],
+    "skills": [
+      {
+        "name": "Hasura Cloud"
+      },
+      {
+        "name": "SharePoint Designer",
+        "endorsements": "2 endorsements"
+      },
+      {
+        "name": "PHP",
+        "positions": [
+          "Endorsed by Jeshua ben Joseph who is highly skilled at this"
+        ],
+        "endorsements": "4 endorsements"
+      },
+      {
+        "name": "CakePHP",
+        "endorsements": "1 endorsement"
+      },
+      {
+        "name": ".NET",
+        "endorsements": "2 endorsements"
+      },
+      {
+        "name": "Bash",
+        "endorsements": "3 endorsements"
+      },
+      {
+        "name": "MySQL",
+        "endorsements": "3 endorsements"
+      },
+      {
+        "name": "API",
+        "endorsements": "1 endorsement"
+      },
+      {
+        "name": "Linux System Administration",
+        "endorsements": "3 endorsements"
+      },
+      {
+        "name": "jQuery",
+        "endorsements": "3 endorsements"
+      },
+      {
+        "name": "Ruby on Rails",
+        "endorsements": "2 endorsements"
+      },
+      {
+        "name": "Photoshop",
+        "endorsements": "2 endorsements"
+      },
+      {
+        "name": "Illustrator",
+        "endorsements": "2 endorsements"
+      },
+      {
+        "name": "Hype",
+        "endorsements": "2 endorsements"
+      },
+      {
+        "name": "Flash",
+        "endorsements": "2 endorsements"
+      },
+      {
+        "name": "iOS development",
+        "endorsements": "2 endorsements"
+      },
+      {
+        "name": "JSON",
+        "endorsements": "2 endorsements"
+      },
+      {
+        "name": "JavaScript",
+        "endorsements": "4 endorsements"
+      },
+      {
+        "name": "Apache",
+        "endorsements": "2 endorsements"
+      },
+      {
+        "name": "CSS",
+        "endorsements": "2 endorsements"
+      }
+    ],
+    "composeOptionType": "UPSELL"
+  }
+]
