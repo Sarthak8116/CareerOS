@@ -476,6 +476,24 @@ describe("PackageReview — editing a document", () => {
     expect(document.body.textContent).not.toContain("Something else entirely.");
   });
 
+  it("says so when an edit empties a document, because the .zip will then have no such file", () => {
+    /* `includedDocuments` (the zipper's own rule) omits empty documents. If
+       the review surface kept showing one as part of the package, the user
+       would be told a file is in the archive that isn't — the review going
+       decorative. */
+    render(<Harness initial={pkg({ documents: [doc({ claims: [claim()] })] })} />);
+    expect(screen.queryByText(/there will be no/i)).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: /^edit$/i }));
+    fireEvent.change(screen.getByLabelText(/cover letter content/i), {
+      target: { value: "   " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
+
+    const notice = screen.getByText(/there will be no/i);
+    expect(notice.textContent).toContain("cover-letter.md");
+  });
+
   it("a not-requested document offers no editor — there is nothing to edit", () => {
     render(
       <Harness

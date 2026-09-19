@@ -8,6 +8,7 @@ import type {
   PackageDocument,
 } from "@/lib/types";
 import { Button, Card, CardHeader, Pill, SectionTitle } from "@/components/ui/primitives";
+import { includedDocuments } from "@/lib/package/zip";
 import { DocumentCard } from "@/components/PackageDocumentCard";
 
 /**
@@ -69,6 +70,13 @@ export function PackageReview({
   exportError?: string;
 }) {
   const unresolved = useMemo(() => unresolvedClaims(pkg), [pkg]);
+  /* WHAT THE ARCHIVE WILL ACTUALLY CONTAIN, asked of the zipper rather than
+     restated here. `includedDocuments` also drops any document whose content
+     is empty — so a document the user edits down to nothing silently would not
+     be in the .zip while this page still showed it as part of the package.
+     Deriving the answer from the same function that builds the archive is the
+     only way the review surface and the export cannot disagree. */
+  const archived = useMemo(() => new Set(includedDocuments(pkg)), [pkg]);
   const gaps = pkg.missing;
   /* "Complete" is only said when BOTH signals agree. A package that claims
      complete while naming gaps is a defect somewhere upstream — it is not the
@@ -186,6 +194,7 @@ export function PackageReview({
             <DocumentCard
               key={`${i}-${doc.fileName}`}
               doc={doc}
+              inArchive={archived.has(doc)}
               onChange={(next) => replaceDocumentAt(i, next)}
             />
           ))}

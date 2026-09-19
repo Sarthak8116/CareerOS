@@ -3,6 +3,7 @@
 import type { ApplicationForm, Campaign, CampaignTask, Job } from "@/lib/types";
 import { Campaign as CampaignSchema } from "@/lib/types";
 import { demoCandidate } from "@/lib/demo/candidate";
+import { getProfile } from "@/lib/profileStore";
 import { demoJob } from "@/lib/demo/job";
 import { getCampaignProvider } from "@/lib/providers/ai";
 import { sanitizeUntrusted } from "@/lib/security/untrusted";
@@ -91,7 +92,20 @@ export async function createCampaignFromJob(
 ): Promise<Campaign> {
   const provider = getCampaignProvider();
   const campaign = await provider.buildCampaign({
-    candidate: demoCandidate,
+    /**
+     * The USER's profile, not the demo candidate.
+     *
+     * Everything the campaign asserts — fit dimensions, gaps, tasks,
+     * readiness — is computed from this. Passing `demoCandidate` here meant a
+     * real user's campaign analysed someone else's evidence and presented the
+     * result as being about them, which is the product's central promise
+     * inverted rather than a cosmetic mix-up.
+     *
+     * `getProfile()` falls back to `demoCandidate` when nothing has been
+     * imported, so demo mode is unchanged. Do not reintroduce a second copy of
+     * that fallback decision here — the store owns it.
+     */
+    candidate: getProfile(),
     job,
     createdAt: SEED_STAMP,
   });

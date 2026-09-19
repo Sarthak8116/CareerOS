@@ -120,9 +120,12 @@ export function claimsStillMade(
 
 export function DocumentCard({
   doc,
+  inArchive,
   onChange,
 }: {
   doc: PackageDocument;
+  /** Whether this document will actually be a file in the .zip. */
+  inArchive: boolean;
   onChange: (next: PackageDocument) => void;
 }) {
   const [editing, setEditing] = useState(false);
@@ -208,6 +211,15 @@ export function DocumentCard({
       </div>
 
       <p className="mt-2 text-sm text-slate-600">{status.sentence}</p>
+
+      {/* Empty content means the zipper writes no file for it. Saying so is
+          the difference between a review surface and a decorative one. */}
+      {doc.status !== "not-requested" && !inArchive && (
+        <p className="mt-2 text-sm text-amber-800">
+          This document is empty, so there will be no{" "}
+          <span className="font-mono">{doc.fileName}</span> in the .zip.
+        </p>
+      )}
 
       {doc.status !== "not-requested" && (
         <>
