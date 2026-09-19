@@ -56,6 +56,20 @@ function renderReview(f: ApplicationForm): string {
   return host.textContent ?? "";
 }
 
+/** Text of just the "Résumé" requirement row — the other rows (cover letter,
+ *  portfolio) legitimately carry different statuses and must not pollute the
+ *  assertion for this one. */
+function resumeRowText(f: ApplicationForm): string {
+  const markup = renderToStaticMarkup(
+    <ApplicationFormReview form={f} disabled={false} onChange={() => {}} />,
+  );
+  const host = document.createElement("div");
+  host.innerHTML = markup;
+  const rows = Array.from(host.querySelectorAll("dl > div"));
+  const row = rows.find((r) => r.textContent?.startsWith("Résumé"));
+  return row?.textContent ?? "";
+}
+
 describe("ApplicationFormReview — not-requested vs unknown vs asked-but-unstated", () => {
   const cases: {
     status: RequirementStatus;
@@ -99,10 +113,10 @@ describe("ApplicationFormReview — not-requested vs unknown vs asked-but-unstat
 
   for (const { status, completeness, expectedText, forbiddenText } of cases) {
     it(`résumé status "${status}" at completeness "${completeness}" reads as "${expectedText}"`, () => {
-      const text = renderReview(form({ resume: status, completeness }));
-      expect(text).toContain(expectedText);
+      const rowText = resumeRowText(form({ resume: status, completeness }));
+      expect(rowText).toContain(expectedText);
       for (const forbidden of forbiddenText) {
-        expect(text).not.toContain(forbidden);
+        expect(rowText).not.toContain(forbidden);
       }
     });
   }

@@ -281,7 +281,13 @@ describe("workday", () => {
     expect(out.job!.postedAt).toBeUndefined();
     // The wording is preserved as an assumption rather than silently dropped.
     expect(out.assumptions.join(" ")).toContain("Posted Today");
-    expect(out.job!.unstated).toContain("postedAt");
+    // `postedAt` is optional and simply ABSENT — it holds no placeholder, so
+    // there is no false impression to correct and it belongs in neither map
+    // (same treatment as `deadline`). The fact the user needs reaches them
+    // through `assumptions`, which is the channel for notes that are not about
+    // a substituted value.
+    expect(out.job!.unstated ?? []).not.toContain("postedAt");
+    expect(out.fieldOrigins.postedAt).toBeUndefined();
   });
 
   it("keeps the legal-entity company name verbatim and says where it came from", () => {

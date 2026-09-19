@@ -1,12 +1,15 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { Job, Campaign, ApplicationForm, ApplicationQuestionCategory } from "@/lib/types";
 import { Campaign as CampaignSchema } from "@/lib/types";
 import { buildJob } from "@/lib/intake/map";
 import type { FieldOrigins } from "@/lib/intake/types";
 import { greenhouseAdapter } from "@/lib/intake/adapters/greenhouse";
-import { demoCandidate } from "@/lib/demo/candidate";
-import { getCampaignProvider } from "@/lib/providers/ai";
+import { createCampaignFromJob, getCampaign } from "@/lib/store";
 import greenhouseJobDetail from "@/lib/intake/__fixtures__/greenhouse-job-detail.json";
+
+beforeEach(() => {
+  window.localStorage.clear();
+});
 
 /**
  * The intake honesty contract — the claims this app must never make about a
@@ -79,25 +82,80 @@ describe("no persisted Job or Campaign ever carries a fieldOrigins key", () => {
     expect("fieldOrigins" in parsed).toBe(false);
   });
 
-  it("an intake job round-tripped through the real campaign-build + localStorage-persistence path carries no fieldOrigins", async () => {
+  it("an intake job+form pushed through the REAL SHIPPED save path (store.ts's createCampaignFromJob) carries no fieldOrigins, in localStorage or back out of it", async () => {
     const output = parseGreenhouse();
     const job = output.job!;
 
-    // The same pipeline store.ts uses: build a campaign from the job, then run
-    // it through exactly the validation store.ts's readRaw() applies to
-    // anything coming back out of localStorage (JSON round-trip + safeParse).
-    const campaign = await getCampaignProvider().buildCampaign({
-      candidate: demoCandidate,
-      job,
-      createdAt: FETCHED_AT,
-    });
-    const roundTripped = JSON.parse(JSON.stringify(campaign));
-    const result = CampaignSchema.safeParse(roundTripped);
-    expect(result.success).toBe(true);
-    if (!result.success) return;
+    // This is no longer a link I build myself: createCampaignFromJob(job, form)
+    // is the actual function the intake UI calls once the user confirms the
+    // review (src/lib/store.ts). Exercising it directly is what turns this
+    // from "a guard that would catch a regression" into "proof the shipped
+    // path is correct" — the distinction this test used to have to caveat.
+    const saved = await createCampaignFromJob(job, output.form);
+    expect(saved.applicationForm).toBeDefined();
 
-    expect(JSON.stringify(result.data)).not.toContain("fieldOrigins");
-    expect(Object.keys(result.data.job)).not.toContain("fieldOrigins");
+    // Read back exactly the way the app does — through the real localStorage
+    // read path, not a hand-rolled JSON round-trip.
+    const reloaded = await getCampaign(saved.id);
+    expect(reloaded).toBeDefined();
+
+    for (const campaign of [saved, reloaded!]) {
+      expect(JSON.stringify(campaign)).not.toContain("fieldOrigins");
+      expect(Object.keys(campaign.job)).not.toContain("fieldOrigins");
+      expect(Object.keys(campaign.applicationForm ?? {})).not.toContain("fieldOrigins");
+    }
+
+    // And the schema still accepts what's actually sitting in localStorage.
+    const raw = window.localStorage.getItem("careeros:campaigns:v1");
+    expect(raw).toBeTruthy();
+    const parsed = JSON.parse(raw!);
+    for (const c of parsed) {
+      expect(CampaignSchema.safeParse(c).success).toBe(true);
+    }
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/* Edit-clears-unstated must survive the real save path.               */
+/*                                                                      */
+/* ParsedJobReview.set() strips a field from job.unstated the moment    */
+/* the user edits it — a confirmed value must never persist as "we      */
+/* made this up". This proves that survives all the way through         */
+/* createCampaignFromJob and back out of localStorage, not just on      */
+/* screen (coder-ui flagged this as their #2 highest-risk item).        */
+/* ------------------------------------------------------------------ */
+
+describe("editing a placeholder field clears it from Job.unstated, and that survives persistence", () => {
+  it("a field the user just confirmed is never read back as 'we made this up'", async () => {
+    const output = parseGreenhouse();
+    const parsedJob = output.job!;
+
+    // Simulate what happens on screen: the posting didn't state a location,
+    // so intake defaulted it and flagged it; the user then typed a real one
+    // into ParsedJobReview and confirmed it. Replicating exactly what
+    // ParsedJobReview.tsx's set() does (src/components/ParsedJobReview.tsx):
+    // set the field, and drop it from `unstated`.
+    const silentJob: Job = {
+      ...parsedJob,
+      location: "Unknown",
+      unstated: [...(parsedJob.unstated ?? []), "location"],
+    };
+    expect(silentJob.unstated).toContain("location");
+
+    const userConfirmed: Job = {
+      ...silentJob,
+      location: "Austin, TX",
+      unstated: (silentJob.unstated ?? []).filter((f) => f !== "location"),
+    };
+    expect(userConfirmed.unstated ?? []).not.toContain("location");
+
+    const saved = await createCampaignFromJob(userConfirmed, output.form);
+    const reloaded = await getCampaign(saved.id);
+
+    for (const campaign of [saved, reloaded!]) {
+      expect(campaign.job.location).toBe("Austin, TX");
+      expect(campaign.job.unstated ?? []).not.toContain("location");
+    }
   });
 });
 
@@ -181,16 +239,30 @@ describe("fieldOrigins and Job.unstated agree on every field (no silent drift)",
     expect(built!.job.unstated ?? []).toEqual([]);
   });
 
-  it("postedAt specifically: absent posting date must be 'defaulted' in origins, not just pushed to unstated", () => {
-    // src/lib/intake/map.ts: `if (!draft.postedAt) unstated.push("postedAt")`
-    // pushes to unstated but never sets origins.postedAt — confirmed live bug.
+  it("postedAt/deadline specifically: absent is silence, not a placeholder — neither origins nor unstated marks them", () => {
+    // UPDATED, not weakened: this test originally caught map.ts pushing
+    // "postedAt" into unstated without ever setting origins.postedAt to
+    // "defaulted" — a real, confirmed drift bug (reported and fixed).
+    //
+    // The fix that landed goes further than the one-line patch I suggested:
+    // `unstated` is now DERIVED from `origins` by construction
+    // (`Object.keys(origins).filter(origin === "defaulted")` in map.ts), so
+    // the two can no longer diverge for ANY field, which the generic sweep
+    // above now proves unconditionally. Separately, postedAt/deadline were
+    // deliberately excluded from "defaulted" entirely: unlike location or
+    // employmentType, an absent date gets no substituted placeholder value
+    // (no "Unknown", no best-fit enum) — there is nothing dishonest to flag,
+    // so map.ts's own comment states they're "marked in neither map."
+    // Verifying that documented behavior directly, since it's exactly the
+    // kind of claim worth pinning down with a test rather than a comment.
     const built = buildJob(minimalDraft);
     expect(built).toBeDefined();
-    expect(built!.job.unstated ?? []).toContain("postedAt");
-    expect(
-      built!.fieldOrigins.postedAt,
-      "origins.postedAt must be \"defaulted\" whenever postedAt is absent and therefore in Job.unstated",
-    ).toBe("defaulted");
+    expect(built!.job.unstated ?? []).not.toContain("postedAt");
+    expect(built!.job.unstated ?? []).not.toContain("deadline");
+    expect(built!.fieldOrigins.postedAt).toBeUndefined();
+    expect(built!.fieldOrigins.deadline).toBeUndefined();
+    // And per the by-construction invariant, that's self-consistent.
+    assertOriginsAgreeWithUnstated(built!.fieldOrigins, built!.job.unstated);
   });
 });
 

@@ -249,10 +249,13 @@ function ImportJobForm({
   return (
     <Card className="mt-3">
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
+        {/* Deliberately doesn't name which fields: the generic adapter can
+            only offer a title (from the page title), never a company, so
+            promising both would itself be a guess. */}
         {unverified && (
           <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-            We guessed the title and company from the link you pasted — check
-            them before you build. Nothing here is saved until you do.
+            We filled in what we could read from the link you pasted — check it
+            before you build. Nothing here is saved until you do.
           </p>
         )}
 

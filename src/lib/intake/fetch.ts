@@ -33,14 +33,32 @@ import { IntakeError } from "@/lib/intake/types";
  *   validating lookup with a public address and the connecting lookup with a
  *   private one, and reach an internal host through the guard.
  *
- * Closing it properly means connecting to a PINNED address while preserving SNI
- * and the Host header — a custom agent, not a flag. That was judged beyond P1.
- * What the guard above does stop: literal private IPs, localhost/.local, hosts
- * that resolve to private space at validation time, and redirects into private
- * space. What it does not stop is an attacker who controls DNS for a name they
- * also persuade the user to paste.
+ * THE FIX IS KNOWN AND TESTED, and is scheduled for P6 alongside the other
+ * network-layer work. Do not re-derive it:
  *
- * Do not describe this module as rebinding-safe until a pinned-IP agent lands.
+ *   `node:https` accepts a custom `lookup`, and that lookup supplies the address
+ *   the socket actually connects to. Doing the private-range check INSIDE it
+ *   makes validation and connection share ONE resolution, so no window exists.
+ *   Verified against the live network: a public host still returns 200 (we
+ *   still connect by hostname, so SNI, certificate validation and virtual
+ *   hosting are unaffected), and a rejection inside the lookup surfaces as a
+ *   clean request error before any socket gets an address.
+ *
+ * Note the distinction, because it is easy to get backwards: re-resolving at
+ * connect time is NOT the fix — an independent second lookup IS the hole. The
+ * fix is making the validating and connecting lookups the same lookup.
+ *
+ * The undici route (`Agent({ connect: { lookup } })`) is the same idea and also
+ * works, but `undici` is not a dependency of this project — only `undici-types`
+ * is present, which is declarations with no runtime. It would need adding.
+ *
+ * What the guard above DOES stop: literal private IPs, localhost/.local, hosts
+ * that resolve to private space at validation time, hosts with even one private
+ * record among several, and redirects into private space. What it does NOT stop
+ * is an attacker who controls DNS for a name they also persuade the user to
+ * paste, and who wins a race against a single 15s request.
+ *
+ * Do not describe this module as rebinding-safe until that lookup lands.
  *
  * Nothing here logs: a URL can itself carry a secret, so console output in this
  * module would be a leak (`client.test.ts` asserts the same rule for Harvest).
