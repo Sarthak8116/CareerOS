@@ -9,25 +9,25 @@ import { demoJob } from "@/lib/demo/job";
 import { demoPeople } from "@/lib/demo/people";
 
 /**
- * DEMO DRY RUN — exercises the full §19 demo script end to end through the real
+ * DEMO DRY RUN, exercises the full §19 demo script end to end through the real
  * engines (no browser, no store). Doubles as an integration test proving the
  * whole pipeline produces the intended content deterministically.
  */
-describe("§19 demo flow — end to end", () => {
-  it("Scene 1 — candidate profile has an evidence graph with public proof", () => {
+describe("§19 demo flow, end to end", () => {
+  it("Scene 1, candidate profile has an evidence graph with public proof", () => {
     expect(demoCandidate.name).toBe("Ava Chen");
     expect(demoCandidate.evidence.length).toBeGreaterThanOrEqual(5);
     expect(demoCandidate.evidence.some((e) => e.publicProof)).toBe(true);
     expect(demoCandidate.links.github).toContain("avechen");
   });
 
-  it("Scene 2 — the demo job is the NVIDIA systems role, pre-parsed", () => {
+  it("Scene 2, the demo job is the NVIDIA systems role, pre-parsed", () => {
     expect(demoJob.company).toBe("NVIDIA");
     expect(demoJob.normalizedTitle).toMatch(/systems software/i);
     expect(demoJob.requirements.length).toBeGreaterThan(0);
   });
 
-  it("Scenes 3–7 — Build My Campaign produces a full, grounded campaign", async () => {
+  it("Scenes 3–7, Build My Campaign produces a full, grounded campaign", async () => {
     const c = await getCampaignProvider().buildCampaign({
       candidate: demoCandidate,
       job: demoJob,
@@ -55,7 +55,7 @@ describe("§19 demo flow — end to end", () => {
     expect(c.nextAction.trim().length).toBeGreaterThan(0);
   });
 
-  it("Scene 5 — opportunity graph has a warmest path ending at the job", () => {
+  it("Scene 5, opportunity graph has a warmest path ending at the job", () => {
     const graph = buildOpportunityGraph({
       candidate: demoCandidate,
       job: demoJob,
@@ -71,7 +71,7 @@ describe("§19 demo flow — end to end", () => {
     expect(graph.warmestPath[graph.warmestPath.length - 1]).toBe(demoJob.id);
   });
 
-  it("Scene 6 — outreach to the alumnus is evidence-backed", () => {
+  it("Scene 6, outreach to the alumnus is evidence-backed", () => {
     const messages = generateAllOutreach(demoCandidate, demoJob, demoPeople);
     expect(messages.length).toBe(demoPeople.length);
     const alum = demoPeople.find((p) => p.outreachPriority === "first")!;
@@ -81,7 +81,7 @@ describe("§19 demo flow — end to end", () => {
     expect(msg.full.trim().length).toBeGreaterThan(0);
   });
 
-  it("Scene 8 — interview prep returns role-specific questions", () => {
+  it("Scene 8, interview prep returns role-specific questions", () => {
     const qs = getInterviewQuestions(demoCandidate, demoJob);
     expect(qs.length).toBeGreaterThanOrEqual(6);
     expect(qs.some((q) => q.category === "technical" || q.category === "domain")).toBe(true);

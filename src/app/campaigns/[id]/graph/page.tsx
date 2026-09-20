@@ -13,7 +13,7 @@ import { Card, CardHeader, ButtonLink, EmptyState } from "@/components/ui/primit
 import { OpportunityGraphView } from "@/components/OpportunityGraph";
 
 /**
- * Opportunity graph page (§5.12) — the relationship map for a campaign.
+ * Opportunity graph page (§5.12), the relationship map for a campaign.
  * Answers: who to contact first, the warmest path in, and which evidence
  * supports the role. All inferred links are labeled, never presented as fact.
  */
@@ -96,11 +96,11 @@ export default function CampaignGraphPage() {
       <Card>
         <CardHeader
           title="How you connect to this role"
-          subtitle="The warmest path in is highlighted. Inferred relationships are labeled — not confirmed."
+          subtitle="The warmest path in is highlighted. Inferred relationships are labeled, not confirmed."
         />
         <OpportunityGraphView graph={graph} />
         <p className="mt-4 text-xs text-slate-500">
-          Inferred relationships are labeled — not confirmed. Verify people and reporting lines
+          Inferred relationships are labeled, not confirmed. Verify people and reporting lines
           before you reach out.
         </p>
       </Card>

@@ -16,7 +16,7 @@ import { respondWith } from "@/test/httpsMock";
  * parse, and the promise that `intakeFromUrl` NEVER throws upward.
  *
  * DNS is mocked so the suite runs with no network at all. The transport is
- * `node:https`, not global `fetch` — `fetch.ts` connects through
+ * `node:https`, not global `fetch`: `fetch.ts` connects through
  * `https.request` because only that accepts the custom `lookup` which closes
  * the DNS-rebinding window.
  */

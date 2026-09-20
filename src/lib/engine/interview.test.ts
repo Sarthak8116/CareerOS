@@ -23,7 +23,7 @@ describe("getInterviewQuestions", () => {
 
     expect(project?.prompt).toContain("private data-processing tool in Python");
     expect(project?.evidenceToUse).toEqual([
-      "real_project — Built a private data-processing tool in Python",
+      "real_project: Built a private data-processing tool in Python",
     ]);
   });
 

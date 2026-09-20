@@ -1,5 +1,5 @@
 /**
- * Résumé rasterisation — PDF pages to page images, IN THE BROWSER.
+ * Résumé rasterisation, PDF pages to page images, IN THE BROWSER.
  *
  * WHY THIS EXISTS: Nemotron Parse cannot read a PDF. Measured against the live
  * API, not read from docs: plain text input returns 400 "The model does not
@@ -9,7 +9,7 @@
  * before it reaches the model.
  *
  * WHY CLIENT-SIDE, AND WHY THIS MUST NOT BE "OPTIMISED" ONTO THE SERVER LATER:
- *  1. Privacy. The user's résumé — their address, their employment history —
+ *  1. Privacy. The user's résumé, their address, their employment history,
  *     never leaves their machine as a document. Only the rendered pages of the
  *     résumé they chose to analyse are uploaded. This is the same reasoning
  *     behind client-side zipping in the package flow. Moving rasterisation to
@@ -67,7 +67,7 @@ export interface RasterizedResume {
  * Page cap. Résumés are one or two pages; academic CVs run longer. Eight is
  * generous enough that a normal résumé is never clipped, and bounded enough
  * that the upload stays a couple of megabytes. When it bites, the caller is
- * told exactly how many of how many pages were read — a silently truncated
+ * told exactly how many of how many pages were read, a silently truncated
  * résumé means the analysis is missing evidence the user believes they gave us.
  */
 export const MAX_RESUME_PAGES = 8;
@@ -75,7 +75,7 @@ export const MAX_RESUME_PAGES = 8;
 /**
  * Render scale, measured rather than guessed. pdf.js scale 1 is 72 DPI. On a
  * dense real-world text page the base64 PNG costs roughly:
- *   scale 1.0  ( 72 DPI)  110 KB   — glyph strokes thin out; OCR starts guessing
+ *   scale 1.0  ( 72 DPI)  110 KB  , glyph strokes thin out; OCR starts guessing
  *   scale 1.5  (108 DPI)  176 KB
  *   scale 2.0  (144 DPI)  255 KB   <- chosen
  *   scale 2.5  (180 DPI)  318 KB
@@ -87,7 +87,7 @@ export const MAX_RESUME_PAGES = 8;
 export const RENDER_SCALE = 2;
 
 /**
- * Long-edge clamp. RENDER_SCALE alone is unbounded — a poster-sized page would
+ * Long-edge clamp. RENDER_SCALE alone is unbounded, a poster-sized page would
  * render to a canvas large enough to hurt. 2200 px still covers US Letter and
  * A4 at the full scale above, so normal résumés are never downscaled.
  */
@@ -101,7 +101,7 @@ export const MAX_TOTAL_BASE64_BYTES = 4_000_000;
 
 /**
  * PNG, not JPEG. At scale 2 JPEG q0.9 saves about 25% (193 KB vs 255 KB) and
- * pays for it with ringing artifacts along glyph edges — exactly the signal a
+ * pays for it with ringing artifacts along glyph edges, exactly the signal a
  * text-extraction model depends on. A quarter less payload is not worth
  * degrading the only thing in the image that matters.
  */
@@ -136,7 +136,7 @@ interface PdfjsModule {
 }
 
 /**
- * Test seams. Production passes none of these — the defaults below are what
+ * Test seams. Production passes none of these, the defaults below are what
  * actually ships, so a test that overrides only the canvas still exercises the
  * real pdf.js parse and render path.
  */
@@ -163,7 +163,7 @@ export interface RasterizeOptions {
 /**
  * The legacy build, deliberately, in both the browser and tests. The modern
  * build calls `Promise.try`, which is absent from Node 22 and from browsers
- * older than roughly a year — a résumé upload is not the place to require a
+ * older than roughly a year, a résumé upload is not the place to require a
  * bleeding-edge engine. Using it in tests too means the code under test is the
  * code that ships.
  */
@@ -227,7 +227,7 @@ function classifyLoadError(err: unknown, pdfjs: PdfjsModule): never {
   }
   throw new ResumeRasterizeError(
     "corrupt",
-    "That PDF could not be opened — the file looks damaged or incomplete. Try re-exporting it and uploading again.",
+    "That PDF could not be opened, the file looks damaged or incomplete. Try re-exporting it and uploading again.",
   );
 }
 
@@ -307,7 +307,7 @@ export async function rasterizeResumePdf(
   if (bytes.length === 0) {
     throw new ResumeRasterizeError(
       "empty-file",
-      "That file is empty — there are no pages to read. Please upload your résumé PDF again.",
+      "That file is empty, there are no pages to read. Please upload your résumé PDF again.",
     );
   }
   if (!looksLikePdf(bytes)) {
@@ -402,7 +402,7 @@ export async function rasterizeResumePdf(
         page.cleanup();
       }
 
-      // Stop before the body grows past what a request can carry — but never
+      // Stop before the body grows past what a request can carry, but never
       // before there is a first page, or we would return nothing at all.
       if (
         pages.length > 0 &&

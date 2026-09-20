@@ -1,7 +1,7 @@
 // @vitest-environment node
 /**
  * These tests run the real pdf.js parse and render path. The only thing
- * substituted is the canvas, because jsdom has none — @napi-rs/canvas (already
+ * substituted is the canvas, because jsdom has none, @napi-rs/canvas (already
  * present as a pdfjs-dist optional dependency) stands in for the browser's.
  *
  * Every image assertion decodes the bytes the module actually produced and
@@ -59,7 +59,7 @@ async function darkPixels(dataUrl: string): Promise<number> {
 
 /**
  * A stand-in worker port that answers the liveness probe the way pdf.js's real
- * worker does — one "ready" message as soon as anything listens — and then
+ * worker does, one "ready" message as soon as anything listens, and then
  * stays silent, so the operation is still in flight when the test kills it.
  */
 function messageAnsweringPort() {
@@ -100,7 +100,7 @@ async function expectCode(promise: Promise<unknown>, code: string) {
   return err as ResumeRasterizeError;
 }
 
-describe("rasterizeResumePdf — the bytes it produces", () => {
+describe("rasterizeResumePdf, the bytes it produces", () => {
   it("renders every page as a decodable PNG at the declared size", async () => {
     const result = await rasterizeResumePdf(tinyPdf({ pages: 3 }), { deps });
 
@@ -119,7 +119,7 @@ describe("rasterizeResumePdf — the bytes it produces", () => {
       // The dimensions inside the file must match what we told the server.
       expect(bytes.readUInt32BE(16)).toBe(page.width);
       expect(bytes.readUInt32BE(20)).toBe(page.height);
-      // 612x792pt at scale 2 — the page geometry, not a hard-coded guess.
+      // 612x792pt at scale 2, the page geometry, not a hard-coded guess.
       expect(page.width).toBe(612 * RENDER_SCALE);
       expect(page.height).toBe(792 * RENDER_SCALE);
       expect(page.width).toBeLessThanOrEqual(MAX_PAGE_EDGE_PX);
@@ -174,7 +174,7 @@ describe("rasterizeResumePdf — the bytes it produces", () => {
   });
 });
 
-describe("rasterizeResumePdf — truncation is reported, never silent", () => {
+describe("rasterizeResumePdf, truncation is reported, never silent", () => {
   it("stops at the page cap and says so with both numbers", async () => {
     const result = await rasterizeResumePdf(tinyPdf({ pages: 12 }), {
       maxPages: 4,
@@ -208,7 +208,7 @@ describe("rasterizeResumePdf — truncation is reported, never silent", () => {
   });
 });
 
-describe("rasterizeResumePdf — failures are honest, not empty", () => {
+describe("rasterizeResumePdf, failures are honest, not empty", () => {
   it("refuses an empty file", async () => {
     await expectCode(
       rasterizeResumePdf(new Uint8Array(0), { deps }),

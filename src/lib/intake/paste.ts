@@ -8,7 +8,7 @@ import { createCleaner, questionId } from "@/lib/intake/map";
 /**
  * The login-wall fallback: turn questions the user pasted into a form.
  *
- * PURE — no network, no clock (`fetchedAt` is passed in) — so the UI imports it
+ * PURE, no network, no clock (`fetchedAt` is passed in), so the UI imports it
  * directly and no route is needed. This is the path for every board whose
  * application form we cannot read, which is all of them except Greenhouse.
  *
@@ -18,7 +18,7 @@ import { createCleaner, questionId } from "@/lib/intake/map";
  *
  * Detection stays deliberately dumb. We recognise a question by explicit
  * punctuation or an explicit required-marker, and we do NOT try to judge
- * whether a sentence "sounds like" a question — a wrong guess would put words
+ * whether a sentence "sounds like" a question, a wrong guess would put words
  * in the employer's mouth. Anything we cannot classify is reported in
  * `unknowns` rather than silently dropped or silently invented.
  */
@@ -38,7 +38,7 @@ export interface PastedFormInput {
   text: string;
   fetchedAt: string;
   applyUrl?: string;
-  /** The board this came from, when known — recorded, never guessed. */
+  /** The board this came from, when known, recorded, never guessed. */
   adapter?: string;
 }
 
@@ -96,7 +96,7 @@ export function formFromPastedQuestions(input: PastedFormInput): ApplicationForm
       // Never classified beyond what the words explicitly say.
       category: "other",
       // Set ONLY when the paste carried an explicit marker. Absent means we do
-      // not know — it must never be defaulted to false.
+      // not know, it must never be defaulted to false.
       ...(required ? { required: true } : {}),
       trust: "user-provided",
     });
@@ -126,7 +126,7 @@ export function formFromPastedQuestions(input: PastedFormInput): ApplicationForm
     );
   }
   unknowns.push(
-    "This is only the part of the form you pasted — the employer may ask for more.",
+    "This is only the part of the form you pasted, the employer may ask for more.",
   );
 
   return {
@@ -135,7 +135,7 @@ export function formFromPastedQuestions(input: PastedFormInput): ApplicationForm
     adapter: input.adapter ?? "paste",
     ...(input.applyUrl ? { applyUrl: input.applyUrl } : {}),
     fetchedAt: input.fetchedAt,
-    // Never "complete" — see the note above.
+    // Never "complete", see the note above.
     completeness: "partial",
     resume,
     coverLetter,

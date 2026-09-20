@@ -13,7 +13,7 @@ const MAX_PAGES = 8;
 /** Decoded image bytes across the whole résumé. */
 const MAX_TOTAL_BYTES = 6 * 1024 * 1024;
 
-/** GET /api/campaign — is live mode configured? (the intake page checks this) */
+/** GET /api/campaign, is live mode configured? (the intake page checks this) */
 export function GET() {
   return NextResponse.json({ live: liveModeAvailable() });
 }
@@ -24,7 +24,7 @@ export function GET() {
  * PDF file therefore never leaves their machine.
  *
  * PNG only. The client renders PNG exclusively, so anything else either did not
- * come from it or was relabelled on the way — either way it is rejected rather
+ * come from it or was relabelled on the way, either way it is rejected rather
  * than forwarded to an external API.
  */
 const PNG_DATA_URL = /^data:image\/png;base64,[A-Za-z0-9+/]+={0,2}$/;
@@ -42,7 +42,7 @@ const Body = z.object({
     pages: z.array(ResumePage).min(1).max(MAX_PAGES),
     /** Pages in the user's actual PDF, which may exceed what was sent. */
     totalPages: z.number().int().positive(),
-    // Advisory only — truncation is DERIVED below so the two cannot diverge.
+    // Advisory only, truncation is DERIVED below so the two cannot diverge.
     truncated: z.boolean().nullish(),
     truncatedReason: z.enum(["page-cap", "size-cap"]).nullish(),
   }),
@@ -50,7 +50,7 @@ const Body = z.object({
 
 /**
  * The `data:image/png` prefix is a claim; the magic bytes are the proof.
- * 12 base64 characters decode to 9 bytes — enough for the 8-byte signature.
+ * 12 base64 characters decode to 9 bytes, enough for the 8-byte signature.
  */
 function hasPngSignature(dataUrl: string): boolean {
   const comma = dataUrl.indexOf(",") + 1;
@@ -59,7 +59,7 @@ function hasPngSignature(dataUrl: string): boolean {
   return head.length >= 8 && PNG.every((byte, i) => head[i] === byte);
 }
 
-/** POST /api/campaign — build a real campaign from a résumé + job posting. */
+/** POST /api/campaign, build a real campaign from a résumé + job posting. */
 export async function POST(req: Request) {
   if (!liveModeAvailable()) {
     return NextResponse.json(
@@ -85,7 +85,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error:
-          "Please upload your résumé as a PDF — its pages did not arrive as readable images.",
+          "Please upload your résumé as a PDF, its pages did not arrive as readable images.",
       },
       { status: 400 },
     );
@@ -152,9 +152,9 @@ export async function POST(req: Request) {
       err instanceof Error ? err.message : "Live analysis failed unexpectedly.";
     // Don't leak internals (or a key); return a concise, user-safe message.
     const safe = /api key|401|403|authentication/i.test(message)
-      ? "Authentication failed — check your NVIDIA API key."
+      ? "Authentication failed, check your NVIDIA API key."
       : /rate|429/i.test(message)
-        ? "Rate limited by the model API — try again shortly."
+        ? "Rate limited by the model API, try again shortly."
         : /could not read/i.test(message)
           ? "CareerOS could not read that résumé. Try re-exporting the PDF and uploading it again."
           : "Live analysis failed. The model may have returned an unexpected result; try again.";

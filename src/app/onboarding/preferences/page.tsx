@@ -9,7 +9,7 @@ import { demoCandidate } from "@/lib/demo/candidate";
 import { getProfile, updateProfilePreferences } from "@/lib/profileStore";
 
 /**
- * Onboarding · Preferences — DEMO MODE.
+ * Onboarding · Preferences, DEMO MODE.
  * Form is pre-filled from the active profile and persists the edited preference
  * fields locally. "Finish setup" returns to the dashboard without submitting
  * anything externally.
@@ -57,7 +57,7 @@ export default function PreferencesOnboarding() {
             Set your preferences
           </h1>
           <p className="mt-2 flex flex-wrap items-center gap-2 text-base leading-relaxed text-slate-600">
-            <span>Pre-filled from your sample profile — edit anything.</span>
+            <span>Pre-filled from your sample profile, edit anything.</span>
             <Pill className="bg-emerald-50 text-emerald-700 ring-emerald-600/20">
               <Check className="h-3 w-3" />
               Demo data loaded
@@ -96,7 +96,7 @@ export default function PreferencesOnboarding() {
               className={inputClass}
             />
             <p className="mt-1.5 text-xs text-slate-400">
-              Comma-separated — the roles CareerOS builds campaigns for.
+              Comma-separated, the roles CareerOS builds campaigns for.
             </p>
           </div>
 
@@ -115,7 +115,7 @@ export default function PreferencesOnboarding() {
               className={inputClass}
             />
             <p className="mt-1.5 text-xs text-slate-400">
-              Comma-separated — used to prioritize opportunities.
+              Comma-separated, used to prioritize opportunities.
             </p>
           </div>
 

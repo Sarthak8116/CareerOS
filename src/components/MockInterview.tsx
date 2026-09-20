@@ -42,7 +42,7 @@ const difficultyStyle: Record<
 };
 
 /* ---------------------------------------------------------------- */
-/* Mock interview (§5.19 P0) — one question at a time, text mode      */
+/* Mock interview (§5.19 P0), one question at a time, text mode      */
 /* ---------------------------------------------------------------- */
 
 export function MockInterview({ questions }: { questions: InterviewQuestion[] }) {
@@ -218,7 +218,7 @@ export function MockInterview({ questions }: { questions: InterviewQuestion[] })
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
             rows={7}
-            placeholder="Talk through your answer as you would out loud — the specifics, the trade-offs, and the evidence you'd cite."
+            placeholder="Talk through your answer as you would out loud, the specifics, the trade-offs, and the evidence you'd cite."
             className="w-full resize-y rounded-xl border border-slate-200 p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
           />
           <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -237,7 +237,7 @@ export function MockInterview({ questions }: { questions: InterviewQuestion[] })
           </div>
           {caps.voice && (
             <p className="mt-2 text-xs text-slate-400">
-              Your recording is transcribed and discarded — check the transcript before you submit.
+              Your recording is transcribed and discarded, check the transcript before you submit.
             </p>
           )}
           {voiceError && (
@@ -255,7 +255,7 @@ export function MockInterview({ questions }: { questions: InterviewQuestion[] })
           <p className="text-xs text-slate-400">
             {gradedBy === "model"
               ? "Graded by NVIDIA Nemotron Super from what you said and your recorded evidence."
-              : "Offline feedback — a keyword check against the answer hints, not a model."}
+              : "Offline feedback, a keyword check against the answer hints, not a model."}
           </p>
           <div className="flex justify-end">
             <Button onClick={goNext}>
@@ -269,7 +269,7 @@ export function MockInterview({ questions }: { questions: InterviewQuestion[] })
 }
 
 /* ---------------------------------------------------------------- */
-/* Feedback — grounded strictly in the engine output                 */
+/* Feedback, grounded strictly in the engine output                 */
 /* ---------------------------------------------------------------- */
 
 function Feedback({ evaluation }: { evaluation: AnswerEvaluation }) {
@@ -322,7 +322,7 @@ function Feedback({ evaluation }: { evaluation: AnswerEvaluation }) {
 }
 
 /* ---------------------------------------------------------------- */
-/* End-of-session summary — categories covered                       */
+/* End-of-session summary, categories covered                       */
 /* ---------------------------------------------------------------- */
 
 function SummaryView({
@@ -368,7 +368,7 @@ function SummaryView({
         </div>
 
         <p className="text-sm leading-relaxed text-slate-500">
-          Feedback here is qualitative — it flags what you covered and where to
+          Feedback here is qualitative, it flags what you covered and where to
           add specifics. Re-run whenever you want another pass.
         </p>
 

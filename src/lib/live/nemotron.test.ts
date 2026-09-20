@@ -9,7 +9,7 @@ import {
  * Behavioral tests for the Nemotron provider (src/lib/live/nemotron.ts),
  * built entirely on FIXTURES derived from the FROZEN contract
  * (careeros/contract/p2.5-nemotron-provider), which was itself measured
- * against the live API. No live calls happen in this suite — `fetch` is
+ * against the live API. No live calls happen in this suite, `fetch` is
  * mocked throughout.
  *
  * Static guards (server-only, no console.*, key never reaches a
@@ -56,7 +56,7 @@ function jsonResponse(body: unknown, init?: { ok?: boolean; status?: number }) {
 
 const Schema = z.object({ ok: z.boolean() });
 
-describe("liveModeAvailable — the no-key path (the ONLY proven-working path)", () => {
+describe("liveModeAvailable, the no-key path (the ONLY proven-working path)", () => {
   it("is false with no NVIDIA key set", async () => {
     const { liveModeAvailable } = await import("@/lib/live/nemotron");
     expect(liveModeAvailable()).toBe(false);
@@ -75,7 +75,7 @@ describe("liveModeAvailable — the no-key path (the ONLY proven-working path)",
   });
 });
 
-describe("parseStructured — request shape (Lightning reasoning-suppression contract)", () => {
+describe("parseStructured, request shape (Lightning reasoning-suppression contract)", () => {
   it("sends BOTH response_format:json_object AND chat_template_kwargs:{thinking:false} on every schema-constrained call, for every model role", async () => {
     process.env.NVIDIA_API_KEY = "shared-key-value";
     for (const role of ["lightning", "super", "nano"] as const) {
@@ -110,7 +110,7 @@ describe("parseStructured — request shape (Lightning reasoning-suppression con
 
   it("throws instead of returning prose when the model answers unsuppressed (the measured default-Lightning failure mode)", async () => {
     process.env.NVIDIA_API_KEY = "shared-key-value";
-    // Fixture: this is what Lightning returns with NEITHER flag — the shape
+    // Fixture: this is what Lightning returns with NEITHER flag, the shape
     // this app must never actually send, but if it did, parseStructured must
     // not silently accept the prose as if it were the JSON answer.
     const fetchMock = vi
@@ -132,7 +132,7 @@ describe("parseStructured — request shape (Lightning reasoning-suppression con
   });
 });
 
-describe("parseStructured — ONE corrective retry (must not be quietly dropped)", () => {
+describe("parseStructured, ONE corrective retry (must not be quietly dropped)", () => {
   it("retries exactly once after a schema-validation miss, then succeeds", async () => {
     process.env.NVIDIA_API_KEY = "shared-key-value";
     const fetchMock = vi
@@ -157,7 +157,7 @@ describe("parseStructured — ONE corrective retry (must not be quietly dropped)
     expect(result).toEqual({ ok: true });
     expect(fetchMock).toHaveBeenCalledTimes(2);
 
-    // The retry request must show the model its bad output plus the errors —
+    // The retry request must show the model its bad output plus the errors,
     // not just repeat the original prompt verbatim.
     const secondBody = JSON.parse(
       (fetchMock.mock.calls[1][1] as RequestInit).body as string,
@@ -304,7 +304,7 @@ describe("key material never survives an error round-trip (scrub)", () => {
   });
 });
 
-describe("Nemotron Parse — image-only boundary (MEASURED: rejects text AND PDF)", () => {
+describe("Nemotron Parse, image-only boundary (MEASURED: rejects text AND PDF)", () => {
   it("isSupportedPageImage accepts a PNG/JPEG data URL", async () => {
     const { isSupportedPageImage } = await import("@/lib/live/nemotron");
     expect(
@@ -319,10 +319,10 @@ describe("Nemotron Parse — image-only boundary (MEASURED: rejects text AND PDF
     ).toBe(true);
   });
 
-  it("isSupportedPageImage rejects a PDF data URL — MEASURED: nemotron-parse 400s on PDF base64", async () => {
+  it("isSupportedPageImage rejects a PDF data URL, MEASURED: nemotron-parse 400s on PDF base64", async () => {
     const { isSupportedPageImage } = await import("@/lib/live/nemotron");
     // Fixture from the contract: this is the shape of input that produces
-    // parseRejectsPdfInput (400) from the live API — it must never reach fetch.
+    // parseRejectsPdfInput (400) from the live API, it must never reach fetch.
     expect(
       isSupportedPageImage("data:application/pdf;base64," + "A".repeat(40)),
     ).toBe(false);
@@ -337,11 +337,11 @@ describe("Nemotron Parse — image-only boundary (MEASURED: rejects text AND PDF
   });
 });
 
-describe("readDocumentPages — reasoning suppression during transcription (RESOLVED, was an open it.todo)", () => {
+describe("readDocumentPages, reasoning suppression during transcription (RESOLVED, was an open it.todo)", () => {
   // Previously flagged and left as it.todo: the frozen contract only measured
   // Lightning's reasoning-suppression requirement for JSON-mode calls, and an
   // earlier revision of chat() coupled chat_template_kwargs:{thinking:false}
-  // to the `json` flag, so page transcription (json:false) never sent it —
+  // to the `json` flag, so page transcription (json:false) never sent it,
   // risking hidden-reasoning prose landing in the transcript from whichever
   // reasoning-named model does the fallback read.
   //
@@ -349,19 +349,19 @@ describe("readDocumentPages — reasoning suppression during transcription (RESO
   // is now sent for every role EXCEPT "parse", independent of `json`. Per the
   // instruction to rewrite against the real mechanism rather than patch
   // assertions, this is now a real, asserted behavioral test rather than a
-  // todo — it fails again if that coupling regresses.
+  // todo, it fails again if that coupling regresses.
   it("sends chat_template_kwargs:{thinking:false} on the plain-text fallback transcription call, but never on the PARSE call", async () => {
     process.env.NVIDIA_API_KEY = "shared-key-value";
     const fetchMock = vi
       .fn()
-      // 1st call: PARSE attempt on the one page — fails, forcing the fallback.
+      // 1st call: PARSE attempt on the one page, fails, forcing the fallback.
       .mockResolvedValueOnce({
         ok: false,
         status: 500,
         text: async () => "parse failed",
         json: async () => ({}),
       } as Response)
-      // 2nd call: fallback-role attempt on the same page — succeeds.
+      // 2nd call: fallback-role attempt on the same page, succeeds.
       .mockResolvedValueOnce(
         jsonResponse({ choices: [{ message: { content: "transcribed text" } }] }),
       );
@@ -382,12 +382,12 @@ describe("readDocumentPages — reasoning suppression during transcription (RESO
     );
 
     // PARSE: no chat_template_kwargs (it's a document VLM, not a chat/reasoning
-    // model — the contract never measured a "thinking" issue for it).
+    // model, the contract never measured a "thinking" issue for it).
     expect(firstBody.chat_template_kwargs).toBeUndefined();
     // Fallback role: thinking suppression IS sent, even though this is a
     // plain-text (non-JSON) call.
     expect(secondBody.chat_template_kwargs).toEqual({ thinking: false });
-    // Neither transcription call asks for JSON — the output is prose.
+    // Neither transcription call asks for JSON, the output is prose.
     expect(firstBody.response_format).toBeUndefined();
     expect(secondBody.response_format).toBeUndefined();
     expect(result.model).not.toBe("parse");
@@ -395,7 +395,7 @@ describe("readDocumentPages — reasoning suppression during transcription (RESO
   });
 });
 
-describe("RESUME_SHAPER vs. PAGE_READER_FALLBACK — deliberate deviation from the frozen contract, ruled and explained", () => {
+describe("RESUME_SHAPER vs. PAGE_READER_FALLBACK, deliberate deviation from the frozen contract, ruled and explained", () => {
   // RESOLVED: flagged as an unexplained contradiction (RESUME_SHAPER="super"
   // vs. comments/contract both still saying "nano"); team-lead ruled it a
   // deliberate correctness call (the evidence graph is honesty-critical, so
@@ -404,7 +404,7 @@ describe("RESUME_SHAPER vs. PAGE_READER_FALLBACK — deliberate deviation from t
   // nemotron reported a real transient bug in this exact area: RESUME_SHAPER
   // and the page-reading fallback used to be ONE constant when both were
   // "nano". Flipping the shaper to "super" without splitting them would have
-  // silently repointed page-image reading at a text-only model — every page
+  // silently repointed page-image reading at a text-only model, every page
   // would fail and get reported as "we could not read your résumé", a lie
   // about the cause. PAGE_READER_FALLBACK now exists specifically to keep
   // these independent; test that they stay that way.
@@ -422,14 +422,14 @@ describe("RESUME_SHAPER vs. PAGE_READER_FALLBACK — deliberate deviation from t
     process.env.NVIDIA_API_KEY = "shared-key-value";
     const fetchMock = vi
       .fn()
-      // PARSE attempt on the one page — fails, forcing the fallback.
+      // PARSE attempt on the one page, fails, forcing the fallback.
       .mockResolvedValueOnce({
         ok: false,
         status: 500,
         text: async () => "parse failed",
         json: async () => ({}),
       } as Response)
-      // Fallback attempt — succeeds.
+      // Fallback attempt, succeeds.
       .mockResolvedValueOnce(
         jsonResponse({ choices: [{ message: { content: "transcribed" } }] }),
       );
@@ -452,11 +452,11 @@ describe("RESUME_SHAPER vs. PAGE_READER_FALLBACK — deliberate deviation from t
   });
 });
 
-describe("readDocumentPages — re-guards page format before any bytes leave for the API", () => {
+describe("readDocumentPages, re-guards page format before any bytes leave for the API", () => {
   // isSupportedPageImage is live code inside readDocumentPages, not just the
   // exported predicate (which the earlier "image-only boundary" describe
   // block above tests directly). The route already validates PNG + magic
-  // bytes before calling in, so a page failing THIS check is our own bug —
+  // bytes before calling in, so a page failing THIS check is our own bug,
   // and per coder-nemotron, it deliberately throws rather than marking the
   // page "unreadable", because telling the user their résumé was unreadable
   // when the actual fault is ours would be dishonest.

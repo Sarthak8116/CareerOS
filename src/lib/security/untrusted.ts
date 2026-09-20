@@ -7,11 +7,11 @@
  * calls, data-exfiltration asks, etc.).
  *
  * This module is a pure, deterministic, dependency-free string guard. It NEVER
- * executes anything and NEVER interprets the content as instructions — it only
+ * executes anything and NEVER interprets the content as instructions, it only
  * inspects and rewrites strings.
  *
  * IMPORTANT FOR CALLERS: the `clean` string returned by {@link sanitizeUntrusted}
- * must be treated strictly as DATA — quoted/retrieved text to reason ABOUT — and
+ * must be treated strictly as DATA, quoted/retrieved text to reason ABOUT, and
  * NEVER spliced into a system/instruction position or forwarded to a tool as a
  * command. The returned `flags` are advisory signals for logging, UI warnings,
  * or human review; they do not change how the text should be handled (always as
@@ -99,7 +99,7 @@ export function detectInjection(text: string): string[] {
 
   // Scan BOTH the raw text and its entity-decoded form. Decoding matters
   // because "&#73;gnore all previous instructions" reads as an instruction to a
-  // model but matches no literal /\bignore\b/ pattern — scanning only the raw
+  // model but matches no literal /\bignore\b/ pattern, scanning only the raw
   // bytes missed it entirely. Scanning both means an encoded payload is caught
   // without losing any rule that depends on the original punctuation.
   const decoded = decodeEntities(text);
@@ -157,7 +157,7 @@ const MAX_DECODE_PASSES = 3;
  * Decode HTML entities so injection detection sees what a MODEL would read,
  * not the literal bytes.
  *
- * This is a DETECTION aid, not an output transform — {@link sanitizeUntrusted}
+ * This is a DETECTION aid, not an output transform, {@link sanitizeUntrusted}
  * still escapes on the way out, so nothing decoded here can render as markup.
  *
  * Runs up to {@link MAX_DECODE_PASSES} times because payloads are sometimes
@@ -206,8 +206,8 @@ export function decodeEntities(text: string): string {
  *     never render or be misread as structure.
  *  5. Normalize excess whitespace.
  *
- * IMPORTANT FOR CALLERS: treat the returned `clean` string as DATA only — quoted
- * content to reason about — never as instructions and never forwarded to a tool
+ * IMPORTANT FOR CALLERS: treat the returned `clean` string as DATA only, quoted
+ * content to reason about, never as instructions and never forwarded to a tool
  * as a command.
  *
  * @param text arbitrary untrusted input

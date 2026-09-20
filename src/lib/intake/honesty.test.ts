@@ -12,7 +12,7 @@ beforeEach(() => {
 });
 
 /**
- * The intake honesty contract — the claims this app must never make about a
+ * The intake honesty contract, the claims this app must never make about a
  * job posting it read for the user. Asserted directly against real adapter
  * output and real captured fixtures, the same way `harvest/honesty.test.ts`
  * and `profileStore.test.ts` assert honesty rules rather than only mechanics.
@@ -34,12 +34,12 @@ function parseGreenhouse() {
 /* ------------------------------------------------------------------ */
 /* No PERSISTED Job/Campaign ever carries a fieldOrigins key.          */
 /*                                                                      */
-/* NOTE ON SCOPE: fieldOrigins legitimately crosses the API boundary — */
+/* NOTE ON SCOPE: fieldOrigins legitimately crosses the API boundary, */
 /* it rides on IntakeResult in the POST /api/intake response body, for */
 /* the pre-build review step, before anything is saved. That transport */
 /* is correct and this file does NOT test against it. The invariant    */
 /* below is narrower: once a Job/Campaign is BUILT and PERSISTED (the  */
-/* campaign-build path, localStorage), fieldOrigins must not survive — */
+/* campaign-build path, localStorage), fieldOrigins must not survive, */
 /* Job.unstated is the persisted representation instead.               */
 /* ------------------------------------------------------------------ */
 
@@ -67,7 +67,7 @@ describe("no persisted Job or Campaign ever carries a fieldOrigins key", () => {
     // (it rides on IntakeResult to the review step)...
     expect(output.fieldOrigins).toBeTruthy();
     expect(Object.keys(output.fieldOrigins).length).toBeGreaterThan(0);
-    // ...but it must never be a property ON the job or form it describes —
+    // ...but it must never be a property ON the job or form it describes,
     // it is a sibling on AdapterOutput/IntakeResult, not a merged-in field.
     expect(Object.keys(output.job!)).not.toContain("fieldOrigins");
     expect(Object.keys(output.form)).not.toContain("fieldOrigins");
@@ -90,11 +90,11 @@ describe("no persisted Job or Campaign ever carries a fieldOrigins key", () => {
     // is the actual function the intake UI calls once the user confirms the
     // review (src/lib/store.ts). Exercising it directly is what turns this
     // from "a guard that would catch a regression" into "proof the shipped
-    // path is correct" — the distinction this test used to have to caveat.
+    // path is correct", the distinction this test used to have to caveat.
     const saved = await createCampaignFromJob(job, output.form);
     expect(saved.applicationForm).toBeDefined();
 
-    // Read back exactly the way the app does — through the real localStorage
+    // Read back exactly the way the app does, through the real localStorage
     // read path, not a hand-rolled JSON round-trip.
     const reloaded = await getCampaign(saved.id);
     expect(reloaded).toBeDefined();
@@ -119,7 +119,7 @@ describe("no persisted Job or Campaign ever carries a fieldOrigins key", () => {
 /* Edit-clears-unstated must survive the real save path.               */
 /*                                                                      */
 /* ParsedJobReview.set() strips a field from job.unstated the moment    */
-/* the user edits it — a confirmed value must never persist as "we      */
+/* the user edits it, a confirmed value must never persist as "we      */
 /* made this up". This proves that survives all the way through         */
 /* createCampaignFromJob and back out of localStorage, not just on      */
 /* screen (coder-ui flagged this as their #2 highest-risk item).        */
@@ -166,7 +166,7 @@ describe("editing a placeholder field clears it from Job.unstated, and that surv
 /*   - fieldOrigins  (transport, to the pre-build review step)         */
 /*   - Job.unstated  (persisted, reaches the Campaign and P2)          */
 /* If a field is "defaulted" in one but not reflected in the other, a  */
-/* consumer of ONE of the two representations sees the wrong answer —  */
+/* consumer of ONE of the two representations sees the wrong answer,  */
 /* invisibly, since nothing throws. The invariant: for every field,    */
 /* origin === "defaulted"  IFF  that field is in Job.unstated.         */
 /* ------------------------------------------------------------------ */
@@ -185,7 +185,7 @@ function assertOriginsAgreeWithUnstated(
     if (origin !== "defaulted") continue;
     expect(
       unstatedSet.has(field),
-      `origin["${field}"] is "defaulted" but "${field}" is missing from Job.unstated — ` +
+      `origin["${field}"] is "defaulted" but "${field}" is missing from Job.unstated, ` +
         `a consumer reading fieldOrigins sees a placeholder while a consumer reading ` +
         `Job.unstated sees nothing wrong`,
     ).toBe(true);
@@ -196,7 +196,7 @@ function assertOriginsAgreeWithUnstated(
     expect(
       origin,
       `"${field}" is in Job.unstated but origins["${field}"] is ${JSON.stringify(origin)}, ` +
-        `not "defaulted" — a consumer reading Job.unstated sees a placeholder while a ` +
+        `not "defaulted", a consumer reading Job.unstated sees a placeholder while a ` +
         `consumer reading fieldOrigins sees a real, stated value`,
     ).toBe("defaulted");
   }
@@ -212,13 +212,13 @@ describe("fieldOrigins and Job.unstated agree on every field (no silent drift)",
     origins: {},
   };
 
-  it("a posting that states almost nothing — every defaulted field agrees with unstated", () => {
+  it("a posting that states almost nothing, every defaulted field agrees with unstated", () => {
     const built = buildJob(minimalDraft);
     expect(built).toBeDefined();
     assertOriginsAgreeWithUnstated(built!.fieldOrigins, built!.job.unstated);
   });
 
-  it("a posting that states everything — nothing is defaulted, nothing is unstated", () => {
+  it("a posting that states everything, nothing is defaulted, nothing is unstated", () => {
     const built = buildJob({
       ...minimalDraft,
       location: "Remote",
@@ -239,10 +239,10 @@ describe("fieldOrigins and Job.unstated agree on every field (no silent drift)",
     expect(built!.job.unstated ?? []).toEqual([]);
   });
 
-  it("postedAt/deadline specifically: absent is silence, not a placeholder — neither origins nor unstated marks them", () => {
+  it("postedAt/deadline specifically: absent is silence, not a placeholder, neither origins nor unstated marks them", () => {
     // UPDATED, not weakened: this test originally caught map.ts pushing
     // "postedAt" into unstated without ever setting origins.postedAt to
-    // "defaulted" — a real, confirmed drift bug (reported and fixed).
+    // "defaulted", a real, confirmed drift bug (reported and fixed).
     //
     // The fix that landed goes further than the one-line patch I suggested:
     // `unstated` is now DERIVED from `origins` by construction
@@ -251,7 +251,7 @@ describe("fieldOrigins and Job.unstated agree on every field (no silent drift)",
     // above now proves unconditionally. Separately, postedAt/deadline were
     // deliberately excluded from "defaulted" entirely: unlike location or
     // employmentType, an absent date gets no substituted placeholder value
-    // (no "Unknown", no best-fit enum) — there is nothing dishonest to flag,
+    // (no "Unknown", no best-fit enum), there is nothing dishonest to flag,
     // so map.ts's own comment states they're "marked in neither map."
     // Verifying that documented behavior directly, since it's exactly the
     // kind of claim worth pinning down with a test rather than a comment.
@@ -267,10 +267,10 @@ describe("fieldOrigins and Job.unstated agree on every field (no silent drift)",
 });
 
 /* ------------------------------------------------------------------ */
-/* employmentTypeRaw — present only when the posting actually said something */
+/* employmentTypeRaw, present only when the posting actually said something */
 /* ------------------------------------------------------------------ */
 
-describe("Job.employmentTypeRaw — emitted only when the posting stated a type", () => {
+describe("Job.employmentTypeRaw, emitted only when the posting stated a type", () => {
   function baseDraft() {
     return {
       source: "test-adapter",
@@ -282,7 +282,7 @@ describe("Job.employmentTypeRaw — emitted only when the posting stated a type"
     };
   }
 
-  it("stated and representable — Raw is present, employmentType is NOT recorded as unstated", () => {
+  it("stated and representable, Raw is present, employmentType is NOT recorded as unstated", () => {
     const built = buildJob({
       ...baseDraft(),
       employmentType: "full-time",
@@ -295,7 +295,7 @@ describe("Job.employmentTypeRaw — emitted only when the posting stated a type"
     expect(built!.job.unstated ?? []).not.toContain("employmentType");
   });
 
-  it("stated but unrepresentable — Raw is present, employmentType falls back and IS recorded as unstated", () => {
+  it("stated but unrepresentable, Raw is present, employmentType falls back and IS recorded as unstated", () => {
     // "Part time" is real posting text our 3-member enum cannot hold.
     const built = buildJob({
       ...baseDraft(),
@@ -305,14 +305,14 @@ describe("Job.employmentTypeRaw — emitted only when the posting stated a type"
     expect(built).toBeDefined();
     expect(built!.job.employmentTypeRaw).toBe("Part time");
     expect(built!.job.unstated ?? []).toContain("employmentType");
-    // Falls back to a real enum member — never invents a 4th category.
+    // Falls back to a real enum member, never invents a 4th category.
     expect(built!.job.employmentType).toBe("full-time");
   });
 
-  it("silent — the posting said nothing, so Raw is entirely absent and employmentType IS unstated", () => {
+  it("silent, the posting said nothing, so Raw is entirely absent and employmentType IS unstated", () => {
     const built = buildJob({ ...baseDraft(), employmentType: undefined, employmentTypeRaw: undefined });
     expect(built).toBeDefined();
-    // Key must be ABSENT, not present-and-undefined — a reader must be able to
+    // Key must be ABSENT, not present-and-undefined, a reader must be able to
     // tell "said nothing" from "said something we couldn't parse" by presence.
     expect("employmentTypeRaw" in built!.job).toBe(false);
     expect(built!.job.unstated ?? []).toContain("employmentType");
@@ -327,12 +327,12 @@ describe("demographic/EEO questions never reach ApplicationForm output", () => {
   it("Greenhouse's demographic_questions block is excluded from form.questions", () => {
     // Sanity check the fixture actually exercises this: real Robinhood data
     // does carry a demographic_questions block (EEO race/gender/veteran/
-    // disability questions) — if this ever stops being true the test below
+    // disability questions), if this ever stops being true the test below
     // would pass vacuously, so we assert the input has teeth first.
     const raw = greenhouseJobDetail as { demographic_questions?: { questions?: unknown[] } };
     expect(
       raw.demographic_questions?.questions?.length ?? 0,
-      "fixture no longer exercises demographic_questions — this test needs a fixture that does",
+      "fixture no longer exercises demographic_questions, this test needs a fixture that does",
     ).toBeGreaterThan(0);
 
     const output = parseGreenhouse();
@@ -341,13 +341,13 @@ describe("demographic/EEO questions never reach ApplicationForm output", () => {
     for (const q of output.form.questions) {
       expect(
         q.category,
-        `question "${q.prompt}" must not be categorized/exposed as demographic — CareerOS must never surface or answer protected-characteristic questions on the candidate's behalf`,
+        `question "${q.prompt}" must not be categorized/exposed as demographic, CareerOS must never surface or answer protected-characteristic questions on the candidate's behalf`,
       ).not.toBe("demographic");
     }
   });
 
   it("excludedSections names the section but never carries the actual EEO question wording or options", () => {
-    // The exclusion is only as strong as what it DOESN'T copy — naming the
+    // The exclusion is only as strong as what it DOESN'T copy, naming the
     // section ("Equal employment opportunity questions") is fine; leaking the
     // individual prompts ("What is your gender identity?") or their answer
     // options back out through excludedSections would defeat the whole point.
@@ -370,7 +370,7 @@ describe("demographic/EEO questions never reach ApplicationForm output", () => {
   });
 
   it("ApplicationQuestionCategory no longer offers \"demographic\" as a value a question can be tagged with", () => {
-    // ApplicationQuestionCategory is NEW in P1 — nothing pre-existing depends
+    // ApplicationQuestionCategory is NEW in P1, nothing pre-existing depends
     // on it, so dropping a member is not an additive-only violation the way it
     // would be for Job/Campaign. Keeping the value around is what let the leak
     // above happen in the first place; this stops it being reintroduced by
@@ -381,12 +381,12 @@ describe("demographic/EEO questions never reach ApplicationForm output", () => {
     ).not.toContain("demographic");
   });
 
-  // Lever's public postings API never exposes application questions at all —
+  // Lever's public postings API never exposes application questions at all,
   // src/lib/intake/adapters/lever.ts always returns unreadableForm() with an
   // empty questions array, and there is no card- or type:"survey"-parsing
   // code anywhere in the intake module yet. So a Lever posting trivially
   // satisfies "no demographic leak" today, but NOT because of a designed
-  // exclusion — there is nothing yet to exclude FROM. This is left as an
+  // exclusion, there is nothing yet to exclude FROM. This is left as an
   // explicit todo rather than a fabricated passing assertion: write the real
   // test once Lever (or paste.ts, for a pasted apply-page card list) gains
   // code that turns a `type: "survey"` card into an ApplicationQuestion.

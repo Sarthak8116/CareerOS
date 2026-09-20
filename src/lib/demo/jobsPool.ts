@@ -6,13 +6,13 @@ import { demoJob } from "@/lib/demo/job";
  * The flagship NVIDIA role (demoJob) plus three contrasting internships so the
  * comparison surfaces real trade-offs. Every requirement reuses the SAME
  * canonical skillKeys as the fit engine (skills.ts) where applicable; unknown
- * skillKeys are intentional — matchSkill returns "none" for them, which is how
+ * skillKeys are intentional, matchSkill returns "none" for them, which is how
  * we model genuine gaps (e.g. web/backend for Stripe, robotics for Tesla).
  *
- * No external calls, no timestamps generated at runtime — all fields are baked.
+ * No external calls, no timestamps generated at runtime, all fields are baked.
  */
 
-/** Microsoft — broad SWE internship. Plays to the candidate's core strengths
+/** Microsoft, broad SWE internship. Plays to the candidate's core strengths
  *  (Python, C, CS degree); nothing exotic. The clean "apply-now" case. */
 const microsoftJob: Job = {
   id: "job_msft_swe",
@@ -30,7 +30,7 @@ const microsoftJob: Job = {
   deadline: "2026-08-30",
   sponsorship: "offered",
   description:
-    "Build features across Microsoft's cloud and developer platforms. Interns own a scoped project end-to-end — design, implement, test, and ship — with a dedicated mentor. Strong generalist software engineering fundamentals matter more than any single stack.",
+    "Build features across Microsoft's cloud and developer platforms. Interns own a scoped project end-to-end, design, implement, test, and ship, with a dedicated mentor. Strong generalist software engineering fundamentals matter more than any single stack.",
   requirements: [
     {
       id: "msft_req_degree",
@@ -45,7 +45,7 @@ const microsoftJob: Job = {
       skillKey: "c_cpp",
     },
     {
-      // Interview-gated fundamental, not something we score from evidence — no skillKey.
+      // Interview-gated fundamental, not something we score from evidence, no skillKey.
       id: "msft_req_dsa",
       text: "Strong data structures and algorithms fundamentals",
       kind: "minimum",
@@ -70,7 +70,7 @@ const microsoftJob: Job = {
   ],
 };
 
-/** Stripe — payments/backend internship. Leans web + backend + distributed
+/** Stripe, payments/backend internship. Leans web + backend + distributed
  *  systems, which the candidate has little public evidence for. The honest
  *  "research-further" case: strong fundamentals, weak stack-specific proof. */
 const stripeJob: Job = {
@@ -141,7 +141,7 @@ const stripeJob: Job = {
   ],
 };
 
-/** Tesla — robotics/autonomy internship. Heavy C++ + low-level debugging
+/** Tesla, robotics/autonomy internship. Heavy C++ + low-level debugging
  *  (which the candidate CAN evidence) plus robotics/controls domain (which
  *  they can't yet). The "build-campaign" case: real overlap + clear stretch. */
 const teslaJob: Job = {

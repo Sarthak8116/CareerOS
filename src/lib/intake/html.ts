@@ -1,14 +1,14 @@
 /**
  * HTML / JSON-LD extraction helpers for job postings.
  *
- * PURE string work — no DOM, no network, no clock. Job descriptions arrive as
+ * PURE string work, no DOM, no network, no clock. Job descriptions arrive as
  * HTML from every ATS, and this module turns that into plain text WITHOUT
  * interpreting any of it.
  *
  * ORDERING IS LOAD-BEARING. Greenhouse double-encodes its description: the
  * JSON string literally contains "&lt;div&gt;", so it must be entity-decoded
  * ONCE before any tag handling. Lever, Ashby and Workday send raw HTML and must
- * NOT be decoded — decoding those would corrupt legitimate text like "A&B" and,
+ * NOT be decoded, decoding those would corrupt legitimate text like "A&B" and,
  * worse, could manufacture markup out of escaped content the employer typed.
  *
  * Nothing here sanitizes. Callers pass the output of `htmlToText` through
@@ -25,7 +25,7 @@ const NAMED_ENTITIES: Record<string, string> = {
   apos: "'",
   nbsp: " ",
   ndash: "–",
-  mdash: "—",
+  mdash: " - ",
   hellip: "…",
   rsquo: "’",
   lsquo: "‘",
@@ -41,7 +41,7 @@ const NAMED_ENTITIES: Record<string, string> = {
  * Decode HTML entities exactly ONCE.
  *
  * Deliberately not applied repeatedly: decoding until stable would turn
- * "&amp;lt;script&gt;" — text an employer legitimately typed to SHOW markup —
+ * "&amp;lt;script&gt;", text an employer legitimately typed to SHOW markup,
  * into live-looking markup. One pass reverses one layer of encoding, which is
  * precisely what Greenhouse applies.
  */
@@ -161,7 +161,7 @@ export function extractJsonLdJobPosting(
     try {
       parsed = JSON.parse(raw);
     } catch {
-      // A malformed block is skipped, not fatal — pages often carry several.
+      // A malformed block is skipped, not fatal, pages often carry several.
       continue;
     }
     const posting = findJobPosting(parsed);
@@ -206,7 +206,7 @@ const HEADING_THEN_LIST =
  * Find every `<ul>`/`<ol>` that sits directly under a heading, paired with that
  * heading's text.
  *
- * Requirements are only ever emitted from a list whose HEADING we recognise —
+ * Requirements are only ever emitted from a list whose HEADING we recognise,
  * we never judge a sentence to decide whether it is a requirement. A list under
  * an unrecognised heading yields nothing, which is the honest result.
  */

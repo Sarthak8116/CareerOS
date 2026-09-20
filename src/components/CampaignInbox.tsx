@@ -78,7 +78,7 @@ export function CampaignInbox({ rows }: { rows: ConversationRow[] }) {
   if (rows.length === 0) {
     return (
       <EmptyState
-        title="No conversations yet — build a campaign"
+        title="No conversations yet, build a campaign"
         body="Once you start a campaign, every outreach thread shows up here in one place."
       />
     );

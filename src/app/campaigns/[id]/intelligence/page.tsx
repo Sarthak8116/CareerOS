@@ -82,7 +82,7 @@ export default function CampaignIntelligencePage() {
         </h1>
         <p className="mt-1 text-sm text-slate-500">
           {job.company}
-          {job.team ? ` · ${job.team}` : ""} — cached research for {job.title}
+          {job.team ? ` · ${job.team}` : ""}, cached research for {job.title}
         </p>
       </div>
 

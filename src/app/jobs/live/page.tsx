@@ -37,12 +37,12 @@ export default function LiveJobPage() {
 
   /**
    * The résumé is rendered to page images HERE, in the browser, and only the
-   * rendered pages are ever uploaded — the PDF itself never leaves the user's
+   * rendered pages are ever uploaded, the PDF itself never leaves the user's
    * machine. See `@/lib/resume/rasterize` for why that must stay true.
    *
    * Rendering happens on selection rather than on submit so the user learns
-   * what CareerOS will actually read — how many pages, and whether any were
-   * left out — before they commit to the analysis, not after.
+   * what CareerOS will actually read, how many pages, and whether any were
+   * left out, before they commit to the analysis, not after.
    */
   async function onResumeFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -173,7 +173,7 @@ export default function LiveJobPage() {
         </div>
         <p className="mt-1 text-sm text-slate-500">
           Upload your résumé (PDF) and paste a real job posting. Your résumé is
-          rendered to page images in your browser — the PDF itself never leaves
+          rendered to page images in your browser, the PDF itself never leaves
           your machine. CareerOS then runs the full analysis and builds a live
           campaign, grounded in your evidence, with no fabricated people or
           numbers.
@@ -191,7 +191,7 @@ export default function LiveJobPage() {
               <code className="rounded bg-amber-100 px-1">.env.local</code>{" "}
               file at the project root and restart the dev server. The exact
               variable name is in the server&apos;s startup error. Your key
-              stays on the server and is never sent to the browser — which is
+              stays on the server and is never sent to the browser, which is
               also why this page does not name it. Meanwhile, the{" "}
               <a href="/demo" className="font-medium underline">demo campaign</a>{" "}
               works with no key.
@@ -302,7 +302,7 @@ export default function LiveJobPage() {
             </p>
             <p className="mt-1 text-sm text-slate-600">
               Reading your résumé pages, parsing the job, and building the
-              campaign. This can take up to a minute or two — the model reasons
+              campaign. This can take up to a minute or two, the model reasons
               through the fit, gaps, and outreach before returning.
             </p>
           </div>

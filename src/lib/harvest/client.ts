@@ -9,7 +9,7 @@ import "server-only";
  * scrubbed from any error text before it can propagate.
  *
  * Harvest is OFF unless BOTH `HARVEST_ENABLED=true` and `APIFY_TOKEN` are set.
- * When it is off, every caller falls back to existing behavior silently —
+ * When it is off, every caller falls back to existing behavior silently,
  * demo mode never touches this module at all.
  */
 
@@ -26,7 +26,7 @@ export const MAX_EMPLOYEES_PER_CAMPAIGN = 25;
  * EXACT STRING MATTERS. The actor validates this against a fixed enum and
  * rejects anything else with a 400. The published docs write it as
  * "$8 per 1000"; the live actor only accepts "$8 per 1k". Verified against the
- * real API — do not "tidy" this string.
+ * real API, do not "tidy" this string.
  * Allowed: "Short ($4 per 1k)" | "Full ($8 per 1k)" | "Full + email search ($12 per 1k)"
  */
 export const EMPLOYEE_SCRAPER_MODE = "Full ($8 per 1k)";
@@ -75,7 +75,7 @@ function getToken(): string {
 
 /**
  * Remove the token from any string before it can reach a log or an error.
- * Defence in depth — we never intentionally put it in one.
+ * Defence in depth, we never intentionally put it in one.
  */
 function scrub(text: string, token: string): string {
   return token ? text.split(token).join("[redacted]") : text;
@@ -91,7 +91,7 @@ export type HarvestActor =
 /**
  * Run one HarvestAPI actor synchronously and return its raw dataset items.
  *
- * The caller is responsible for Zod-validating the result — nothing here trusts
+ * The caller is responsible for Zod-validating the result, nothing here trusts
  * the shape of what comes back, and nothing here interprets the content. All
  * returned text is UNTRUSTED scraped data and must be sanitized before it is
  * rendered or shown to a model.
@@ -167,11 +167,11 @@ export function harvestSafeMessage(err: unknown): string {
       case "disabled":
         return "LinkedIn enrichment is off.";
       case "auth":
-        return "Authentication failed — check APIFY_TOKEN.";
+        return "Authentication failed, check APIFY_TOKEN.";
       case "rate-limited":
-        return "Rate limited by the data provider — try again shortly.";
+        return "Rate limited by the data provider, try again shortly.";
       case "timeout":
-        return "The LinkedIn lookup took too long — try again.";
+        return "The LinkedIn lookup took too long, try again.";
       default:
         return "The LinkedIn lookup failed. Try again shortly.";
     }
@@ -179,8 +179,8 @@ export function harvestSafeMessage(err: unknown): string {
   const raw = err instanceof Error ? err.message : "";
   const safe = scrub(raw, token);
   return /api key|401|authentication/i.test(safe)
-    ? "Authentication failed — check APIFY_TOKEN."
+    ? "Authentication failed, check APIFY_TOKEN."
     : /rate|429/i.test(safe)
-      ? "Rate limited by the data provider — try again shortly."
+      ? "Rate limited by the data provider, try again shortly."
       : "The LinkedIn lookup failed. Try again shortly.";
 }

@@ -9,7 +9,7 @@ import { createCampaignFromJob } from "@/lib/store";
 
 /**
  * Job Comparison table (§5.4). Rows are the categorical comparison dimensions,
- * columns are the cached jobs. Every conclusion is a categorical Level — this
+ * columns are the cached jobs. Every conclusion is a categorical Level, this
  * view never invents compensation numbers or probabilities (build directive
  * §16); where a fact is unknown it is shown as "Unknown", not guessed.
  */

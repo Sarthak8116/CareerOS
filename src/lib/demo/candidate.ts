@@ -2,11 +2,11 @@ import type { Candidate, Evidence } from "@/lib/types";
 
 /**
  * Deterministic synthetic candidate (build directive §18).
- * Undergraduate CS/EE student — Python + C, one systems project, one AI
+ * Undergraduate CS/EE student, Python + C, one systems project, one AI
  * project, GitHub with three relevant repos. Chosen to produce a compelling
  * NVIDIA Systems Software Internship campaign with clear, honest gaps.
  *
- * Every skill/project claim carries an Evidence record with a trust label —
+ * Every skill/project claim carries an Evidence record with a trust label,
  * nothing here is invented beyond what a real resume/GitHub would show.
  */
 
@@ -97,7 +97,7 @@ const evidence: Evidence[] = [
   },
   {
     id: "ev_gpu",
-    claim: "Interested in GPU/parallel computing — no shipped CUDA project yet",
+    claim: "Interested in GPU/parallel computing, no shipped CUDA project yet",
     category: "skill",
     sourceType: "user-confirmation",
     strength: "limited",
@@ -116,7 +116,7 @@ export const demoCandidate: Candidate = {
   degree: "B.S. Computer Science",
   graduationYear: 2026,
   experienceLevel: "student",
-  workAuthorization: "US citizen — no sponsorship required",
+  workAuthorization: "US citizen, no sponsorship required",
   targetRoles: [
     "Software Engineering Intern",
     "Systems Software Intern",

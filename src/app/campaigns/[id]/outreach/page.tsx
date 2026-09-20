@@ -101,7 +101,7 @@ export default function OutreachPage() {
 
       <p className="mt-4 text-sm text-slate-500">
         Each draft is grounded in your evidence and this contact's inferred
-        role. Review carefully —{" "}
+        role. Review carefully,{" "}
         <span className="font-medium text-slate-600">
           nothing is sent without your explicit confirmation
         </span>

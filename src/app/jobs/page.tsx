@@ -54,13 +54,13 @@ export default function JobsPage() {
           Find a job
         </h1>
         <p className="mt-1 text-sm text-slate-500">
-          Paste one job link and CareerOS does the rest — or start from the
+          Paste one job link and CareerOS does the rest, or start from the
           sample role, or paste a description by hand. Every path builds the
           same full, evidence-backed campaign.
         </p>
       </div>
 
-      {/* Section 0 — the headline flow: one link in, a campaign out */}
+      {/* Section 0, the headline flow: one link in, a campaign out */}
       <section className="mt-6">
         <SectionTitle>Start from a job link</SectionTitle>
         <JobLinkIntake
@@ -95,7 +95,7 @@ export default function JobsPage() {
         <Pill className="shrink-0 bg-brand-600 text-white ring-brand-700/20">Live</Pill>
       </a>
 
-      {/* Section A — sample role */}
+      {/* Section A, sample role */}
       <section className="mt-8">
         <SectionTitle>Sample role</SectionTitle>
         {DEMO_JOBS.map((job) => (
@@ -109,7 +109,7 @@ export default function JobsPage() {
         ))}
       </section>
 
-      {/* Section B — import a job. The fallback when a link can't be parsed,
+      {/* Section B, import a job. The fallback when a link can't be parsed,
           and the only route into a login-walled portal. Always available. */}
       <section className="mt-10" id="paste-fallback">
         <SectionTitle>Import a job</SectionTitle>
@@ -124,7 +124,7 @@ export default function JobsPage() {
           onSubmit={(title, company, text) => {
             setBuilding("import");
             const job = jobFromPastedText(title, company, text);
-            // Keep the link the user gave us — they supplied it, so it's theirs.
+            // Keep the link the user gave us, they supplied it, so it's theirs.
             const withUrl = prefill?.url ? { ...job, url: prefill.url } : job;
             // Reuse the same build path; swap the sentinel id for the real one.
             void (async () => {
@@ -228,7 +228,7 @@ function ImportJobForm({
 }: {
   disabled: boolean;
   building: boolean;
-  /** Prefilled from a failed link parse — a guess for the user to confirm. */
+  /** Prefilled from a failed link parse, a guess for the user to confirm. */
   initialTitle?: string;
   initialCompany?: string;
   unverified?: boolean;
@@ -257,7 +257,7 @@ function ImportJobForm({
             promising both would itself be a guess. */}
         {unverified && (
           <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-            We filled in what we could read from the link you pasted — check it
+            We filled in what we could read from the link you pasted, check it
             before you build. Nothing here is saved until you do.
           </p>
         )}

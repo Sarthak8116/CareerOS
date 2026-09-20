@@ -13,7 +13,7 @@ import "server-only";
 
 const BASE = "https://api.elevenlabs.io/v1";
 
-/** "George" — a calm, measured premade voice. Override with ELEVENLABS_VOICE_ID. */
+/** "George", a calm, measured premade voice. Override with ELEVENLABS_VOICE_ID. */
 const DEFAULT_VOICE_ID = "JBFqnCBsd6RMkjVDRZzb";
 const TTS_MODEL = "eleven_flash_v2_5";
 const STT_MODEL = "scribe_v1";
@@ -110,11 +110,11 @@ export function voiceSafeMessage(err: unknown): string {
       case "disabled":
         return "Voice is off. Set ELEVENLABS_API_KEY in .env.local and restart.";
       case "auth":
-        return "Voice authentication failed — check ELEVENLABS_API_KEY.";
+        return "Voice authentication failed, check ELEVENLABS_API_KEY.";
       case "rate-limited":
-        return "The voice service is rate limiting us — try again shortly.";
+        return "The voice service is rate limiting us, try again shortly.";
       case "timeout":
-        return "The voice service took too long — try again.";
+        return "The voice service took too long, try again.";
       default:
         return "The voice service failed. You can still type your answer.";
     }

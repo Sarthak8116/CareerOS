@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
  */
 
 /* ------------------------------------------------------------------ */
-/* Labels — local, so the package's vocabulary lives with its UI        */
+/* Labels, local, so the package's vocabulary lives with its UI        */
 /* ------------------------------------------------------------------ */
 
 const kindLabel: Record<PackageDocument["kind"], string> = {
@@ -57,7 +57,7 @@ const statusStyle: Record<
     text: "Reused from your library",
     className: "bg-violet-50 text-violet-700 ring-violet-600/20",
     sentence:
-      "Pulled from your answer library as-is — it was not written for this posting.",
+      "Pulled from your answer library as-is, it was not written for this posting.",
   },
   "needs-you": {
     text: "Needs you",
@@ -95,19 +95,19 @@ const supportStyle: Record<
  * After the user edits a document, a claim whose sentence is gone is no longer
  * being made and must stop appearing on the honesty surface. Deriving the
  * claim list FROM the content is the only way the two cannot drift; keeping a
- * parallel list would let a deleted sentence stay flagged, or — far worse — a
+ * parallel list would let a deleted sentence stay flagged, or, far worse, a
  * flagged sentence survive an edit that removed only its flag.
  */
 export function claimsStillMade(
   content: string,
   claims: PackageClaim[],
 ): PackageClaim[] {
-  /* `includes` is SUBSTRING matching, and that imprecision is deliberate —
+  /* `includes` is SUBSTRING matching, and that imprecision is deliberate,
      do not "fix" this to an exact sentence match.
      If a removed long sentence happens to contain a shorter claim's text, the
      shorter claim is still treated as made, so the UI keeps showing its flag.
-     That over-reports. The opposite error — dropping a claim that is in fact
-     still asserted — would silently let an unbacked sentence through the
+     That over-reports. The opposite error, dropping a claim that is in fact
+     still asserted, would silently let an unbacked sentence through the
      export gate. A spurious flag costs the user one click; a missed one ships
      an invented claim about a real person. Exact matching would invert that
      error direction, which is why the loose test is the safe one. */
@@ -115,7 +115,7 @@ export function claimsStillMade(
 }
 
 /* ------------------------------------------------------------------ */
-/* One document — reviewable, editable, and honest about its origin     */
+/* One document, reviewable, editable, and honest about its origin     */
 /* ------------------------------------------------------------------ */
 
 export function DocumentCard({
@@ -165,7 +165,7 @@ export function DocumentCard({
     if (content === doc.content) {
       /* The sentence sits inside a longer one; cutting it would mangle a
          sentence the user never chose to touch. Say so instead of doing
-         nothing visible — and leave the claim standing, so it still blocks
+         nothing visible, and leave the claim standing, so it still blocks
          export until the user resolves it for real. */
       setUnremovable(index);
       return;
@@ -174,7 +174,7 @@ export function DocumentCard({
     onChange({
       ...doc,
       content,
-      /* Every claim is re-derived from the new content — including the one
+      /* Every claim is re-derived from the new content, including the one
          just removed. If its sentence somehow still appears elsewhere, it is
          still being made and must stay flagged; pre-filtering it out would
          hide a claim the document still asserts. */
@@ -277,7 +277,7 @@ export function DocumentCard({
 
           {editedHere && (
             <p className="mt-3 text-xs text-slate-500">
-              You edited this. Anything you wrote yourself is yours — CareerOS
+              You edited this. Anything you wrote yourself is yours, CareerOS
               hasn&apos;t checked it against your evidence.
             </p>
           )}
@@ -296,7 +296,7 @@ export function DocumentCard({
 }
 
 /* ------------------------------------------------------------------ */
-/* Claims — every factual sentence, and what stands behind it           */
+/* Claims, every factual sentence, and what stands behind it           */
 /* ------------------------------------------------------------------ */
 
 function ClaimList({
@@ -388,18 +388,18 @@ function ClaimRow({
               "accept all", no multi-select and no path that resolves more than
               one sentence per click. These sentences were drafted by a model,
               not written by the user, so attesting to one is a judgement about
-              a specific sentence — which is why each button names the sentence
+              a specific sentence, which is why each button names the sentence
               it acts on, and why the sentence is rendered in full above it. A
               bulk control would turn ten judgements into one unread click. */}
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <Button
               size="sm"
               variant="secondary"
-              aria-label={`This is true — it's mine: “${claim.text}”`}
+              aria-label={`This is true, it's mine: “${claim.text}”`}
               onClick={() => onResolve("own")}
             >
               <UserCheck className="h-4 w-4" aria-hidden="true" />
-              This is true — it&apos;s mine
+              This is true, it&apos;s mine
             </Button>
             <Button
               size="sm"
@@ -413,8 +413,8 @@ function ClaimRow({
           </div>
           {unremovable && (
             <p className="mt-2 text-sm text-rose-800" role="alert">
-              This sentence isn&apos;t a whole sentence in the document — it sits
-              inside a longer one — so removing it on its own would leave the rest
+              This sentence isn&apos;t a whole sentence in the document, it sits
+              inside a longer one, so removing it on its own would leave the rest
               mangled. Edit the text directly to change it.
             </p>
           )}
@@ -430,8 +430,8 @@ function ClaimRow({
 /* ------------------------------------------------------------------ */
 
 /**
- * Split content into whole units — sentences, and the line breaks between
- * them — such that `units.join("")` reproduces the input exactly.
+ * Split content into whole units, sentences, and the line breaks between
+ * them, such that `units.join("")` reproduces the input exactly.
  *
  * Exported for testing: the reconstruction property is what makes whole-unit
  * removal safe, and it is worth asserting directly.
@@ -450,7 +450,7 @@ export function splitUnits(content: string): string[] {
  * substring of a LONGER sentence, removing the short claim rips its words out
  * of the middle of the long one. The long sentence is left mangled, and because
  * its text no longer matches its claim, `claimsStillMade` silently drops that
- * claim too — so corrupted prose lands in the document the user sends an
+ * claim too, so corrupted prose lands in the document the user sends an
  * employer, with nothing on the honesty surface covering it.
  *
  * A boundary check on the occurrence is NOT sufficient either, and that was a
@@ -461,7 +461,7 @@ export function splitUnits(content: string): string[] {
  * inside one.
  *
  * WHEN THE CLAIM IS NOT A WHOLE UNIT, NOTHING IS REMOVED. There is deliberately
- * no substring fallback "so that it works" — partial removal is precisely the
+ * no substring fallback "so that it works", partial removal is precisely the
  * corruption being fixed here. The content comes back unchanged, the caller
  * detects that and tells the user, and the claim stays unresolved and keeps
  * blocking export. Silent partial mangling must not be reachable.

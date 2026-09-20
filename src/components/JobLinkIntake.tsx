@@ -20,13 +20,13 @@ import { ParsedJobReview } from "@/components/ParsedJobReview";
 import { ApplicationFormReview } from "@/components/ApplicationFormReview";
 
 /**
- * Job-link intake — the headline flow. Paste one link, review what we read,
+ * Job-link intake, the headline flow. Paste one link, review what we read,
  * and build the campaign.
  *
  * The review step is not ceremony: a parsed posting is a claim, not a fact,
  * so the user sees and corrects it before anything is saved (§11). When the
  * parse fails we say so plainly and hand the user to the paste form with
- * whatever we did manage to extract — the fallback is the honest path, not a
+ * whatever we did manage to extract, the fallback is the honest path, not a
  * punishment.
  */
 
@@ -59,7 +59,7 @@ type Phase =
   | { kind: "fetching" }
   | { kind: "parsed"; parsed: Parsed }
   | { kind: "failed"; failure: Failure }
-  /* Carries the parsed job so the review stays on screen while it builds —
+  /* Carries the parsed job so the review stays on screen while it builds,
      the user should still be able to see what they just confirmed. */
   | { kind: "building"; parsed: Parsed };
 
@@ -85,7 +85,7 @@ export function JobLinkIntake({
   const [shapeError, setShapeError] = useState<string | null>(null);
   const [adapters, setAdapters] = useState<{ key: string; label: string }[]>([]);
 
-  /* Capability list only — never a gate. Any https URL is accepted, and an
+  /* Capability list only, never a gate. Any https URL is accepted, and an
      unsupported one fails honestly at POST time. */
   useEffect(() => {
     let active = true;
@@ -253,7 +253,7 @@ export function JobLinkIntake({
           )}
 
           {/* Coverage is stated at its real size. Four ATSs read reliably;
-              everything else falls to JSON-LD, which often isn't there — so
+              everything else falls to JSON-LD, which often isn't there, so
               paste is the honest fallback, not a footnote. */}
           {adapterLabels(adapters).length > 0 && phase.kind === "idle" && (
             <p className="mt-2.5 text-xs text-slate-400">
@@ -266,7 +266,7 @@ export function JobLinkIntake({
         {phase.kind === "fetching" && (
           <p className="mt-4 text-sm text-slate-500">
             Fetching the posting and reading the application form. This is a single
-            request — usually a couple of seconds.
+            request, usually a couple of seconds.
           </p>
         )}
       </Card>
@@ -351,7 +351,7 @@ function ParsedResult({
             disabled={disabled || !canBuild}
             onClick={() => onBuild(parsed)}
           >
-            Looks right — build my campaign
+            Looks right, build my campaign
             <ArrowRight className="h-4 w-4" />
           </Button>
           <Button type="button" variant="ghost" onClick={onDiscard} disabled={disabled}>
@@ -369,7 +369,7 @@ function ParsedResult({
 }
 
 /* ---------------------------------------------------------------- */
-/* Failure — say what happened, then offer the way through            */
+/* Failure, say what happened, then offer the way through            */
 /* ---------------------------------------------------------------- */
 
 function FailureState({
@@ -396,7 +396,7 @@ function FailureState({
         <p className="mt-1 text-sm leading-relaxed text-amber-800">
           {failure.fallback === "paste-questions"
             ? "You can still build the campaign by pasting the posting below."
-            : "Pasting the description works just as well — it's the same campaign, built from text you control."}
+            : "Pasting the description works just as well, it's the same campaign, built from text you control."}
           {prefilled && " We've filled in what we could guess from the link; check it before you build."}
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-3">

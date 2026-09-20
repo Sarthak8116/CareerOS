@@ -15,7 +15,7 @@ import {
 import { Button, Pill } from "@/components/ui/primitives";
 
 /**
- * Onboarding overview — DEMO MODE.
+ * Onboarding overview, DEMO MODE.
  * A 5-step checklist. Every step is pre-satisfied with deterministic demo
  * data (nothing to actually connect), so each shows a "Demo data loaded" pill.
  * Steps with their own sub-route link there; the rest are informational.
@@ -36,7 +36,7 @@ const steps = [
   {
     icon: Mail,
     title: "Gmail",
-    body: "Connected for approved outreach — messages only send with your OK.",
+    body: "Connected for approved outreach, messages only send with your OK.",
     href: null,
   },
   {
@@ -77,7 +77,7 @@ export default function Onboarding() {
           </h1>
           <p className="mt-2 text-base leading-relaxed text-slate-600">
             Your sample profile is ready. Here&apos;s everything CareerOS uses to
-            build evidence-backed campaigns — all pre-loaded for the demo.
+            build evidence-backed campaigns, all pre-loaded for the demo.
           </p>
         </div>
 
@@ -131,7 +131,7 @@ export default function Onboarding() {
 
         <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
           <p className="text-sm text-slate-400">
-            Everything&apos;s optional in the demo — you can dive in now.
+            Everything&apos;s optional in the demo, you can dive in now.
           </p>
           <Button
             size="lg"

@@ -13,7 +13,7 @@ import path from "node:path";
  *     provider key becomes reachable from a client bundle and nothing else
  *     in the suite notices.
  *  2. Everything else is PURE. A `new Date()` or a `Math.random()` slipped
- *     into the builder would not fail a test — it would just make packages
+ *     into the builder would not fail a test, it would just make packages
  *     stop being reproducible, quietly.
  */
 

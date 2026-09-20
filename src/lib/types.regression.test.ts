@@ -25,14 +25,14 @@ import { getCampaignProvider } from "@/lib/providers/ai";
  *    required/optional-ness and the same underlying zod type
  *  - every enum keeps exactly its current set of values (no silent rename,
  *    removal, or narrowing)
- *  - any BRAND NEW top-level field must be optional — a new required field
+ *  - any BRAND NEW top-level field must be optional, a new required field
  *    would break every caller that doesn't know about it yet (the store's
  *    localStorage-persisted campaigns, the demo fixtures, etc.)
  *  - every already-committed fixture (the demo jobs, the seeded NVIDIA demo
- *    campaign) still parses to an object identical to its input — nothing is
+ *    campaign) still parses to an object identical to its input, nothing is
  *    silently dropped, coerced, or defaulted differently
  *
- * If this file fails after an intake change, the failure IS the finding —
+ * If this file fails after an intake change, the failure IS the finding,
  * report it back to coder-intake rather than editing the baseline to match.
  * The one exception is a deliberate, reviewed contract change to Job/Campaign
  * themselves, in which case the baseline below should be updated in the same
@@ -95,13 +95,13 @@ function assertAdditiveOnly(
     if (!(key in baseline)) {
       expect(
         actual.optional,
-        `new field "${key}" must be optional — a required addition breaks every existing caller`,
+        `new field "${key}" must be optional, a required addition breaks every existing caller`,
       ).toBe(true);
     }
   }
 }
 
-describe("Job schema — additivity baseline (frozen from today's types.ts)", () => {
+describe("Job schema, additivity baseline (frozen from today's types.ts)", () => {
   const jobBaseline: Record<string, FieldShape> = {
     id: { optional: false, typeName: "ZodString" },
     source: { optional: false, typeName: "ZodString" },
@@ -138,7 +138,7 @@ describe("Job schema — additivity baseline (frozen from today's types.ts)", ()
   });
 });
 
-describe("Campaign schema — additivity baseline (frozen from today's types.ts)", () => {
+describe("Campaign schema, additivity baseline (frozen from today's types.ts)", () => {
   const campaignBaseline: Record<string, FieldShape> = {
     id: { optional: false, typeName: "ZodString" },
     candidateId: { optional: false, typeName: "ZodString" },
@@ -170,15 +170,15 @@ describe("Campaign schema — additivity baseline (frozen from today's types.ts)
 });
 
 /**
- * P2 APPLICATION PACKAGE — additivity baseline, frozen from the shape landed
+ * P2 APPLICATION PACKAGE, additivity baseline, frozen from the shape landed
  * for P2 (see `careeros/contract/p2-application-package`). `ApplicationPackage`,
  * `PackageDocument`, and `PackageClaim` are brand new in this phase, so there
- * is nothing from an EARLIER phase to protect here — this baseline instead
+ * is nothing from an EARLIER phase to protect here, this baseline instead
  * protects P3 and onward from silently renaming, retyping, or narrowing what
  * P2 shipped. The same additive-only rule applies: a new top-level field must
  * be optional; nothing already here may be renamed, removed, or retyped.
  */
-describe("PackageClaim schema — additivity baseline (frozen from P2)", () => {
+describe("PackageClaim schema, additivity baseline (frozen from P2)", () => {
   const packageClaimBaseline: Record<string, FieldShape> = {
     text: { optional: false, typeName: "ZodString" },
     support: {
@@ -194,7 +194,7 @@ describe("PackageClaim schema — additivity baseline (frozen from P2)", () => {
   });
 });
 
-describe("PackageDocument schema — additivity baseline (frozen from P2)", () => {
+describe("PackageDocument schema, additivity baseline (frozen from P2)", () => {
   const packageDocumentBaseline: Record<string, FieldShape> = {
     kind: {
       optional: false,
@@ -216,7 +216,7 @@ describe("PackageDocument schema — additivity baseline (frozen from P2)", () =
   });
 });
 
-describe("ApplicationPackage schema — additivity baseline (frozen from P2)", () => {
+describe("ApplicationPackage schema, additivity baseline (frozen from P2)", () => {
   const applicationPackageBaseline: Record<string, FieldShape> = {
     campaignId: { optional: false, typeName: "ZodString" },
     jobId: { optional: false, typeName: "ZodString" },
@@ -236,7 +236,7 @@ describe("ApplicationPackage schema — additivity baseline (frozen from P2)", (
     assertAdditiveOnly(applicationPackageBaseline, describeShape(ApplicationPackage.shape));
   });
 
-  it("completeness is restricted to 'complete' | 'partial' — never a broader label", () => {
+  it("completeness is restricted to 'complete' | 'partial', never a broader label", () => {
     // `completeness` is DERIVED (see the P2 contract) and must never widen to
     // include e.g. an asserted "done" state that bypasses derivation. Locking
     // the enum here means a loosened definition fails this file, not silently

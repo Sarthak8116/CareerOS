@@ -4,8 +4,8 @@
  * Reusable answer library + autofill review UI (§5.9).
  *
  * Two halves:
- *  1. The library — editable Q&A cards the candidate curates once and reuses.
- *  2. Autofill preview — takes a mock application's questions and shows which
+ *  1. The library, editable Q&A cards the candidate curates once and reuses.
+ *  2. Autofill preview, takes a mock application's questions and shows which
  *     saved answer WOULD populate each one, as a read-only review screen. This
  *     is deliberately review-only: the point is to demonstrate that nothing is
  *     ever auto-submitted. The candidate always sees and edits before sending.
@@ -41,7 +41,7 @@ const MOCK_APPLICATION = {
 
 /* ------------------------------------------------------------------ */
 /* Lightweight question similarity (token overlap + tag hints).        */
-/* No fake precision — used only to pick a suggested match to REVIEW.  */
+/* No fake precision, used only to pick a suggested match to REVIEW.  */
 /* ------------------------------------------------------------------ */
 
 const STOP = new Set([
@@ -208,7 +208,7 @@ function NewAnswerForm({
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
             rows={4}
-            placeholder="Write it in your own words — you can edit it any time."
+            placeholder="Write it in your own words, you can edit it any time."
             className="w-full resize-y rounded-xl border border-slate-200 p-3 text-sm text-slate-800 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
           />
         </div>
@@ -255,7 +255,7 @@ function AutofillPreview({ answers }: { answers: ApplicationAnswer[] }) {
             Autofill preview
           </span>
         }
-        subtitle={`${MOCK_APPLICATION.company} · ${MOCK_APPLICATION.role} — ${filled} of ${rows.length} fields matched from your library`}
+        subtitle={`${MOCK_APPLICATION.company} · ${MOCK_APPLICATION.role}, ${filled} of ${rows.length} fields matched from your library`}
       />
 
       <div
@@ -264,7 +264,7 @@ function AutofillPreview({ answers }: { answers: ApplicationAnswer[] }) {
       >
         <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
         <span>
-          This is a review preview only. Nothing is submitted — you would confirm
+          This is a review preview only. Nothing is submitted, you would confirm
           and edit every field on the real application before sending.
         </span>
       </div>
@@ -294,7 +294,7 @@ function AutofillPreview({ answers }: { answers: ApplicationAnswer[] }) {
               </div>
             ) : (
               <p className="mt-2 text-sm text-slate-500">
-                No saved answer matched — you would fill this one in manually.
+                No saved answer matched, you would fill this one in manually.
               </p>
             )}
           </li>
@@ -311,7 +311,7 @@ function AutofillPreview({ answers }: { answers: ApplicationAnswer[] }) {
 export function AnswerLibrary() {
   const [answers, setAnswers] = React.useState<ApplicationAnswer[]>([]);
 
-  // Load from localStorage after mount (SSR-safe — store guards window).
+  // Load from localStorage after mount (SSR-safe, store guards window).
   React.useEffect(() => {
     setAnswers(getAnswers());
   }, []);

@@ -5,7 +5,7 @@ import type { PackageDocumentKind } from "@/lib/types";
  *
  * WHY THIS MODULE EXISTS: `folderName` and every `fileName` derive from the job
  * title and company, which came off a SCRAPED POSTING and are untrusted. JSZip
- * does not sanitize entry names — handed "../../etc/evil" it writes exactly
+ * does not sanitize entry names, handed "../../etc/evil" it writes exactly
  * that, producing a Zip Slip archive. Modern extractors refuse traversal, but
  * that is THEIR defence, not ours: we must not generate the malicious archive
  * in the first place.
@@ -14,7 +14,7 @@ import type { PackageDocumentKind } from "@/lib/types";
  * untrusted input; everything else (path separators, dots, colons, drive
  * letters, NUL, RTL overrides, whitespace) collapses to a single "-". Dots are
  * dropped entirely rather than "carefully handled", which is what makes ".."
- * impossible to express — extensions are appended by US, from a literal, after
+ * impossible to express, extensions are appended by US, from a literal, after
  * sanitization.
  *
  * Non-ASCII letters do not survive ("Renée" → "Ren-e"). That is a deliberate
@@ -77,7 +77,7 @@ export interface NamedJob {
   company: string;
 }
 
-/** "NVIDIA-Systems-Software-Intern-Summer-2026" — one folder, no separators. */
+/** "NVIDIA-Systems-Software-Intern-Summer-2026", one folder, no separators. */
 export function packageFolderName(job: NamedJob): string {
   return sanitizeSegment(
     `${job.company} ${job.title}`,
@@ -102,7 +102,7 @@ export function documentFileName(kind: PackageDocumentKind, job: NamedJob): stri
  * Last line of defence before anything is written into an archive.
  *
  * Every entry path is built from the helpers above, so this should never
- * throw — which is exactly why it is worth asserting. A future edit that
+ * throw, which is exactly why it is worth asserting. A future edit that
  * interpolates a raw title into a path fails here rather than shipping a
  * traversal archive to a user.
  */

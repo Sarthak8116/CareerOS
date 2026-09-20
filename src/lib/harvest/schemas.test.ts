@@ -11,11 +11,11 @@ import companyLive from "@/lib/harvest/__fixtures__/company-live.json";
 import posts from "@/lib/harvest/__fixtures__/posts.json";
 
 /**
- * Boundary-validation tests. No live calls — everything runs off recorded
+ * Boundary-validation tests. No live calls, everything runs off recorded
  * fixtures that include deliberately malformed records.
  */
 
-describe("parseItems — boundary validation", () => {
+describe("parseItems, boundary validation", () => {
   it("keeps well-formed profiles and drops records with no linkedinUrl", () => {
     const { valid, dropped } = parseItems(HarvestProfile, employees);
 
@@ -29,7 +29,7 @@ describe("parseItems — boundary validation", () => {
     );
   });
 
-  it("does not throw on malformed input — invalid records are dropped", () => {
+  it("does not throw on malformed input, invalid records are dropped", () => {
     expect(() =>
       parseItems(HarvestProfile, [null, 42, "nope", {}, { linkedinUrl: "" }]),
     ).not.toThrow();
@@ -67,7 +67,7 @@ describe("parseItems — boundary validation", () => {
     expect(valid[0].phone).toBeNull();
   });
 
-  it("drops posts with empty content — nothing to ground on", () => {
+  it("drops posts with empty content, nothing to ground on", () => {
     const { valid, dropped } = parseItems(HarvestPost, posts);
     expect(valid).toHaveLength(2);
     expect(dropped).toBe(1);
@@ -76,7 +76,7 @@ describe("parseItems — boundary validation", () => {
 });
 
 /**
- * REGRESSION — captured from a real `linkedin-company` response on 2026-09-19.
+ * REGRESSION, captured from a real `linkedin-company` response on 2026-09-19.
  *
  * The published docs are wrong in two ways that silently dropped 100% of
  * records until a live smoke test caught it:

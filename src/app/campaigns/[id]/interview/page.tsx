@@ -90,7 +90,7 @@ export default function CampaignInterviewPage() {
         </h1>
         <p className="mt-1 text-sm text-slate-500">
           {job.company}
-          {job.team ? ` · ${job.team}` : ""} — practice one question at a time
+          {job.team ? ` · ${job.team}` : ""}, practice one question at a time
           for {job.title}. Feedback is qualitative, grounded in your evidence.
         </p>
       </div>

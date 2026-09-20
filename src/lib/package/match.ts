@@ -3,7 +3,7 @@
  *
  * Two places need to ask "do these two pieces of text refer to the same
  * thing?": pairing a saved answer with a form question, and pairing a piece of
- * evidence with a job requirement. Neither is a claim about the world — a miss
+ * evidence with a job requirement. Neither is a claim about the world, a miss
  * costs the user a "you must write this" note, which is honest. An over-match
  * is the expensive failure (it would present a stored answer as if it belonged
  * to a question nobody asked), so the thresholds are deliberately strict and
@@ -34,7 +34,7 @@ export function tokenize(text: string): string[] {
     .filter((word) => word.length >= 3 && !STOPWORDS.has(word));
 }
 
-/** Whitespace/punctuation-insensitive equality — the unambiguous case. */
+/** Whitespace/punctuation-insensitive equality, the unambiguous case. */
 export function normalizeForEquality(text: string): string {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }

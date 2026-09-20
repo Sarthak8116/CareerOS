@@ -6,11 +6,11 @@
  * A small localStorage-backed store for the questions candidates get asked over
  * and over on job applications ("Why do you want to work here?", work
  * authorization, etc.). Saving an answer once lets the autofill review flow
- * pre-populate future applications — but the candidate ALWAYS reviews before
+ * pre-populate future applications, but the candidate ALWAYS reviews before
  * anything is submitted. Nothing here submits an application.
  *
  * Demo-mode rules (build directive §18):
- *  - Deterministic ids via slugId; NO new Date() — updatedAt is a fixed string.
+ *  - Deterministic ids via slugId; NO new Date(), updatedAt is a fixed string.
  *  - Seeded answers are grounded in demoCandidate and honest. They are drafts
  *    the candidate is expected to edit, never fabricated experience.
  */
@@ -28,7 +28,7 @@ const SEED_UPDATED_AT = "2026-06-01";
 const AnswerList = z.array(ApplicationAnswer);
 
 /* ------------------------------------------------------------------ */
-/* Seed data — grounded in demoCandidate, drafted honestly.            */
+/* Seed data, grounded in demoCandidate, drafted honestly.            */
 /* ------------------------------------------------------------------ */
 
 const c = demoCandidate;
@@ -38,11 +38,11 @@ const SEED: ApplicationAnswer[] = [
     id: slugId("ans", "why-work-here"),
     question: "Why do you want to work here?",
     answer:
-      "I'm drawn to teams working on systems and AI infrastructure — the space " +
+      "I'm drawn to teams working on systems and AI infrastructure, the space " +
       "where my cache simulator and from-scratch neural-network library both " +
       "come from. I'd like to spend an internship going deep on performance-" +
       "critical software alongside engineers who do this full time. (Edit this " +
-      "per company — name the specific product or team that pulled you in.)",
+      "per company, name the specific product or team that pulled you in.)",
     tags: ["motivation", "cover-letter"],
     updatedAt: SEED_UPDATED_AT,
   },
@@ -52,7 +52,7 @@ const SEED: ApplicationAnswer[] = [
     answer:
       "I built a CPU cache simulator in C that models set associativity and " +
       "several replacement policies, then validated it against reference traces. " +
-      "The hardest part was reasoning about eviction edge cases — I ended up " +
+      "The hardest part was reasoning about eviction edge cases, I ended up " +
       "writing targeted tests for each policy so I could trust the hit-rate " +
       "numbers it reported. It's on my GitHub (" +
       (c.links.github ?? "github profile") +
@@ -83,7 +83,7 @@ const SEED: ApplicationAnswer[] = [
     answer:
       "About one to two years of hands-on C through systems coursework and " +
       "projects (a cache simulator and a memory allocator). My C++ exposure is " +
-      "more limited — one semester of a systems course. I'd describe C as a " +
+      "more limited, one semester of a systems course. I'd describe C as a " +
       "working strength and C++ as still developing.",
     tags: ["skills", "experience"],
     updatedAt: SEED_UPDATED_AT,
@@ -94,7 +94,7 @@ const SEED: ApplicationAnswer[] = [
     answer:
       "Getting to the bottom of how systems actually behave. When I built my " +
       "neural-network training library from scratch in NumPy, I wanted to " +
-      "understand backprop rather than call a framework — that same instinct " +
+      "understand backprop rather than call a framework, that same instinct " +
       "shows up in my systems work. (Keep this honest and specific to you.)",
     tags: ["behavioral", "strengths"],
     updatedAt: SEED_UPDATED_AT,
@@ -119,7 +119,7 @@ function read(): ApplicationAnswer[] {
     }
     const parsed = AnswerList.safeParse(JSON.parse(raw));
     if (!parsed.success) {
-      // Corrupt/invalid stored data — reset to seed rather than throw.
+      // Corrupt/invalid stored data, reset to seed rather than throw.
       write(SEED);
       return SEED;
     }
@@ -135,7 +135,7 @@ function write(answers: ApplicationAnswer[]): void {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
   } catch {
-    // Storage full / unavailable — non-fatal in demo mode.
+    // Storage full / unavailable, non-fatal in demo mode.
   }
 }
 

@@ -26,7 +26,7 @@ const DETECTED_REPOS = [
   {
     name: "cachesim",
     language: "C",
-    summary: "CPU cache simulator — associativity + replacement policies",
+    summary: "CPU cache simulator, associativity + replacement policies",
   },
   {
     name: "neural-mini",
@@ -69,7 +69,7 @@ export default function ConnectGithub() {
         <p className="mt-5 text-base leading-relaxed text-slate-600">
           In the real app, this reads your public repositories to build
           source-backed evidence for your skills. In this demo,{" "}
-          <span className="font-medium text-slate-800">nothing connects</span> —
+          <span className="font-medium text-slate-800">nothing connects</span>,
           clicking below just reveals the sample data we&apos;d detect.
         </p>
       </div>
@@ -81,7 +81,7 @@ export default function ConnectGithub() {
               <ShieldCheck className="h-6 w-6" />
             </div>
             <p className="mt-4 text-sm font-medium text-slate-800">
-              Mock connection — no real OAuth
+              Mock connection, no real OAuth
             </p>
             <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">
               This button does not open GitHub, request a token, or send any

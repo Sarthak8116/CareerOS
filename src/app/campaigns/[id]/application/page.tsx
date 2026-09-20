@@ -58,7 +58,7 @@ export default function ApplicationStudioPage() {
    *
    * This page used to ground everything in `demoCandidate`, which meant a real
    * user was shown claim verification and resume recommendations computed
-   * against SOMEONE ELSE'S evidence — the honesty surface asserting things
+   * against SOMEONE ELSE'S evidence, the honesty surface asserting things
    * about a different person and calling it their check. Never reintroduce a
    * demo fallback here; `getProfile()` already falls back to one internally,
    * once, in the one place that owns that decision.
@@ -150,7 +150,7 @@ export default function ApplicationStudioPage() {
    * Assemble the package.
    *
    * The live draft is best-effort: a 503 (no key) or any failure is the
-   * SUPPORTED path, not an error — `buildApplicationPackage` then assembles
+   * SUPPORTED path, not an error, `buildApplicationPackage` then assembles
    * the letter from the evidence graph instead. Which of the two happened is
    * reported to the user rather than glossed over, because "a model wrote
    * this" and "your own evidence was assembled into this" are different
@@ -171,7 +171,7 @@ export default function ApplicationStudioPage() {
       });
       if (res.ok) {
         const body: unknown = await res.json();
-        /* Validated at the boundary — a malformed draft is dropped rather
+        /* Validated at the boundary, a malformed draft is dropped rather
            than rendered, and we fall back to the deterministic letter. */
         const parsed = CoverLetterDraft.safeParse(
           (body as { draft?: unknown })?.draft,
@@ -179,7 +179,7 @@ export default function ApplicationStudioPage() {
         if (parsed.success) coverLetter = parsed.data;
       }
     } catch {
-      /* Offline or route unreachable — deterministic letter, same as no key. */
+      /* Offline or route unreachable, deterministic letter, same as no key. */
     }
 
     try {
@@ -203,13 +203,13 @@ export default function ApplicationStudioPage() {
     }
   }, [campaign, candidate]);
 
-  /** Download the .zip the user just reviewed — not a freshly rebuilt one. */
+  /** Download the .zip the user just reviewed, not a freshly rebuilt one. */
   const exportZip = useCallback(async () => {
     if (!pkg) return;
     setExporting(true);
     setExportError(undefined);
     /* Declared OUT here on purpose. Held inside the try, a failure anywhere
-       after createObjectURL — the anchor click, the DOM insert — would skip
+       after createObjectURL, the anchor click, the DOM insert, would skip
        the revoke and leak the blob for the life of the page. That blob holds
        the user's cover letter and personal information, so it is their data
        left in memory, not just a handle. `finally` revokes it on every path. */
@@ -276,7 +276,7 @@ export default function ApplicationStudioPage() {
           Application studio
         </h1>
         <p className="mt-1 text-sm text-slate-500">
-          Tailoring your resume for {job.title} at {job.company} — every rewrite
+          Tailoring your resume for {job.title} at {job.company}, every rewrite
           traced to your real evidence.
         </p>
       </header>
@@ -301,7 +301,7 @@ export default function ApplicationStudioPage() {
             {origin !== "none" && (
               <p className="mb-4 text-sm text-slate-500">
                 {origin === "model"
-                  ? "The cover letter was drafted by the model, then every sentence was graded against your evidence — the grading below is what counts, not the drafting."
+                  ? "The cover letter was drafted by the model, then every sentence was graded against your evidence, the grading below is what counts, not the drafting."
                   : "The cover letter was assembled from your evidence rather than written by a model."}
               </p>
             )}
@@ -321,7 +321,7 @@ export default function ApplicationStudioPage() {
             />
             <p className="text-sm text-slate-600">
               You&apos;ll see each document, what it claims, and what CareerOS
-              could not produce — before anything is exported.
+              could not produce, before anything is exported.
             </p>
             {buildError && (
               <p className="mt-3 text-sm text-rose-700" role="alert">

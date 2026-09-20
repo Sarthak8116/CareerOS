@@ -17,12 +17,12 @@ import { Button, ButtonLink, Card, Pill } from "@/components/ui/primitives";
  *
  * SAFETY: No real OAuth. "Connect" only flips local state to a simulated
  * "connected" view. The honest explanation below describes how the REAL app
- * would use Gmail — draft/send only with explicit per-message approval —
+ * would use Gmail, draft/send only with explicit per-message approval,
  * but in this demo nothing is authorized, sent, or transmitted.
  */
 
 const GUARANTEES = [
-  "Outreach is only ever drafted — never sent without your explicit approval.",
+  "Outreach is only ever drafted, never sent without your explicit approval.",
   "Every message shows its evidence before you approve it.",
   "You can edit or discard any draft. Nothing leaves your outbox silently.",
 ];
@@ -63,7 +63,7 @@ export default function ConnectGmail() {
           <span className="font-medium text-slate-800">
             only to draft and send outreach with your explicit approval
           </span>{" "}
-          — one message at a time, never in bulk, never automatically. In this
+         , one message at a time, never in bulk, never automatically. In this
           demo it&apos;s fully simulated: no account is linked and no email can
           be sent.
         </p>
@@ -97,7 +97,7 @@ export default function ConnectGmail() {
               <ShieldCheck className="h-6 w-6" />
             </div>
             <p className="mt-4 text-sm font-medium text-slate-800">
-              Mock connection — no real OAuth
+              Mock connection, no real OAuth
             </p>
             <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">
               This button does not open Google, request a token, or send any
@@ -118,7 +118,7 @@ export default function ConnectGmail() {
             <div>
               <span className="text-sm font-semibold">Connected (demo)</span>
               <p className="text-sm font-normal text-slate-500">
-                Simulated only — no inbox is linked and no email can be sent.
+                Simulated only, no inbox is linked and no email can be sent.
               </p>
             </div>
           </div>

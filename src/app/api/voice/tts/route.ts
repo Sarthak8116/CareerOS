@@ -10,7 +10,7 @@ import { liveModeAvailable } from "@/lib/live/nemotron";
 
 export const runtime = "nodejs";
 
-/** GET — which spoken-interview capabilities are configured? */
+/** GET, which spoken-interview capabilities are configured? */
 export function GET() {
   return NextResponse.json({ voice: voiceAvailable(), grading: liveModeAvailable() });
 }

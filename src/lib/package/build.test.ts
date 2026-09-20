@@ -9,7 +9,7 @@ import type {
 import { buildApplicationPackage, deriveCompleteness } from "./build";
 
 /**
- * The package builder — where the P2 contract's four hard constraints are
+ * The package builder, where the P2 contract's four hard constraints are
  * actually enforced, not just described:
  *
  *  1. every factual sentence in a document is backed by a PackageClaim
@@ -142,7 +142,7 @@ const PERSONAL_QUESTIONS_ALL: ApplicationForm["questions"] = [
   { id: "q_portfolio", prompt: "Portfolio URL", kind: "url", category: "personal-info", autofillKey: "portfolio", trust: "source-backed" },
 ];
 
-describe("deriveCompleteness — the ONLY place completeness is computed", () => {
+describe("deriveCompleteness, the ONLY place completeness is computed", () => {
   it("is complete exactly when nothing is missing", () => {
     expect(deriveCompleteness([])).toBe("complete");
   });
@@ -153,11 +153,11 @@ describe("deriveCompleteness — the ONLY place completeness is computed", () =>
   });
 });
 
-describe("buildApplicationPackage — completeness is derived, never asserted", () => {
+describe("buildApplicationPackage, completeness is derived, never asserted", () => {
   it("a form whose every ask is satisfiable (no resume-file requirement, a matched short answer, satisfiable personal fields) reads complete", () => {
     // `resume` is deliberately "not-requested" here: a required resume ALWAYS
     // leaves a residual gap (see the dedicated test below) because the
-    // package only ever contains a Markdown draft, never a formatted file —
+    // package only ever contains a Markdown draft, never a formatted file,
     // that is intentional honesty, not something this "complete" case should
     // fight.
     const { package: pkg } = buildApplicationPackage({
@@ -193,7 +193,7 @@ describe("buildApplicationPackage — completeness is derived, never asserted", 
     expect(pkg.missing).toEqual([]);
   });
 
-  it("a required resume ALWAYS leaves a residual gap — the package only ever contains a Markdown draft, never the formatted file the form asks for", () => {
+  it("a required resume ALWAYS leaves a residual gap, the package only ever contains a Markdown draft, never the formatted file the form asks for", () => {
     const { package: pkg } = buildApplicationPackage({
       campaign: campaign({ applicationForm: form({ resume: "required" }) }),
       candidate: candidate(),
@@ -229,7 +229,7 @@ describe("buildApplicationPackage — completeness is derived, never asserted", 
     expect(pkg.missing.some((m) => m.includes("Describe a technical challenge"))).toBe(true);
   });
 
-  it("completeness NEVER disagrees with an empty missing[] or vice versa — derivation cannot drift", () => {
+  it("completeness NEVER disagrees with an empty missing[] or vice versa, derivation cannot drift", () => {
     // Property check across a handful of shapes: whatever missing[] ends up
     // being, completeness must be exactly deriveCompleteness(missing).
     const cases: Partial<ApplicationForm>[] = [
@@ -261,7 +261,7 @@ describe("buildApplicationPackage — completeness is derived, never asserted", 
   });
 });
 
-describe("buildApplicationPackage — excludedSections carries through untouched", () => {
+describe("buildApplicationPackage, excludedSections carries through untouched", () => {
   it("passes the form's excludedSections through verbatim", () => {
     const { package: pkg } = buildApplicationPackage({
       campaign: campaign({
@@ -295,7 +295,7 @@ describe("buildApplicationPackage — excludedSections carries through untouched
   });
 });
 
-describe("buildApplicationPackage — reused and drafted never collapse", () => {
+describe("buildApplicationPackage, reused and drafted never collapse", () => {
   it("the cover letter (something CareerOS actually writes) is 'drafted', never 'reused'", () => {
     const { package: pkg } = buildApplicationPackage({
       campaign: campaign(),
@@ -307,7 +307,7 @@ describe("buildApplicationPackage — reused and drafted never collapse", () => 
     expect(coverLetter.status).toBe("drafted");
   });
 
-  it("short-answers is NEVER 'drafted' — matched answers are 'reused', unmatched are 'needs-you'", () => {
+  it("short-answers is NEVER 'drafted', matched answers are 'reused', unmatched are 'needs-you'", () => {
     const { package: matched } = buildApplicationPackage({
       campaign: campaign({
         applicationForm: form({
@@ -361,9 +361,9 @@ describe("buildApplicationPackage — reused and drafted never collapse", () => 
     expect(unmatchedDoc.status).not.toBe("drafted");
   });
 
-  it("personal-info is NEVER 'drafted' — it is pulled from the stored profile, not written for this posting", () => {
+  it("personal-info is NEVER 'drafted', it is pulled from the stored profile, not written for this posting", () => {
     // Exercised two ways: once where the form asks for personal fields
-    // (populated), once where it does not (not-requested) — "drafted" must
+    // (populated), once where it does not (not-requested), "drafted" must
     // never appear in either case.
     const { package: populated } = buildApplicationPackage({
       campaign: campaign({
@@ -420,7 +420,7 @@ describe("buildApplicationPackage — reused and drafted never collapse", () => 
   });
 });
 
-describe("buildApplicationPackage — no factual sentence reaches a document without a PackageClaim", () => {
+describe("buildApplicationPackage, no factual sentence reaches a document without a PackageClaim", () => {
   it("the cover letter's claims cover every sentence actually rendered into its content", () => {
     const { package: pkg } = buildApplicationPackage({
       campaign: campaign(),
@@ -443,14 +443,14 @@ describe("buildApplicationPackage — no factual sentence reaches a document wit
       builtAt: BUILT_AT,
     });
     const resume = pkg.documents.find((d) => d.kind === "resume")!;
-    // One claim per evidence row — nothing dropped, nothing added.
+    // One claim per evidence row, nothing dropped, nothing added.
     expect(resume.claims).toHaveLength(candidate().evidence.length);
     for (const claim of resume.claims) {
       expect(resume.content).toContain(claim.text);
     }
   });
 
-  it("short-answers claims are all 'user-provided' — the user's own words, never asserted as evidenced", () => {
+  it("short-answers claims are all 'user-provided', the user's own words, never asserted as evidenced", () => {
     const { package: pkg } = buildApplicationPackage({
       campaign: campaign({
         applicationForm: form({
@@ -497,10 +497,10 @@ describe("buildApplicationPackage — no factual sentence reaches a document wit
   });
 });
 
-describe("buildApplicationPackage — personal info never invents a field absent from the profile", () => {
+describe("buildApplicationPackage, personal info never invents a field absent from the profile", () => {
   it("a candidate missing links, a splittable name, email, and phone shows notes, not invented values", () => {
     const sparse = candidate({
-      name: "Madonna", // single token — cannot split into first/last
+      name: "Madonna", // single token, cannot split into first/last
       links: {}, // no github/linkedin/portfolio at all
     });
     const { package: pkg } = buildApplicationPackage({
@@ -513,7 +513,7 @@ describe("buildApplicationPackage — personal info never invents a field absent
     });
     const personalInfo = pkg.documents.find((d) => d.kind === "personal-info")!;
 
-    // Never fabricates an email or phone number — CareerOS does not store them.
+    // Never fabricates an email or phone number, CareerOS does not store them.
     expect(personalInfo.content).not.toMatch(/@[a-z0-9.-]+\.[a-z]{2,}/i); // no email-shaped string
     expect(personalInfo.content).toMatch(/does not store your email/i);
     expect(personalInfo.content).toMatch(/does not store your phone/i);
@@ -552,7 +552,7 @@ describe("buildApplicationPackage — personal info never invents a field absent
   });
 });
 
-describe("buildApplicationPackage — folder/file names are sanitized all the way through assembly", () => {
+describe("buildApplicationPackage, folder/file names are sanitized all the way through assembly", () => {
   it("a hostile job title and company never reach folderName or a document fileName unsanitized", () => {
     const { package: pkg } = buildApplicationPackage({
       campaign: campaign({
@@ -572,7 +572,7 @@ describe("buildApplicationPackage — folder/file names are sanitized all the wa
   });
 });
 
-describe("buildApplicationPackage — cover-letter 'not-requested' is honored", () => {
+describe("buildApplicationPackage, cover-letter 'not-requested' is honored", () => {
   it("produces an empty, unclaimed, not-requested cover-letter document and never lists it as missing", () => {
     const { package: pkg } = buildApplicationPackage({
       campaign: campaign({ applicationForm: form({ coverLetter: "not-requested" }) }),
@@ -588,7 +588,7 @@ describe("buildApplicationPackage — cover-letter 'not-requested' is honored", 
   });
 });
 
-describe("buildApplicationPackage — determinism (no clock, no randomness, anywhere in the call graph)", () => {
+describe("buildApplicationPackage, determinism (no clock, no randomness, anywhere in the call graph)", () => {
   it("the same campaign, candidate, library, and builtAt produce a byte-identical package across two calls", () => {
     const input = {
       campaign: campaign({
@@ -660,7 +660,7 @@ describe("buildApplicationPackage — determinism (no clock, no randomness, anyw
   });
 });
 
-describe("buildApplicationPackage — the result is schema-valid by construction", () => {
+describe("buildApplicationPackage, the result is schema-valid by construction", () => {
   it("parses through ApplicationPackage without alteration (the builder validates its own output)", async () => {
     const { ApplicationPackage } = await import("@/lib/types");
     const { package: pkg } = buildApplicationPackage({

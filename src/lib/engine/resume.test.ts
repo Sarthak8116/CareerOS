@@ -24,7 +24,7 @@ describe("verifyClaims", () => {
 
   it("does not fabricate flags on a clean, source-backed claim", () => {
     // ev_cachesim ("Built a CPU cache simulator…") is strong, public, and free
-    // of vague wording — there is nothing to flag.
+    // of vague wording, there is nothing to flag.
     const cacheClaim = demoCandidate.evidence.find((e) => e.id === "ev_cachesim")!.claim;
     expect(flags.some((f) => f.text === cacheClaim)).toBe(false);
   });
@@ -49,7 +49,7 @@ describe("getResumeRecommendations", () => {
   it("traces every recommendation to real evidence and starts it pending", () => {
     for (const rec of recs) {
       expect(rec.status).toBe("pending");
-      // evidenceUsed is a human-readable citation string — never empty.
+      // evidenceUsed is a human-readable citation string, never empty.
       expect(typeof rec.evidenceUsed).toBe("string");
       expect(rec.evidenceUsed.trim().length).toBeGreaterThan(0);
       // A real recommendation also carries its rewrite and the requirement it addresses.
@@ -79,7 +79,7 @@ describe("getResumeRecommendations", () => {
    *
    * The recommendations used to be a hardcoded bank of prose keyed to the demo
    * candidate's evidence ids, and `citeEvidence` degraded SILENTLY to raw ids
-   * for anyone else — it did not fail, it emitted confident sentences about a
+   * for anyone else, it did not fail, it emitted confident sentences about a
    * different person. The failure is invisible unless a test names a different
    * candidate and checks whose evidence came back.
    */

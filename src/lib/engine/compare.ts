@@ -10,7 +10,7 @@ import { matchSkill, LEVEL_RANK, type SkillMatch } from "@/lib/engine/skills";
 /**
  * Job Comparison engine (§5.4). Ranks a set of cached jobs for one candidate
  * across categorical dimensions. Every fit-related dimension is GROUNDED in
- * matchSkill over the job's canonical skillKeys — no invented scores, no fake
+ * matchSkill over the job's canonical skillKeys, no invented scores, no fake
  * compensation numbers, no randomness or wall-clock reads (§16, §18).
  *
  * All conclusions are categorical Levels (strong / moderate / limited / none).
@@ -73,7 +73,7 @@ function preferredDimension(job: Job, candidate: Candidate): {
   const note =
     matches.length === 0
       ? "No preferred skills specified."
-      : `${metCount}/${matches.length} preferred skills partially covered — the rest are upside.`;
+      : `${metCount}/${matches.length} preferred skills partially covered, the rest are upside.`;
   return { dim: { category: "Preferred requirements", level, note }, level };
 }
 
@@ -85,7 +85,7 @@ function locationDimension(job: Job, candidate: Candidate): CompareDimension {
     return {
       category: "Location",
       level: "strong",
-      note: "Remote — no relocation required.",
+      note: "Remote, no relocation required.",
     };
   }
   const sameMetro = job.location
@@ -104,8 +104,8 @@ function locationDimension(job: Job, candidate: Candidate): CompareDimension {
     level,
     note:
       job.remote === "hybrid"
-        ? `${job.location}, hybrid — relocation for an internship, some on-site days.`
-        : `${job.location}, on-site — requires relocating from ${candidate.location}.`,
+        ? `${job.location}, hybrid, relocation for an internship, some on-site days.`
+        : `${job.location}, on-site, requires relocating from ${candidate.location}.`,
   };
 }
 
@@ -117,7 +117,7 @@ function sponsorshipDimension(job: Job, candidate: Candidate): CompareDimension 
     return {
       category: "Sponsorship",
       level: "strong",
-      note: "Candidate needs no sponsorship — not a constraint.",
+      note: "Candidate needs no sponsorship, not a constraint.",
     };
   }
   if (job.sponsorship === "offered") {
@@ -131,18 +131,18 @@ function sponsorshipDimension(job: Job, candidate: Candidate): CompareDimension 
     return {
       category: "Sponsorship",
       level: "none",
-      note: "Employer does not sponsor — likely a hard blocker.",
+      note: "Employer does not sponsor, likely a hard blocker.",
     };
   }
   return {
     category: "Sponsorship",
     level: "limited",
-    note: "Sponsorship policy unclear — verify before investing.",
+    note: "Sponsorship policy unclear, verify before investing.",
   };
 }
 
 /** Learning potential is HIGH when the role exposes the candidate to skills
- *  they lack or only weakly hold — i.e. the gaps are the upside. */
+ *  they lack or only weakly hold, i.e. the gaps are the upside. */
 function learningDimension(job: Job, candidate: Candidate): CompareDimension {
   const all = [
     ...skillMatchesForKind(job, candidate, "minimum"),
@@ -157,8 +157,8 @@ function learningDimension(job: Job, candidate: Candidate): CompareDimension {
   else level = "limited";
   const note =
     stretch === 0
-      ? "Mostly plays to existing strengths — modest new-skill growth."
-      : `${stretch} skill area(s) beyond current evidence — strong room to grow.`;
+      ? "Mostly plays to existing strengths, modest new-skill growth."
+      : `${stretch} skill area(s) beyond current evidence, strong room to grow.`;
   return { category: "Learning potential", level, note };
 }
 
@@ -175,12 +175,12 @@ function interviewDimension(hardLevel: Level, job: Job, candidate: Candidate): C
   }
   const note =
     level === "strong"
-      ? "Hard requirements well-evidenced — competitive at screen."
+      ? "Hard requirements well-evidenced, competitive at screen."
       : level === "moderate"
         ? "Core requirements met; a sharper resume lifts callback odds."
         : level === "limited"
-          ? "Thin evidence on gating requirements — needs a build-campaign first."
-          : "Missing gating requirements — a cold apply is unlikely to convert.";
+          ? "Thin evidence on gating requirements, needs a build-campaign first."
+          : "Missing gating requirements, a cold apply is unlikely to convert.";
   return { category: "Likelihood of interview", level, note };
 }
 
@@ -190,13 +190,13 @@ function networkDimension(job: Job): CompareDimension {
   return {
     category: "Network opportunity",
     level: "limited",
-    note: `No mapped contacts at ${job.company} yet — run the network engine to warm a path.`,
+    note: `No mapped contacts at ${job.company} yet, run the network engine to warm a path.`,
   };
 }
 
 /**
- * Recommendation is driven by what screeners actually gate on — the HARD
- * requirements — with preferred skills and sponsorship as modifiers.
+ * Recommendation is driven by what screeners actually gate on, the HARD
+ * requirements, with preferred skills and sponsorship as modifiers.
  *  - clears the bar strongly AND already covers the nice-to-haves -> apply now
  *  - clears the bar but preferred skills are thin -> a short campaign sharpens it
  *  - partial on the bar -> research/close gaps first
@@ -251,7 +251,7 @@ export function compareJobs(
         : overall === "moderate"
           ? "Solid core fit with addressable gaps."
           : overall === "limited"
-            ? "Partial fit — meaningful gaps to close first."
+            ? "Partial fit, meaningful gaps to close first."
             : "Weak fit against the stated requirements.";
 
     const dimensions: CompareDimension[] = [

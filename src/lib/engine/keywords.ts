@@ -10,14 +10,14 @@ import { overlap, tokenize, MIN_SHARED_TOKENS } from "@/lib/package/match";
  *
  * THREE STATES, NOT TWO. "Present but weakly worded" is a different fact from
  * "present" and from "absent", and it is the most actionable one the product
- * has — it is what `gaps.ts` classifies as a `resume-wording-gap` and what
+ * has, it is what `gaps.ts` classifies as a `resume-wording-gap` and what
  * `engine/resume.ts` turns into a rewrite. Collapsing it into "covered" throws
  * that away; collapsing it into "missing" tells the user they lack a skill
  * they actually have.
  *
  * Coverage is a fact about TEXT OVERLAP between the posting and the
  * candidate's recorded evidence. It is never a claim about what an applicant
- * tracking system will do with the résumé — we cannot observe that, so we do
+ * tracking system will do with the résumé, we cannot observe that, so we do
  * not say it. See `summarizeCoverage`.
  *
  * Matching is NOT reimplemented here: canonical skills go through
@@ -65,7 +65,7 @@ export interface CoverageSummary {
   matchesEveryRequirement: boolean;
   /**
    * The sentence the UI may show. The product line is "matches every keyword
-   * and requirement the job lists" — NEVER "passes the ATS", which would be a
+   * and requirement the job lists", NEVER "passes the ATS", which would be a
    * claim about software we cannot observe.
    */
   statement: string;
@@ -146,7 +146,7 @@ export function computeRequirementCoverage(
     const supporting = candidate.evidence.filter((e) => ids.includes(e.id));
 
     /* `matchSkill` satisfies a requirement from the PROFILE (the degree line)
-       with no evidence row at all — that is a real "covered", not an absence. */
+       with no evidence row at all, that is a real "covered", not an absence. */
     const fromProfile =
       Boolean(skillMatch) &&
       skillMatch!.supportingEvidenceIds.length === 0 &&

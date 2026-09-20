@@ -7,25 +7,25 @@ import { ApplicationFormReview } from "@/components/ApplicationFormReview";
  * The invariants coder-ui flagged as the highest-risk part of this card:
  *
  *  1. "not-requested" (a FACT: we read the whole form and it doesn't ask) must
- *     never read like "unknown" (an ADMISSION: we couldn't read the form) —
+ *     never read like "unknown" (an ADMISSION: we couldn't read the form),
  *     collapsing the two is the worst bug available here, per the component's
  *     own header comment.
  *  2. A complete form that simply doesn't STATE whether a field is mandatory
- *     is a THIRD, distinct case from both of the above — "asked for, but the
- *     form doesn't say whether it's mandatory" — and must render differently
+ *     is a THIRD, distinct case from both of the above, "asked for, but the
+ *     form doesn't say whether it's mandatory", and must render differently
  *     depending on `completeness`, not collapse into "unknown".
  *  3. `excludedSections` (a deliberate, disclosed omission) must render in the
- *     neutral box, never alongside `unknowns` (things we failed to read) —
+ *     neutral box, never alongside `unknowns` (things we failed to read),
  *     conflating the two would make a deliberate privacy choice look like a
  *     parsing failure.
  *  4. `completeness: "none"` is a normal, successful outcome for the FORM
- *     specifically (the JOB still parsed) — it gets its own honest header,
+ *     specifically (the JOB still parsed), it gets its own honest header,
  *     not the request-rows a complete/partial form gets.
  *
  * Rendered via `react-dom/server` into a jsdom node, matching
  * ParsedJobReview.test.tsx: @testing-library/dom (RTL's required peer) is not
  * installed, so these are static-output assertions rather than interaction
- * tests — sufficient here since none of the above depends on user input.
+ * tests, sufficient here since none of the above depends on user input.
  */
 
 function form(overrides: Partial<ApplicationForm> = {}): ApplicationForm {
@@ -56,7 +56,7 @@ function renderReview(f: ApplicationForm): string {
   return host.textContent ?? "";
 }
 
-/** Text of just the "Résumé" requirement row — the other rows (cover letter,
+/** Text of just the "Résumé" requirement row, the other rows (cover letter,
  *  portfolio) legitimately carry different statuses and must not pollute the
  *  assertion for this one. */
 function resumeRowText(f: ApplicationForm): string {
@@ -70,7 +70,7 @@ function resumeRowText(f: ApplicationForm): string {
   return row?.textContent ?? "";
 }
 
-describe("ApplicationFormReview — not-requested vs unknown vs asked-but-unstated", () => {
+describe("ApplicationFormReview, not-requested vs unknown vs asked-but-unstated", () => {
   const cases: {
     status: RequirementStatus;
     completeness: ApplicationForm["completeness"];
@@ -86,15 +86,15 @@ describe("ApplicationFormReview — not-requested vs unknown vs asked-but-unstat
     {
       status: "unknown",
       completeness: "partial",
-      expectedText: "Unknown — we couldn't read the form",
+      expectedText: "Unknown, we couldn't read the form",
       forbiddenText: ["Not requested", "doesn't say whether"],
     },
     {
       // The form was fully enumerated but is silent on THIS field's
-      // requiredness — a claim about the field, not about our ability to read.
+      // requiredness, a claim about the field, not about our ability to read.
       status: "unknown",
       completeness: "complete",
-      expectedText: "Asked for — the form doesn't say whether it's mandatory",
+      expectedText: "Asked for, the form doesn't say whether it's mandatory",
       forbiddenText: ["Not requested", "we couldn't read the form"],
     },
     {
@@ -126,14 +126,14 @@ describe("ApplicationFormReview — not-requested vs unknown vs asked-but-unstat
     // `status: "unknown"`, different meaning entirely.
     const partial = renderReview(form({ resume: "unknown", completeness: "partial" }));
     const complete = renderReview(form({ resume: "unknown", completeness: "complete" }));
-    expect(partial).toContain("Unknown — we couldn't read the form");
-    expect(complete).toContain("Asked for — the form doesn't say whether it's mandatory");
+    expect(partial).toContain("Unknown, we couldn't read the form");
+    expect(complete).toContain("Asked for, the form doesn't say whether it's mandatory");
     expect(partial).not.toContain("Asked for");
     expect(complete).not.toContain("we couldn't read the form");
   });
 });
 
-describe("ApplicationFormReview — excludedSections vs unknowns", () => {
+describe("ApplicationFormReview, excludedSections vs unknowns", () => {
   it("names an excluded section without treating it as something we failed to read", () => {
     const text = renderReview(
       form({ excludedSections: ["Equal employment opportunity questions"] }),
@@ -173,7 +173,7 @@ describe("ApplicationFormReview — excludedSections vs unknowns", () => {
   });
 });
 
-describe("ApplicationFormReview — completeness: \"none\" is a successful, honest outcome, not an error state", () => {
+describe("ApplicationFormReview, completeness: \"none\" is a successful, honest outcome, not an error state", () => {
   it("shows the honest 'could not read' header without implying the JOB itself failed", () => {
     const text = renderReview(
       form({
@@ -188,7 +188,7 @@ describe("ApplicationFormReview — completeness: \"none\" is a successful, hone
     expect(text).toContain("The job itself parsed fine");
   });
 
-  it("does not render requirement rows at all when the form is unreadable — showing 'Unknown' three times would overstate what we know", () => {
+  it("does not render requirement rows at all when the form is unreadable, showing 'Unknown' three times would overstate what we know", () => {
     const markup = renderToStaticMarkup(
       <ApplicationFormReview
         form={form({ completeness: "none", resume: "unknown", coverLetter: "unknown", portfolio: "unknown" })}

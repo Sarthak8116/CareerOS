@@ -42,7 +42,7 @@ describe("compareJobs", () => {
         expect(dim.category.length).toBeGreaterThan(0);
         expect(dim.level).toBeDefined();
         expect(VALID_LEVELS.has(dim.level)).toBe(true);
-        // Levels are categorical strings, never numbers — so never NaN.
+        // Levels are categorical strings, never numbers, so never NaN.
         expect(Number.isNaN(dim.level as unknown as number)).toBe(false);
         expect(typeof dim.note).toBe("string");
         expect(dim.note.length).toBeGreaterThan(0);
@@ -62,7 +62,7 @@ describe("compareJobs", () => {
     }
   });
 
-  it("rejects a job that does not sponsor when the candidate needs it — is honest here", () => {
+  it("rejects a job that does not sponsor when the candidate needs it, is honest here", () => {
     // Ava is a US citizen needing no sponsorship, so Tesla's not-offered policy
     // is NOT a blocker; the recommendation must not be a sponsorship 'reject'.
     const tesla = comparisons.find((c) => c.company === "Tesla");

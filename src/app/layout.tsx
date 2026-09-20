@@ -18,7 +18,7 @@ const fraunces = Fraunces({
 
 export const metadata: Metadata = {
   title: {
-    default: "CareerOS — a complete campaign for getting hired",
+    default: "CareerOS, a complete campaign for getting hired",
     template: "%s · CareerOS",
   },
   description:

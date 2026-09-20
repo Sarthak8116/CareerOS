@@ -76,7 +76,7 @@ describe("profileToPerson", () => {
     expect(allText).not.toContain("<");
   });
 
-  it("is deterministic — same input, identical output", () => {
+  it("is deterministic, same input, identical output", () => {
     const opts = { companyName: "NVIDIA", fetchedAt: FETCHED_AT };
     const a = profileToPerson(byHandle("dan-whitfield"), opts);
     const b = profileToPerson(byHandle("dan-whitfield"), opts);
@@ -140,7 +140,7 @@ describe("companyToFacts", () => {
   });
 });
 
-/** REGRESSION — mapping the real captured payload (see schemas.test.ts). */
+/** REGRESSION, mapping the real captured payload (see schemas.test.ts). */
 describe("companyToFacts on the real captured payload", () => {
   const live = companyToFacts(
     parseItems(HarvestCompany, companyLive).valid[0],
@@ -167,7 +167,7 @@ describe("companyToFacts on the real captured payload", () => {
 });
 
 /**
- * REGRESSION — real `linkedin-company-employees` profiles (identities redacted,
+ * REGRESSION, real `linkedin-company-employees` profiles (identities redacted,
  * structure untouched), captured 2026-09-19.
  *
  * Four docs-vs-reality bugs were found here, each of which broke the feature
@@ -176,7 +176,7 @@ describe("companyToFacts on the real captured payload", () => {
 describe("real captured employee profiles", () => {
   const { valid, dropped } = parseItems(HarvestProfile, employeesLive);
 
-  it("all three validate — nulls and array topSkills tolerated", () => {
+  it("all three validate, nulls and array topSkills tolerated", () => {
     expect(dropped).toBe(0);
     expect(valid).toHaveLength(3);
   });
@@ -198,7 +198,7 @@ describe("real captured employee profiles", () => {
         fetchedAt: FETCHED_AT,
       })!;
       expect(person).toBeDefined();
-      // A current role carries `endDate: { text: "Present" }` — present but
+      // A current role carries `endDate: { text: "Present" }`: present but
       // yearless. Treating that as "ended" fell back to the headline.
       expect(person.title).not.toMatch(/passionate about|enabling the next wave/i);
       expect(person.title.length).toBeLessThan(120);

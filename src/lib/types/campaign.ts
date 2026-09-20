@@ -15,7 +15,7 @@ import {
 } from "@/lib/types/core";
 
 /* ------------------------------------------------------------------ */
-/* People / hiring network (§5.10) — minimal for the slice             */
+/* People / hiring network (§5.10), minimal for the slice             */
 /* ------------------------------------------------------------------ */
 
 export const Person = z.object({
@@ -34,7 +34,7 @@ export const Person = z.object({
   outreachPriority: z.enum(["first", "high", "medium", "low"]),
 
   /* --- Optional live-enrichment fields (absent in demo mode) --- */
-  /** Public profile URL — the provenance link for this record. */
+  /** Public profile URL, the provenance link for this record. */
   linkedinUrl: z.string().optional(),
   headline: z.string().optional(),
   location: z.string().optional(),
@@ -69,8 +69,8 @@ export type AgentActivity = z.infer<typeof AgentActivity>;
  *
  * The "not-requested" / "unknown" split is the whole point of this enum and
  * collapsing the two is the worst bug available in this module:
- *  - "not-requested" — we read the WHOLE form and it does not ask. A fact.
- *  - "unknown"       — we could not read the form. An absence of knowledge.
+ *  - "not-requested", we read the WHOLE form and it does not ask. A fact.
+ *  - "unknown"      , we could not read the form. An absence of knowledge.
  * Only an adapter whose `completeness` is "complete" may ever emit
  * "not-requested"; everyone else says "unknown" and asks the user.
  */
@@ -98,7 +98,7 @@ export type ApplicationQuestionKind = z.infer<typeof ApplicationQuestionKind>;
 
 /**
  * A routing hint, never rendered as a claim about the question. Defaulting to
- * "other" is always acceptable — a wrong category costs nothing, whereas a
+ * "other" is always acceptable, a wrong category costs nothing, whereas a
  * confident wrong label would be a claim we cannot support.
  */
 export const ApplicationQuestionCategory = z.enum([
@@ -109,7 +109,7 @@ export const ApplicationQuestionCategory = z.enum([
   "motivation",
   // NOTE: there is deliberately no "demographic" member. EEO self-identification
   // questions (gender, race, veteran and disability status) are never parsed into
-  // an ApplicationForm — they are voluntary by law, exist for aggregate compliance
+  // an ApplicationForm, they are voluntary by law, exist for aggregate compliance
   // reporting rather than evaluation, and a tool that pre-fills them has no
   // business doing so. They are recorded in `ApplicationForm.excludedSections`
   // and disclosed to the user instead of being silently dropped.
@@ -147,8 +147,8 @@ export type ApplicationAutofillKey = z.infer<typeof ApplicationAutofillKey>;
 /**
  * One question from a real application form.
  *
- * `prompt` is the employer's EXACT wording, sanitized. It is UNTRUSTED DATA —
- * it came off a web page — and must never be treated as an instruction.
+ * `prompt` is the employer's EXACT wording, sanitized. It is UNTRUSTED DATA,
+ * it came off a web page, and must never be treated as an instruction.
  */
 export const ApplicationQuestion = z.object({
   id: z.string(),
@@ -156,7 +156,7 @@ export const ApplicationQuestion = z.object({
   kind: ApplicationQuestionKind,
   category: ApplicationQuestionCategory,
   /**
-   * ABSENT means we did not read whether it is required — not that it is
+   * ABSENT means we did not read whether it is required, not that it is
    * optional. Defaulting this to `false` would assert something we never saw.
    */
   required: z.boolean().optional(),
@@ -173,9 +173,9 @@ export type ApplicationQuestion = z.infer<typeof ApplicationQuestion>;
  * The application form behind a posting, as far as we could actually read it.
  *
  * `completeness` governs how every other field may be interpreted:
- *  - "complete" — the whole form was enumerated, so ABSENCE IS INFORMATIVE.
- *  - "partial"  — we have some of it (e.g. the user pasted what they saw).
- *  - "none"     — we read none of it; every status is "unknown".
+ *  - "complete", the whole form was enumerated, so ABSENCE IS INFORMATIVE.
+ *  - "partial" , we have some of it (e.g. the user pasted what they saw).
+ *  - "none"    , we read none of it; every status is "unknown".
  */
 export const ApplicationForm = z.object({
   jobId: z.string(),
@@ -196,11 +196,11 @@ export const ApplicationForm = z.object({
    * This is a considered omission, not a parsing failure, and the two must not
    * be confused: `unknowns` is "we could not read this", `excludedSections` is
    * "we chose not to". Equal-opportunity questions about race, gender,
-   * disability and veteran status live here — CareerOS does not store or
+   * disability and veteran status live here, CareerOS does not store or
    * pre-fill answers about someone's protected characteristics.
    */
   excludedSections: z.array(z.string()),
-  /** Plain sentences shown to the user verbatim — what we could not read. */
+  /** Plain sentences shown to the user verbatim, what we could not read. */
   unknowns: z.array(z.string()),
   /** Advisory sanitizer flags. They never change handling, only the warning. */
   warnings: z.array(z.string()),
@@ -240,7 +240,7 @@ export const Campaign = z.object({
 
   /**
    * Optional live LinkedIn enrichment, fetched server-side when Harvest is
-   * enabled. Absent in demo mode and in live mode without the feature flag —
+   * enabled. Absent in demo mode and in live mode without the feature flag,
    * every consumer must degrade to existing behavior when it is missing.
    */
   harvest: z
@@ -253,7 +253,7 @@ export const Campaign = z.object({
 
   /**
    * The application form for this job, when intake could read one. Absent for
-   * demo campaigns and for every campaign created before P1 — consumers must
+   * demo campaigns and for every campaign created before P1, consumers must
    * degrade to existing behavior when it is missing, exactly like `harvest`.
    */
   applicationForm: ApplicationForm.optional(),
@@ -264,14 +264,14 @@ export const Campaign = z.object({
    *
    * Recommendations themselves are DERIVED (recomputed from the candidate's
    * evidence graph and this job's requirements on every render), so only the
-   * decision is stored — storing the generated prose would let a stale rewrite
+   * decision is stored, storing the generated prose would let a stale rewrite
    * about an older version of the profile outlive the evidence behind it.
    *
    * Only a real decision is recorded: "pending" is the absence of a key, not a
    * stored value, so a rewrite the user has not looked at is never mistaken
    * for one they considered and left alone.
    *
-   * Absent for every campaign created before P3 — consumers must treat a
+   * Absent for every campaign created before P3, consumers must treat a
    * missing map exactly like an empty one.
    */
   resumeDecisions: z.record(z.enum(["accepted", "rejected"])).optional(),

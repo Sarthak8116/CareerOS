@@ -12,13 +12,13 @@ import { demoIntelByCompany } from "@/lib/demo/company";
  * Company intelligence resolver (build directive §5.6).
  *
  * In DEMO MODE the only researched companies are the cached ones (today,
- * NVIDIA) — for those we return the cached, source-backed intel. For any other job we return a
+ * NVIDIA), for those we return the cached, source-backed intel. For any other job we return a
  * minimal, HONEST intel object derived purely from the job's own fields, with
  * NO sources and clearly-labelled low-reliability notes. We never fabricate
  * research for a company we haven't cached.
  *
  * When live LinkedIn data is present (`harvest`), the company's own published
- * facts and recent posts are folded in as SOURCES — each with the company's
+ * facts and recent posts are folded in as SOURCES, each with the company's
  * LinkedIn URL and the fetch time. That is a self-description, not independent
  * research, and the copy here says so. The fallback is unchanged: with no
  * harvest data this behaves exactly as it always has.
@@ -34,7 +34,7 @@ export function getCompanyIntel(
   return withHarvest(base, harvest.company, harvest.companyPosts ?? []);
 }
 
-/** A LinkedIn record is a company describing ITSELF — moderate, not strong. */
+/** A LinkedIn record is a company describing ITSELF, moderate, not strong. */
 const SELF_REPORTED_RELIABILITY = "moderate" as const;
 
 /**
@@ -43,7 +43,7 @@ const SELF_REPORTED_RELIABILITY = "moderate" as const;
  * Rules kept deliberately tight:
  *  - Only factual fields are merged (headcount, industries, specialities, HQ).
  *    No analysis is invented from them.
- *  - Nothing already researched is overwritten — harvest fills gaps and adds
+ *  - Nothing already researched is overwritten, harvest fills gaps and adds
  *    sources, so the curated NVIDIA profile keeps its hand-authored copy.
  *  - Every merged claim becomes a `ResearchSource` with the LinkedIn URL and
  *    the fetch timestamp, so the UI can attribute it.
@@ -67,7 +67,7 @@ function withHarvest(
   sources.push({
     id: "src_linkedin_company",
     url: facts.linkedinUrl,
-    title: `${facts.name} — LinkedIn company page`,
+    title: `${facts.name}, LinkedIn company page`,
     publisher: "LinkedIn (company self-description)",
     excerpt: facts.tagline ?? facts.description ?? factLine,
     reliability: SELF_REPORTED_RELIABILITY,
@@ -80,7 +80,7 @@ function withHarvest(
       url: post.url ?? facts.linkedinUrl,
       title: post.postedAt
         ? `${facts.name} post · ${post.postedAt}`
-        : `${facts.name} — recent LinkedIn post`,
+        : `${facts.name}, recent LinkedIn post`,
       publisher: "LinkedIn (company post)",
       excerpt: post.excerpt,
       reliability: SELF_REPORTED_RELIABILITY,
@@ -88,13 +88,13 @@ function withHarvest(
     });
   }
 
-  // Only fill genuinely empty slots — never overwrite researched copy.
+  // Only fill genuinely empty slots, never overwrite researched copy.
   const products =
     base.products.length > 0 ? base.products : facts.specialities.slice(0, 8);
   const description =
     base.sources.length > 0 || !facts.description
       ? base.description
-      : `${facts.description} (The company's own LinkedIn description — self-reported, not independent research.)`;
+      : `${facts.description} (The company's own LinkedIn description, self-reported, not independent research.)`;
 
   const risks = [
     ...base.risks,
@@ -113,7 +113,7 @@ function withHarvest(
 
 /**
  * Build a truthful placeholder from job fields alone. Everything here is a
- * restatement of what the job posting already says — no external claims — so
+ * restatement of what the job posting already says, no external claims, so
  * the UI can distinguish "researched" from "not yet researched".
  */
 function genericIntel(job: Job): CompanyIntel {
@@ -135,7 +135,7 @@ function genericIntel(job: Job): CompanyIntel {
       : `The posting does not describe the day-to-day work for ${role}.`,
     valuesBeyondJD: [],
     talkingPoints: [
-      `Run company research for ${company} before applying — this profile is a placeholder built from the posting alone.`,
+      `Run company research for ${company} before applying, this profile is a placeholder built from the posting alone.`,
     ],
     risks: [
       `Low-confidence profile: no external sources were consulted for ${company}.`,

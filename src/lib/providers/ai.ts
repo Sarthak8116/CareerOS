@@ -21,7 +21,7 @@ export interface CampaignProvider {
 
 /**
  * Deterministic demo provider. Runs the rule-based engine end-to-end with
- * cached people data — no external calls, no keys, reproducible output.
+ * cached people data, no external calls, no keys, reproducible output.
  */
 export class DemoCampaignProvider implements CampaignProvider {
   readonly mode = "demo" as const;
@@ -51,7 +51,7 @@ export class DemoCampaignProvider implements CampaignProvider {
     const nextAction = trueGap
       ? trueGap.action.summary
       : unanswered >= 2 && (role === "none" || role === "limited")
-        ? `Decide whether this role is the right target — ${unanswered} minimum requirements have no recorded evidence`
+        ? `Decide whether this role is the right target, ${unanswered} minimum requirements have no recorded evidence`
         : gaps[0] && gaps[0].classification !== "low-priority-gap"
           ? gaps[0].action.summary
           : "Tailor the resume and submit the application";
@@ -76,7 +76,7 @@ export class DemoCampaignProvider implements CampaignProvider {
 
 /**
  * Provider selector. Live mode is intentionally unimplemented for the
- * hackathon slice — it throws so we never silently fall back to fake "live"
+ * hackathon slice, it throws so we never silently fall back to fake "live"
  * behavior. Demo mode is the reliable default (§20).
  */
 export function getCampaignProvider(): CampaignProvider {

@@ -83,7 +83,7 @@ function job(overrides: Partial<Job> = {}): Job {
 /* THE CORE HONESTY INVARIANT: a deterministic letter is NEVER unsupported */
 /* ------------------------------------------------------------------ */
 
-describe("deterministicCoverLetter — the letter it assembles must always ground as evidenced or user-provided", () => {
+describe("deterministicCoverLetter, the letter it assembles must always ground as evidenced or user-provided", () => {
   it("a straightforward candidate/job pair produces zero unsupported claims", () => {
     const cand = candidate();
     const j = job({
@@ -99,12 +99,12 @@ describe("deterministicCoverLetter — the letter it assembles must always groun
 
   it("REGRESSION CHECK: a requirement whose text itself contains a metric can make an honestly-quoted sentence read as 'unsupported'", () => {
     // The body sentence template appends the REQUIREMENT's own wording after
-    // the evidence claim: `${evidence.claim} — which speaks to your
+    // the evidence claim: `${evidence.claim}, which speaks to your
     // requirement, "${requirement.text}".` If the requirement's wording
     // happens to contain something groundSentences' stricter numeric-
     // precision check reads as a metric (a real posting can absolutely say
     // "reduce latency by 30%" as a responsibility), that digit did not come
-    // from the candidate's evidence — it came from the EMPLOYER'S posting —
+    // from the candidate's evidence, it came from the EMPLOYER'S posting,
     // and addsPrecision cannot tell the difference. If this test fails
     // (support !== "evidenced"), that is confirmation of a real bug: a
     // sentence quoting real evidence verbatim gets marked as if the
@@ -168,7 +168,7 @@ describe("deterministicCoverLetter — the letter it assembles must always groun
     );
   });
 
-  it("a candidate with zero evidence produces a letter with no evidence-role sentences at all — never a fabricated one", () => {
+  it("a candidate with zero evidence produces a letter with no evidence-role sentences at all, never a fabricated one", () => {
     const cand = candidate({ evidence: [] });
     const j = job({ requirements: [requirement({ text: "Anything" })] });
     const draft = deterministicCoverLetter(cand, j);
@@ -181,7 +181,7 @@ describe("deterministicCoverLetter — the letter it assembles must always groun
 });
 
 /* ------------------------------------------------------------------ */
-/* selectEvidenceForJob — deterministic matching and tie-breaking      */
+/* selectEvidenceForJob, deterministic matching and tie-breaking      */
 /* ------------------------------------------------------------------ */
 
 describe("selectEvidenceForJob", () => {
@@ -289,10 +289,10 @@ describe("selectEvidenceForJob", () => {
 });
 
 /* ------------------------------------------------------------------ */
-/* deterministicCoverLetter — structure                                */
+/* deterministicCoverLetter, structure                                */
 /* ------------------------------------------------------------------ */
 
-describe("deterministicCoverLetter — structure", () => {
+describe("deterministicCoverLetter, structure", () => {
   it("opens by naming the exact job title and company", () => {
     const cand = candidate();
     const j = job({ title: "Backend Intern", company: "Robinhood" });
@@ -339,7 +339,7 @@ describe("deterministicCoverLetter — structure", () => {
     expect(draft.closing).toContain("Priya Raman");
   });
 
-  it("never invents a recipient name — greeting is always the generic form", () => {
+  it("never invents a recipient name, greeting is always the generic form", () => {
     const draft = deterministicCoverLetter(candidate(), job());
     expect(draft.greeting).toBe("Dear Hiring Team,");
   });

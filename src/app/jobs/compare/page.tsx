@@ -8,7 +8,7 @@ import { demoJobsPool } from "@/lib/demo/jobsPool";
 
 /**
  * Job Comparison view (§5.4). Compares the active candidate against a pool of
- * cached sample roles across categorical dimensions — deterministic, no live
+ * cached sample roles across categorical dimensions, deterministic, no live
  * calls, no invented numbers. The comparison is computed at render time from
  * the same fit engine used everywhere else.
  */
@@ -28,7 +28,7 @@ export default function JobComparePage() {
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-500">
             {candidate.headline}. Each role below is scored against the same
-            evidence graph across categorical dimensions — hard requirements,
+            evidence graph across categorical dimensions, hard requirements,
             location, sponsorship, learning upside and more. Conclusions are
             labels, never invented scores; where a fact is unknown it is marked
             as such. Pick a role to spin up a tailored campaign.

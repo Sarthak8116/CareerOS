@@ -10,7 +10,7 @@ import { groundSentences, type GroundedSentence } from "@/lib/package/claims";
 import { overlap } from "@/lib/package/match";
 
 /**
- * Cover-letter drafting — the highest-risk generation in the product.
+ * Cover-letter drafting, the highest-risk generation in the product.
  *
  * This module is PURE. It owns the shape a letter must take, the deterministic
  * letter we assemble when no model is available, the rendering, and the
@@ -20,7 +20,7 @@ import { overlap } from "@/lib/package/match";
  * held to a weaker standard than the deterministic one.
  *
  * The sentence-level shape is the whole design. A letter is not a blob of
- * prose we check afterwards — the generator must commit, per sentence, to what
+ * prose we check afterwards, the generator must commit, per sentence, to what
  * the sentence is doing and which evidence backs it. A sentence that cannot
  * name its evidence is either about the posting, or it is unsupported, and the
  * UI shows the user which before offering the download.
@@ -28,7 +28,7 @@ import { overlap } from "@/lib/package/match";
 
 export const CoverLetterSentence = z.object({
   text: z.string().min(1).max(400),
-  /** "evidence" | "profile" | "intent" — see lib/package/claims.ts. */
+  /** "evidence" | "profile" | "intent", see lib/package/claims.ts. */
   role: z.enum(["evidence", "profile", "intent"]),
   /** REQUIRED for role "evidence": an Evidence id from the candidate's graph. */
   evidenceId: z.string().optional(),
@@ -36,7 +36,7 @@ export const CoverLetterSentence = z.object({
 export type CoverLetterSentence = z.infer<typeof CoverLetterSentence>;
 
 export const CoverLetterDraft = z.object({
-  /** No invented recipient name — "Dear Hiring Team," unless the posting named one. */
+  /** No invented recipient name, "Dear Hiring Team," unless the posting named one. */
   greeting: z.string().min(1).max(120),
   paragraphs: z
     .array(z.object({ sentences: z.array(CoverLetterSentence).min(1).max(6) }))
@@ -138,7 +138,7 @@ export const DETERMINISTIC_BODY_SENTENCES = 3;
 /**
  * How a body sentence names the requirement it answers.
  *
- * These are OUR words, keyed off the requirement's kind — the posting's own
+ * These are OUR words, keyed off the requirement's kind, the posting's own
  * wording is deliberately NOT quoted into the sentence. A graded sentence must
  * contain only what the candidate is asserting: quoting an employer who writes
  * "reduce p99 latency by 30%" would put the employer's number inside the
@@ -157,7 +157,7 @@ const CONNECTIVE: Record<JobRequirement["kind"], string> = {
  *
  * Every body sentence QUOTES an evidence claim verbatim and cites its id, so
  * the grounding pass marks it "evidenced" without the module having to assert
- * anything of its own. It reads like an assembled letter because it is one —
+ * anything of its own. It reads like an assembled letter because it is one,
  * that honesty is the point, not a limitation to paper over.
  */
 export function deterministicCoverLetter(
@@ -182,7 +182,7 @@ export function deterministicCoverLetter(
     job,
     DETERMINISTIC_BODY_SENTENCES,
   ).map(({ evidence, requirement }) => ({
-    text: `${evidence.claim}${requirement ? ` — ${CONNECTIVE[requirement.kind]}` : ""}.`,
+    text: `${evidence.claim}${requirement ? `: ${CONNECTIVE[requirement.kind]}` : ""}.`,
     role: "evidence" as const,
     evidenceId: evidence.id,
   }));
@@ -216,7 +216,7 @@ export function deterministicCoverLetter(
 /**
  * Render a draft to the plain text that goes in the .zip.
  *
- * No claim labels are written into the letter itself — it has to be a document
+ * No claim labels are written into the letter itself, it has to be a document
  * the user can actually send. The per-sentence grading rides alongside it on
  * `PackageDocument.claims`, which is what the UI shows before export.
  */

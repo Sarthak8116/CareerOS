@@ -3,7 +3,7 @@ import type { Candidate, Evidence, Level, Confidence } from "@/lib/types";
 /**
  * Maps a job requirement's canonical skillKey to the candidate's supporting
  * evidence, producing a categorical match Level + confidence. Deterministic
- * and evidence-grounded — no invented experience (§5.1, §16).
+ * and evidence-grounded, no invented experience (§5.1, §16).
  */
 
 export interface SkillMatch {
@@ -97,7 +97,7 @@ export function matchSkill(
       level: "strong",
       confidence: "high",
       supportingEvidenceIds: [],
-      note: `${candidate.degree}, graduating ${candidate.graduationYear} — requirement met.`,
+      note: `${candidate.degree}, graduating ${candidate.graduationYear}, requirement met.`,
     };
   }
 

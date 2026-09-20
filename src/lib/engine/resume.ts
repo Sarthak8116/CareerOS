@@ -31,7 +31,7 @@ export interface ResumeStyleMemory {
  * Two responsibilities, both strictly evidence-grounded and deterministic
  * (no Math.random, no new Date):
  *
- *  1. getResumeRecommendations — rewrite existing resume bullets so the
+ *  1. getResumeRecommendations, rewrite existing resume bullets so the
  *     candidate's REAL evidence is framed against the job's REQUIREMENTS.
  *     Every `suggested` line is built from Evidence rows belonging to THIS
  *     candidate; nothing is invented, no metrics are added.
@@ -39,10 +39,10 @@ export interface ResumeStyleMemory {
  *     This used to be a hardcoded bank of prose keyed to the demo
  *     candidate's evidence ids. For anyone else `citeEvidence` degraded
  *     silently to raw ids and the product emitted confident sentences about
- *     a different person. It is now generated per candidate, per job — and
+ *     a different person. It is now generated per candidate, per job, and
  *     an empty list is the honest answer when nothing supports a rewrite.
  *
- *  2. verifyClaims — the honesty pass. Flags risky claims (weak evidence,
+ *  2. verifyClaims, the honesty pass. Flags risky claims (weak evidence,
  *     unsupported assertions, buzzword filler, fabricated metrics) so the
  *     candidate fixes them before an employer does.
  */
@@ -215,7 +215,7 @@ function isGrounded(candidate: Candidate, suggested: string, cited: Evidence[]):
 
 function reasonFor(row: RequirementCoverage, merged: boolean): string {
   const base = merged
-    ? "Groups the evidence that answers this requirement into one bullet, strongest first, with your public links attached — the reviewer sees the proof beside the claim instead of hunting for it."
+    ? "Groups the evidence that answers this requirement into one bullet, strongest first, with your public links attached, the reviewer sees the proof beside the claim instead of hunting for it."
     : "Attaches your public proof to the line that answers this requirement, so the claim arrives with its source.";
 
   if (row.missingTerms.length === 0) return base;
@@ -223,7 +223,7 @@ function reasonFor(row: RequirementCoverage, merged: boolean): string {
   const terms = row.missingTerms.slice(0, 5).map((t) => `"${t}"`).join(", ");
   return (
     `${base} The posting words this requirement as "${row.requirement}", and your recorded evidence never uses ${terms}. ` +
-    "Add those words yourself only where your work genuinely covers them — CareerOS will not put a skill, a metric, or a scope in your resume that your evidence does not back."
+    "Add those words yourself only where your work genuinely covers them, CareerOS will not put a skill, a metric, or a scope in your resume that your evidence does not back."
   );
 }
 
@@ -231,7 +231,7 @@ function reasonFor(row: RequirementCoverage, merged: boolean): string {
  * Rewrites for THIS candidate against THIS job.
  *
  * Only requirements the candidate's evidence already answers but does not
- * WORD like the posting produce a rewrite — that is the one gap a rewrite can
+ * WORD like the posting produce a rewrite, that is the one gap a rewrite can
  * actually close. A missing requirement needs evidence, not prose, and a thin
  * one needs a project (both are `gaps.ts`'s job). A requirement whose rewrite
  * would be identical to what the candidate already recorded produces nothing.
@@ -291,7 +291,7 @@ function hasInventedMetric(text: string): boolean {
 
 /**
  * Flags risky claims per §5.8. Deterministic scan over the candidate's own
- * evidence — the flags are advisory ("fix this before an employer notices"),
+ * evidence, the flags are advisory ("fix this before an employer notices"),
  * never fabrications. On honest, evidence-labelled data most claims pass:
  * that clean result is itself the point.
  */
@@ -306,7 +306,7 @@ export function verifyClaims(candidate: Candidate): ClaimFlag[] {
         text: ev.claim,
         issue: "invented-metric",
         severity: "strong",
-        note: "Contains a performance figure with no public benchmark or source to back it. Remove the number or link the proof — invented metrics are the fastest way to lose credibility in a screen.",
+        note: "Contains a performance figure with no public benchmark or source to back it. Remove the number or link the proof, invented metrics are the fastest way to lose credibility in a screen.",
       });
       continue; // one primary flag per claim keeps the list actionable
     }
@@ -318,7 +318,7 @@ export function verifyClaims(candidate: Candidate): ClaimFlag[] {
         text: ev.claim,
         issue: "unsupported",
         severity: "moderate",
-        note: "No shipped artifact backs this yet — it is an interest, not a demonstrated skill. Keep it phrased as interest (as written) or close the gap with a small public project before claiming competence.",
+        note: "No shipped artifact backs this yet, it is an interest, not a demonstrated skill. Keep it phrased as interest (as written) or close the gap with a small public project before claiming competence.",
       });
       continue;
     }
@@ -343,7 +343,7 @@ export function verifyClaims(candidate: Candidate): ClaimFlag[] {
         text: ev.claim,
         issue: "vague-buzzword",
         severity: "limited",
-        note: `Uses the filler word "${buzz}". Swap it for the concrete evidence you already have (projects, repos) — show the skill instead of asserting it.`,
+        note: `Uses the filler word "${buzz}". Swap it for the concrete evidence you already have (projects, repos), show the skill instead of asserting it.`,
       });
     }
   }

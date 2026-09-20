@@ -2,7 +2,7 @@ import type { Person } from "@/lib/types";
 
 /**
  * Cached hiring-network people for the demo campaign (build directive §5.10,
- * §20 reliability). All inferred relationships are clearly labeled — nothing
+ * §20 reliability). All inferred relationships are clearly labeled, nothing
  * is presented as a confirmed reporting line or recruiter ownership.
  */
 
@@ -13,7 +13,7 @@ export const demoPeople: Person[] = [
     title: "Senior Systems Software Engineer, GPU Runtime",
     company: "NVIDIA",
     inferredRole: "Likely team member on the hiring team",
-    connection: "UIUC alumnus (B.S. CS 2019) — same university as candidate",
+    connection: "UIUC alumnus (B.S. CS 2019), same university as candidate",
     commonality: "Shared university + systems-course background",
     relevance: "strong",
     influence: "moderate",

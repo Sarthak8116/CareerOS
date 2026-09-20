@@ -30,11 +30,11 @@ const REMOTE_BY_WORKPLACE: Record<string, Job["remote"]> = {
   remote: "remote",
   hybrid: "hybrid",
   onsite: "onsite",
-  // "unspecified" deliberately absent — it means the employer didn't say.
+  // "unspecified" deliberately absent, it means the employer didn't say.
 };
 
 /**
- * `categories.commitment` is FREE TEXT, not an enum — real values include
+ * `categories.commitment` is FREE TEXT, not an enum, real values include
  * null, "Regular Full Time (Salary)" and "Remote". We only map on an
  * unambiguous hit and otherwise leave the type unstated.
  */
@@ -125,7 +125,7 @@ export const leverAdapter: IntakeAdapter = {
     const remote = REMOTE_BY_WORKPLACE[workplace];
     const employmentType = employmentFromCommitment(raw.categories?.commitment);
 
-    // Epoch MILLISECONDS, not an ISO string. Guard the conversion — an invalid
+    // Epoch MILLISECONDS, not an ISO string. Guard the conversion, an invalid
     // number must leave `postedAt` absent rather than produce "Invalid Date".
     let postedAt: string | undefined;
     if (typeof raw.createdAt === "number" && Number.isFinite(raw.createdAt)) {

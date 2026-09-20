@@ -4,12 +4,12 @@ import { tokenize, normalizeForEquality, overlap, isSameTopic, MIN_SHARED_TOKENS
 /**
  * `isSameTopic` decides whether a saved answer / evidence item may stand in
  * for a form question / job requirement. Per the module's own header, an
- * OVER-match is the expensive failure — it presents a stored answer as if it
- * belonged to a question nobody asked — so these tests lean on cases that
+ * OVER-match is the expensive failure, it presents a stored answer as if it
+ * belonged to a question nobody asked, so these tests lean on cases that
  * ought to miss, not just ones that ought to hit.
  *
  * One documented exception: see "deliberate over-match (ruled acceptable,
- * not a bug)" below — a short query matching a longer, topically-broader
+ * not a bug)" below, a short query matching a longer, topically-broader
  * target is a RULED product decision, not an oversight, because the
  * resulting "reused" answer names the library question it came from rather
  * than silently claiming to be a clean match.
@@ -55,7 +55,7 @@ describe("overlap", () => {
   });
 });
 
-describe("isSameTopic — matches", () => {
+describe("isSameTopic, matches", () => {
   it("matches on exact normalized equality regardless of punctuation/case", () => {
     expect(isSameTopic("Why do you want to work here?", "why do you want to work here")).toBe(true);
   });
@@ -76,7 +76,7 @@ describe("isSameTopic — matches", () => {
   });
 });
 
-describe("isSameTopic — deliberate misses (over-matching is the expensive failure)", () => {
+describe("isSameTopic, deliberate misses (over-matching is the expensive failure)", () => {
   it("does not match two short questions sharing only stopwords/one topical word", () => {
     expect(isSameTopic("Are you authorized to work?", "Do you want this job?")).toBe(false);
   });
@@ -104,7 +104,7 @@ describe("isSameTopic — deliberate misses (over-matching is the expensive fail
 });
 
 /**
- * RULED, PINNED (not a bug) — coder-package's decision, made deliberately
+ * RULED, PINNED (not a bug), coder-package's decision, made deliberately
  * rather than reverse-engineered from a test case.
  *
  * `coverageOfQuery >= 0.7` has no ceiling on how much EXTRA content the
@@ -112,18 +112,18 @@ describe("isSameTopic — deliberate misses (over-matching is the expensive fail
  * library question that also covers other topics. coder-package chose not
  * to tighten this: the failure mode of matching is a user handed their OWN
  * saved answer, labelled "reused", with the library question it came from
- * printed alongside it (`matchAnswers` / `buildShortAnswers` — see
- * shortAnswers.test.ts) — visible over-answering, not a misleading claim.
+ * printed alongside it (`matchAnswers` / `buildShortAnswers`: see
+ * shortAnswers.test.ts), visible over-answering, not a misleading claim.
  * The failure mode of NOT matching is a silent "needs-you" on the single
  * most common application question ("Why do you want to work here?"),
  * defeating the point of having an answer library at all. Between visible
  * over-answering and silent missing, this module chooses to over-answer
- * visibly. Flagged to 'main' as a product call, not a defect — asserted here
+ * visibly. Flagged to 'main' as a product call, not a defect, asserted here
  * so a future edit that tightens branch 1 does so on purpose, with this test
  * as the thing it must consciously change, not by accident.
  */
-describe("isSameTopic — deliberate over-match (ruled acceptable, not a bug)", () => {
-  it("a short query DOES match a longer target that also covers substantial unrelated topics — by design", () => {
+describe("isSameTopic, deliberate over-match (ruled acceptable, not a bug)", () => {
+  it("a short query DOES match a longer target that also covers substantial unrelated topics, by design", () => {
     expect(
       isSameTopic(
         "Why do you want to work here?",

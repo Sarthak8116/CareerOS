@@ -35,7 +35,7 @@ describe("getProfile", () => {
   it("returns the stored profile once one is saved, and it survives a reload", () => {
     saveProfile({ ...demoCandidate, name: "Imported Person" });
     expect(hasStoredProfile()).toBe(true);
-    // A fresh read goes back through localStorage — this is the regression the
+    // A fresh read goes back through localStorage, this is the regression the
     // whole module exists to prevent.
     expect(getProfile().name).toBe("Imported Person");
   });

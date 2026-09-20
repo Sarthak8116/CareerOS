@@ -21,8 +21,8 @@ import { buildPersonalInfo } from "@/lib/package/personalInfo";
 /**
  * The application package builder.
  *
- * Assembles one campaign into the four documents the posting asks for, and —
- * just as importantly — the plain-language list of what it asks for that we
+ * Assembles one campaign into the four documents the posting asks for, and,
+ * just as importantly, the plain-language list of what it asks for that we
  * did NOT produce.
  *
  * "COMPLETE" IS A CLAIM, NOT A LABEL. `completeness` is derived from `missing`
@@ -38,7 +38,7 @@ import { buildPersonalInfo } from "@/lib/package/personalInfo";
 export interface BuildPackageInput {
   campaign: Campaign;
   candidate: Candidate;
-  /** The answer library. Passed in — `lib/answers.ts` is a client module. */
+  /** The answer library. Passed in, `lib/answers.ts` is a client module. */
   library: ApplicationAnswer[];
   /** ISO timestamp from the caller. Never `new Date()` inside this engine. */
   builtAt: string;
@@ -135,7 +135,7 @@ export function buildApplicationPackage(input: BuildPackageInput): BuiltPackage 
   /* --- Things we produce no document for at all -------------------- */
   if (form?.portfolio === "required" || form?.portfolio === "optional") {
     missing.push(
-      "A portfolio or work samples — this application asks for them and CareerOS does not assemble them.",
+      "A portfolio or work samples, this application asks for them and CareerOS does not assemble them.",
     );
   }
 
@@ -145,11 +145,11 @@ export function buildApplicationPackage(input: BuildPackageInput): BuiltPackage 
   // carried through and disclosed separately.
   if (!form) {
     missing.push(
-      "The application's own requirements — CareerOS never read a form for this posting, so this package is built on what it could infer from the job description alone.",
+      "The application's own requirements, CareerOS never read a form for this posting, so this package is built on what it could infer from the job description alone.",
     );
   } else if (form.completeness !== "complete") {
     missing.push(
-      "The rest of the application form — CareerOS read only part of it, so it cannot tell you this package is everything the employer asks for.",
+      "The rest of the application form, CareerOS read only part of it, so it cannot tell you this package is everything the employer asks for.",
     );
     missing.push(...form.unknowns);
   }

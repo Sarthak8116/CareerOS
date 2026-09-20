@@ -7,7 +7,7 @@ import type { Candidate, Person } from "@/lib/types";
  * exaggerated admiration, no early/aggressive referral asks, no generic
  * praise, and no invented shared interests. Every personalization point is
  * grounded in a real Person field (connection / commonality) or a real
- * Candidate evidence claim. All output is DETERMINISTIC — no randomness,
+ * Candidate evidence claim. All output is DETERMINISTIC, no randomness,
  * no clock reads. Timing is expressed as relative strings.
  */
 
@@ -41,7 +41,7 @@ export interface OutreachContext {
   team?: string;
   /**
    * Candidate evidence claims resolved from the evidence graph. Absent when the
-   * candidate has recorded nothing relevant — the copy then says less rather
+   * candidate has recorded nothing relevant, the copy then says less rather
    * than describing a background nobody recorded.
    */
   projectClaim?: string;
@@ -50,7 +50,7 @@ export interface OutreachContext {
 }
 
 /* ------------------------------------------------------------------ */
-/* Timing (relative strings only — never a real Date)                  */
+/* Timing (relative strings only, never a real Date)                  */
 /* ------------------------------------------------------------------ */
 
 export const FOLLOW_UP = "+5 business days";
@@ -83,7 +83,7 @@ const lines = (parts: Array<string | undefined>) =>
  * No direct "refer me" ask.
  */
 export function buildAlumnusCopy(ctx: OutreachContext): OutreachCopy {
-  const subject = `Fellow ${ctx.university} alum — quick question about ${workArea(ctx)} at ${ctx.company}`;
+  const subject = `Fellow ${ctx.university} alum, quick question about ${workArea(ctx)} at ${ctx.company}`;
   const project = projectLine(ctx, "Most recently I worked on:");
 
   const full = lines([
@@ -99,10 +99,10 @@ export function buildAlumnusCopy(ctx: OutreachContext): OutreachCopy {
     ctx.candidateFirstName,
   ]);
 
-  const concise = `Hi ${ctx.personFirstName} — fellow ${ctx.university} alum here, interested in the ${ctx.jobTitle} role at ${ctx.company}.${ctx.projectClaim ? ` I recently worked on ${ctx.projectClaim}.` : ""} Would you be open to a quick 15-min chat about your experience there, and how candidates are typically considered? Thanks either way. — ${ctx.candidateFirstName}`;
+  const concise = `Hi ${ctx.personFirstName}, fellow ${ctx.university} alum here, interested in the ${ctx.jobTitle} role at ${ctx.company}.${ctx.projectClaim ? ` I recently worked on ${ctx.projectClaim}.` : ""} Would you be open to a quick 15-min chat about your experience there, and how candidates are typically considered? Thanks either way., ${ctx.candidateFirstName}`;
 
   return {
-    objective: `Request a brief informational chat with a fellow alum, and softly learn the consideration path — no direct referral ask.`,
+    objective: `Request a brief informational chat with a fellow alum, and softly learn the consideration path, no direct referral ask.`,
     subject,
     full,
     concise,
@@ -114,7 +114,7 @@ export function buildAlumnusCopy(ctx: OutreachContext): OutreachCopy {
  * application + timeline process.
  */
 export function buildRecruiterCopy(ctx: OutreachContext): OutreachCopy {
-  const subject = `${ctx.jobTitle} at ${ctx.company} — interested candidate`;
+  const subject = `${ctx.jobTitle} at ${ctx.company}, interested candidate`;
   const background =
     ctx.supportingClaims.length > 0
       ? `Relevant background: ${ctx.supportingClaims.join("; ")}. On work authorization: ${ctx.workAuth}.`
@@ -133,7 +133,7 @@ export function buildRecruiterCopy(ctx: OutreachContext): OutreachCopy {
     ctx.candidateFullName,
   ]);
 
-  const concise = `Hi ${ctx.personFirstName} — I'm applying for the ${ctx.jobTitle} role at ${ctx.company}.${ctx.supportingClaims.length > 0 ? ` Relevant background: ${ctx.supportingClaims.join("; ")}.` : ""} (${ctx.workAuth}) Could you share the best way to get my application considered and the rough timeline? Happy to send my resume. Thanks! — ${ctx.candidateFirstName}`;
+  const concise = `Hi ${ctx.personFirstName}, I'm applying for the ${ctx.jobTitle} role at ${ctx.company}.${ctx.supportingClaims.length > 0 ? ` Relevant background: ${ctx.supportingClaims.join("; ")}.` : ""} (${ctx.workAuth}) Could you share the best way to get my application considered and the rough timeline? Happy to send my resume. Thanks!, ${ctx.candidateFirstName}`;
 
   return {
     objective: `Express specific interest in the ${ctx.jobTitle} role and ask the recruiter about the application path and timeline.`,
@@ -156,7 +156,7 @@ export function buildManagerCopy(ctx: OutreachContext): OutreachCopy {
   const full = lines([
     `Hi ${ctx.personFirstName},`,
     ``,
-    `${ctx.intro} I'm not writing to ask for anything — just to learn from someone close to ${workArea(ctx)} at ${ctx.company}.`,
+    `${ctx.intro} I'm not writing to ask for anything, just to learn from someone close to ${workArea(ctx)} at ${ctx.company}.`,
     ``,
     `${project ? `${project} ` : ""}It left me curious: what is the hardest trade-off your team is working through right now?`,
     ``,
@@ -166,17 +166,17 @@ export function buildManagerCopy(ctx: OutreachContext): OutreachCopy {
     ctx.candidateFirstName,
   ]);
 
-  const concise = `Hi ${ctx.personFirstName} — not asking for anything.${ctx.projectClaim ? ` After working on ${ctx.projectClaim}, I got curious:` : ""} what is the hardest trade-off your team is working through on ${workArea(ctx)} right now? Understand if you're too busy. — ${ctx.candidateFirstName}`;
+  const concise = `Hi ${ctx.personFirstName}, not asking for anything.${ctx.projectClaim ? ` After working on ${ctx.projectClaim}, I got curious:` : ""} what is the hardest trade-off your team is working through on ${workArea(ctx)} right now? Understand if you're too busy., ${ctx.candidateFirstName}`;
 
   return {
-    objective: `Ask one open question about the team's work — no referral, interview, or application ask. Sharpen the question before sending.`,
+    objective: `Ask one open question about the team's work, no referral, interview, or application ask. Sharpen the question before sending.`,
     subject,
     full,
     concise,
   };
 }
 
-/** Fallback for a contact whose role doesn't map cleanly — soft networking. */
+/** Fallback for a contact whose role doesn't map cleanly, soft networking. */
 export function buildNetworkingCopy(ctx: OutreachContext): OutreachCopy {
   const subject = `Interested in ${workArea(ctx)} at ${ctx.company}`;
   const project = projectLine(ctx, "Most recently I worked on:");
@@ -194,7 +194,7 @@ export function buildNetworkingCopy(ctx: OutreachContext): OutreachCopy {
     ctx.candidateFirstName,
   ]);
 
-  const concise = `Hi ${ctx.personFirstName} — I'm interested in the ${ctx.jobTitle} role at ${ctx.company}.${ctx.projectClaim ? ` I recently worked on ${ctx.projectClaim}.` : ""} I'd value any perspective you're willing to share about the team's work. No pressure. — ${ctx.candidateFirstName}`;
+  const concise = `Hi ${ctx.personFirstName}, I'm interested in the ${ctx.jobTitle} role at ${ctx.company}.${ctx.projectClaim ? ` I recently worked on ${ctx.projectClaim}.` : ""} I'd value any perspective you're willing to share about the team's work. No pressure., ${ctx.candidateFirstName}`;
 
   return {
     objective: `Open a low-pressure networking conversation and learn about the team's work.`,
@@ -205,29 +205,29 @@ export function buildNetworkingCopy(ctx: OutreachContext): OutreachCopy {
 }
 
 /* ------------------------------------------------------------------ */
-/* Risk scanner (§5.14) — flags the patterns messages must avoid       */
+/* Risk scanner (§5.14), flags the patterns messages must avoid       */
 /* ------------------------------------------------------------------ */
 
 const RISK_CHECKS: Array<[RegExp, string]> = [
   [
     /\b(as you know|we both know|you and i both|like you,? i|as a friend|we go way back)\b/i,
-    "Possible fake familiarity — verify any claimed closeness is real before sending.",
+    "Possible fake familiarity, verify any claimed closeness is real before sending.",
   ],
   [
     /\b(huge fan|biggest fan|admire your|amazing|incredible|revolutionary|world-class|genius|deeply honored)\b/i,
-    "Possible exaggerated admiration — keep praise specific, restrained, and true.",
+    "Possible exaggerated admiration, keep praise specific, restrained, and true.",
   ],
   [
     /\b(great company|love your work|impressive work|awesome team|amazing team|big fan of)\b/i,
-    "Possible generic praise — replace with a concrete, specific reference.",
+    "Possible generic praise, replace with a concrete, specific reference.",
   ],
   [
     /\b(refer me|referral to|get me an interview|hire me|guarantee me|forward my resume to the hiring)\b/i,
-    "Contains an early/aggressive ask — soften to a low-pressure request.",
+    "Contains an early/aggressive ask, soften to a low-pressure request.",
   ],
   [
     /\b(we share a passion|our shared love|we both love|as fellow enthusiasts)\b/i,
-    "Possible fabricated shared interest — only reference commonalities backed by a real signal.",
+    "Possible fabricated shared interest, only reference commonalities backed by a real signal.",
   ],
 ];
 
@@ -241,7 +241,7 @@ export function scanMessageRisks(copy: OutreachCopy): string[] {
     if (re.test(text)) warnings.push(msg);
   }
   if (copy.full.length > MAX_BODY_CHARS) {
-    warnings.push("Message body is long — trim it to respect the reader's time.");
+    warnings.push("Message body is long, trim it to respect the reader's time.");
   }
   return warnings;
 }
@@ -271,7 +271,7 @@ export function buildPersonalizationFacts(
     const confirmed =
       !person.warmth &&
       (person.trust === "verified" || person.trust === "source-backed");
-    facts.push(`${person.commonality}${confirmed ? "" : " (inferred — not confirmed)"}`);
+    facts.push(`${person.commonality}${confirmed ? "" : " (inferred, not confirmed)"}`);
   }
   if (primaryEvidenceClaim) {
     facts.push(`Candidate evidence referenced: ${primaryEvidenceClaim}`);
@@ -286,7 +286,7 @@ export function buildClaimsToVerify(person: Person): string[] {
   const trusted = person.trust === "verified" || person.trust === "user-provided";
   if (!trusted) {
     claims.push(
-      `Role inference "${person.inferredRole}" is unconfirmed (${person.trust}, confidence ${person.confidence}) — verify before relying on it.`,
+      `Role inference "${person.inferredRole}" is unconfirmed (${person.trust}, confidence ${person.confidence}), verify before relying on it.`,
     );
   }
   if (

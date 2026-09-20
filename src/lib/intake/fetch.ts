@@ -22,12 +22,12 @@ import { IntakeError } from "@/lib/intake/types";
  *  - THE ADDRESS VALIDATED IS THE ADDRESS CONNECTED TO (see below)
  *  - the hostname is also resolved and checked up front, as defence in depth
  *  - redirects are followed MANUALLY, at most 3 hops, and the host is
- *    re-validated on EVERY hop — a public host is free to redirect into the
+ *    re-validated on EVERY hop, a public host is free to redirect into the
  *    metadata service, so validating only the first URL proves nothing
  *  - the response body is capped, so a hostile server cannot exhaust memory
  *  - no cookies, no Authorization, no caller headers are ever forwarded
  *
- * HOW DNS REBINDING IS CLOSED — and why the obvious phrasing is wrong.
+ * HOW DNS REBINDING IS CLOSED, and why the obvious phrasing is wrong.
  *
  * The invariant is: THE ADDRESS VALIDATED MUST BE THE ADDRESS CONNECTED TO.
  *
@@ -39,7 +39,7 @@ import { IntakeError } from "@/lib/intake/types";
  *
  * So we pass a custom `lookup` to `https.request`. That function is what
  * supplies the address the socket actually connects to, and it applies the
- * private/loopback/link-local checks itself — so validation and connection
+ * private/loopback/link-local checks itself, so validation and connection
  * share ONE resolution and no window exists. Rejecting inside the lookup means
  * the socket never receives an address at all.
  *
@@ -61,7 +61,7 @@ const TIMEOUT_MS = 15_000;
 /** Hard ceiling on a response body. Job postings are far smaller than this. */
 const MAX_BYTES = 2 * 1024 * 1024;
 
-/** Redirect hops allowed. Short on purpose — real postings need 0 or 1. */
+/** Redirect hops allowed. Short on purpose, real postings need 0 or 1. */
 const MAX_REDIRECTS = 3;
 
 /** A plain, honest UA. We identify ourselves rather than impersonating. */
@@ -110,7 +110,7 @@ function isPrivateIPv4(ip: string): boolean {
 function isPrivateIPv6(ip: string): boolean {
   const normalized = ip.toLowerCase().split("%")[0];
   if (normalized === "::" || normalized === "::1") return true;
-  // IPv4-mapped (::ffff:169.254.169.254) — check the embedded address.
+  // IPv4-mapped (::ffff:169.254.169.254), check the embedded address.
   const mapped = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/.exec(normalized);
   if (mapped) return isPrivateIPv4(mapped[1]);
   if (/^f[cd][0-9a-f]{2}:/.test(normalized)) return true; // unique-local fc00::/7
@@ -143,7 +143,7 @@ function blockedError(address: string): NodeJS.ErrnoException {
  *
  * Node calls it as `(hostname, options, callback)`. With `options.all === true`
  * the callback receives an ARRAY of `{address, family}`; otherwise a single
- * address plus family. Both shapes are handled — mishandling the array form
+ * address plus family. Both shapes are handled, mishandling the array form
  * would silently skip the check for every multi-record host.
  */
 export function guardedLookup(
@@ -156,7 +156,7 @@ export function guardedLookup(
   ) => void,
 ): void {
   // `dns.lookup` is overloaded on whether `options.all` is set, and the option
-  // comes from Node at call time rather than from us — so the callback is typed
+  // comes from Node at call time rather than from us, so the callback is typed
   // for BOTH result shapes here and narrowed below.
   const onResolved = (
     err: NodeJS.ErrnoException | null,
@@ -243,7 +243,7 @@ async function assertSafeUrl(raw: string): Promise<URL> {
   if (records.length === 0) {
     throw new IntakeError("upstream", "That host could not be found.");
   }
-  // EVERY resolved address must be public — a hostname with one public and one
+  // EVERY resolved address must be public, a hostname with one public and one
   // private A record would otherwise be a way through.
   for (const record of records) {
     if (isPrivateAddress(record.address, record.family)) {
@@ -267,7 +267,7 @@ interface RawResponse {
 /**
  * One GET, connected through `guardedLookup`.
  *
- * Redirects are NOT followed here — `safeFetch` follows them by hand so each
+ * Redirects are NOT followed here, `safeFetch` follows them by hand so each
  * hop is re-validated. The body is capped while it streams, so an oversized
  * response is abandoned rather than buffered.
  */
@@ -293,7 +293,7 @@ function httpsGet(url: URL): Promise<RawResponse> {
         lookup: guardedLookup,
         headers: {
           // Deliberately minimal. No cookies, no Authorization, no caller
-          // headers — we never act with the user's credentials.
+          // headers, we never act with the user's credentials.
           accept: "application/json, text/html;q=0.9, */*;q=0.5",
           "user-agent": USER_AGENT,
         },
@@ -313,7 +313,7 @@ function httpsGet(url: URL): Promise<RawResponse> {
         /** Abandon the rest of the body and settle with what we have. */
         const stopReading = () => {
           // Guarded: a real IncomingMessage is a stream, but settling must not
-          // depend on that — if `destroy` is unavailable we still resolve.
+          // depend on that, if `destroy` is unavailable we still resolve.
           if (typeof res.destroy === "function") res.destroy();
           done();
         };
@@ -378,7 +378,7 @@ const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 /**
  * Fetch one URL safely, following a small number of redirects by hand.
  *
- * Returns the response even for a non-2xx status — the orchestrator maps status
+ * Returns the response even for a non-2xx status, the orchestrator maps status
  * codes to user-facing outcomes, and a 404 is a normal result here, not an
  * exception.
  */
@@ -386,7 +386,7 @@ export async function safeFetch(rawUrl: string): Promise<FetchedResponse> {
   let current = rawUrl;
 
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-    // Pre-check, then connect — and the connection re-checks the address it
+    // Pre-check, then connect, and the connection re-checks the address it
     // actually uses, via `guardedLookup`. Both run on EVERY hop: a public host
     // is free to redirect into private space.
     const url = await assertSafeUrl(current);
@@ -445,7 +445,7 @@ export function asJson(res: {
   const body = res.text.trim();
   if (!body) return undefined;
   // Trust the declared type when it is present, but still tolerate a JSON body
-  // served with a sloppy content-type — several boards do exactly that.
+  // served with a sloppy content-type, several boards do exactly that.
   if (type && !/json/i.test(type) && !/^[[{]/.test(body)) return undefined;
   try {
     return JSON.parse(body);

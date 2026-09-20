@@ -66,7 +66,7 @@ export function EvidenceCard({ evidence }: { evidence: Evidence }) {
 }
 
 /* ---------------------------------------------------------------- */
-/* Fit dimension row (§5.3, §5.7) — categorical, no fake %           */
+/* Fit dimension row (§5.3, §5.7), categorical, no fake %           */
 /* ---------------------------------------------------------------- */
 
 const fitFillWidth: Record<string, string> = {
@@ -92,7 +92,7 @@ export function FitDimensionRow({ dimension }: { dimension: FitDimension }) {
           <ConfidencePill confidence={dimension.confidence} />
         </div>
       </div>
-      {/* Qualitative bar — a visual aid, not a precise number. */}
+      {/* Qualitative bar, a visual aid, not a precise number. */}
       <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
         <div className={cn("h-full rounded-full", fitFillWidth[dimension.level], fitFillColor[dimension.level])} />
       </div>
@@ -242,7 +242,7 @@ export function PersonRow({ person, highlight }: { person: Person; highlight?: b
         <TrustPill trust={person.trust} />
       </div>
 
-      {/* Provenance — who told us this, and when. */}
+      {/* Provenance, who told us this, and when. */}
       {person.provenance && (
         <p className="mt-2 text-[11px] text-slate-400">
           Source: LinkedIn via HarvestAPI ·{" "}
@@ -362,7 +362,7 @@ function MiniStat({ label, level }: { label: string; level: Level }) {
 }
 
 /* ---------------------------------------------------------------- */
-/* Task row (§5.18) — client toggle lives in the page               */
+/* Task row (§5.18), client toggle lives in the page               */
 /* ---------------------------------------------------------------- */
 
 export function TaskRow({

@@ -11,7 +11,7 @@ describe("gmailComposeUrl", () => {
     expect(url.searchParams.has("to")).toBe(false);
   });
 
-  it("drops anything that is not a single plain address — no header smuggling", () => {
+  it("drops anything that is not a single plain address, no header smuggling", () => {
     for (const to of ["a@b.com, evil@x.com", "a@b.com\nBcc: evil@x.com", "not-an-email", " "]) {
       expect(new URL(gmailComposeUrl({ to, subject: "s", body: "b" })).searchParams.has("to")).toBe(false);
     }

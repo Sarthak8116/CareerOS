@@ -10,7 +10,7 @@ import { computeRequirementCoverage } from "@/lib/engine/keywords";
 
 /**
  * Computes the six categorical fit dimensions (build directive §5.3, §5.7).
- * No single mysterious score and no fake percentages — each dimension is a
+ * No single mysterious score and no fake percentages, each dimension is a
  * Level + confidence + a plain-language explanation the user can inspect.
  */
 
@@ -36,11 +36,11 @@ export function computeFit(
   const prefMatches = coverage.filter((r) => r.kind === "preferred");
   const minReqs = minMatches;
 
-  /* Role fit — coverage of the minimum bar. */
+  /* Role fit, coverage of the minimum bar. */
   const roleLevel = averageLevel(minMatches.map((m) => m.level));
   const metMin = minMatches.filter((m) => LEVEL_RANK[m.level] >= 2).length;
 
-  /* Evidence fit — how much of the match is backed by public proof. */
+  /* Evidence fit, how much of the match is backed by public proof. */
   const supportingIds = [...minMatches, ...prefMatches].flatMap(
     (m) => m.supportingEvidenceIds,
   );
@@ -50,7 +50,7 @@ export function computeFit(
   const evidenceLevel: Level =
     publicProof >= 4 ? "strong" : publicProof >= 2 ? "moderate" : "limited";
 
-  /* Preference fit — does the role match stated targets? */
+  /* Preference fit, does the role match stated targets? */
   const titleMatch = candidate.targetRoles.some((r) =>
     job.normalizedTitle.toLowerCase().includes(r.toLowerCase().split(" ")[0]),
   );
@@ -64,14 +64,14 @@ export function computeFit(
   const preferenceLevel: Level =
     titleMatch && industryMatch ? "strong" : titleMatch || industryMatch ? "moderate" : "limited";
 
-  /* Network strength — presence of relevant, accessible contacts. */
+  /* Network strength, presence of relevant, accessible contacts. */
   const firstContacts = people.filter((p) => p.outreachPriority === "first").length;
   const strongRelevance = people.filter((p) => p.relevance === "strong").length;
 
   /**
    * When contacts carry overlap-scored warmth (live, sourced network), a real
    * shared school or former employer is a better signal of network strength
-   * than counting titles — so it can lift this dimension one step. It is still
+   * than counting titles, so it can lift this dimension one step. It is still
    * an inference, which is why "strong" is never reachable here and the
    * explanation says so. With no warmth data this is a no-op and the original
    * count-based level stands.
@@ -94,10 +94,10 @@ export function computeFit(
   const networkLevel: Level =
     stronglyWarm >= 1 ? "moderate" : warmContacts >= 1 ? "limited" : countBasedLevel;
 
-  /* Application urgency — deadline proximity (categorical, not a countdown). */
+  /* Application urgency, deadline proximity (categorical, not a countdown). */
   const urgencyLevel: Level = job.deadline ? "moderate" : "limited";
 
-  /* Improvement potential — how much a quick sprint could raise the profile. */
+  /* Improvement potential, how much a quick sprint could raise the profile. */
   const closeToMet = coverage.filter((r) => r.state === "partially-covered").length;
   // Only a canonically-keyed preferred skill has a known quick path to proof.
   const weakPrefs = prefMatches.filter(
@@ -143,7 +143,7 @@ export function computeFit(
             ? "The title matches a role you are targeting; the company's area is outside your stated industries."
             : industryMatch
               ? "The company's area matches your stated industries, but the title is not one you listed as a target."
-              : "Neither the title nor the company's area matches your stated targets — worth a deliberate decision before investing in it.",
+              : "Neither the title nor the company's area matches your stated targets, worth a deliberate decision before investing in it.",
       supportingEvidenceIds: [],
     },
     {
@@ -165,7 +165,7 @@ export function computeFit(
       level: urgencyLevel,
       confidence: "medium",
       explanation: job.deadline
-        ? `A posted deadline (${job.deadline}) means this should not sit — but there is time to make 1–2 high-impact improvements first.`
+        ? `A posted deadline (${job.deadline}) means this should not sit, but there is time to make 1–2 high-impact improvements first.`
         : `No firm deadline detected; apply once the quick wins are done.`,
       supportingEvidenceIds: [],
     },
@@ -176,7 +176,7 @@ export function computeFit(
       confidence: "medium",
       explanation:
         closeToMet >= 1
-          ? `${closeToMet} ${closeToMet === 1 ? "requirement is" : "requirements are"} partly met — a short focused sprint on wording and public proof could visibly strengthen this application.`
+          ? `${closeToMet} ${closeToMet === 1 ? "requirement is" : "requirements are"} partly met, a short focused sprint on wording and public proof could visibly strengthen this application.`
           : weakPrefs >= 1
             ? "A preferred skill is within reach of one small, focused project."
             : "Few requirements are partly met, so quick wins are limited; larger gaps need new evidence.",

@@ -141,7 +141,7 @@ export const Job = z.object({
    *
    * `employmentType` above is a three-member enum the engines switch on, so it
    * must always hold one of those values. Real postings say things the enum
-   * cannot represent — "Part time" has no honest member. Rather than widen the
+   * cannot represent, "Part time" has no honest member. Rather than widen the
    * enum (which would break exhaustive switches downstream) we keep a best-fit
    * value there and preserve the source wording here, so nothing the posting
    * actually said is lost and the UI can show the user the real text.
@@ -157,17 +157,17 @@ export const Job = z.object({
    * The product's hard line is that a field we did not read is never given a
    * plausible-looking value. `Job` predates intake and makes `location`,
    * `seniority` and `employmentType` required, so a placeholder is unavoidable
-   * — this list is what stops that placeholder from silently reading as data.
+   *, this list is what stops that placeholder from silently reading as data.
    * Render each entry via `UNSTATED_LABELS` in `lib/labels.ts`.
    *
    * Only fields that HOLD a substituted value appear here. `postedAt` and
    * `deadline` are optional and simply absent when unstated, so nothing renders
-   * for them and there is no false impression to correct — they are
+   * for them and there is no false impression to correct, they are
    * deliberately excluded. An absent date that genuinely matters (Workday's
    * relative "Posted Today", which we refuse to turn into a real date) is
    * reported through `IntakeResult.assumptions` instead.
    *
-   * READ WITH `employmentTypeRaw` — together they distinguish two cases that
+   * READ WITH `employmentTypeRaw`: together they distinguish two cases that
    * mean different things to the user, and the UI shows different copy for each:
    *
    *   in `unstated` + NO  `employmentTypeRaw`  →  the posting was SILENT
@@ -176,7 +176,7 @@ export const Job = z.object({
    *                                               represent (e.g. "Part time")
    *
    * That inference is TOTAL today because `employmentType` is the only field
-   * whose enum lacks an unknown member — `location` and `seniority` are free
+   * whose enum lacks an unknown member, `location` and `seniority` are free
    * strings, so they are either stated or the literal "Unknown", and `remote`
    * and `sponsorship` have real "unknown"/"unclear" members. If a SECOND
    * unrepresentable-enum field is ever added, this inference stops being total
@@ -322,7 +322,7 @@ export const WarmthSignal = z.object({
     "shared-skill",
   ]),
   detail: z.string(),
-  /** Constrained to inference labels — an overlap is never a confirmed tie. */
+  /** Constrained to inference labels, an overlap is never a confirmed tie. */
   trust: z.enum(["strong-inference", "weak-inference"]),
 });
 export type WarmthSignal = z.infer<typeof WarmthSignal>;
@@ -341,7 +341,7 @@ export type Warmth = z.infer<typeof Warmth>;
 
 /**
  * Company facts as published by the company itself on LinkedIn. Factual fields
- * only — headcount, industries, specialities. No analysis, no invented research.
+ * only, headcount, industries, specialities. No analysis, no invented research.
  */
 export const HarvestCompanyFacts = z.object({
   name: z.string(),

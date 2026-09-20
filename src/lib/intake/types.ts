@@ -3,7 +3,7 @@ import type { ApplicationForm, Job } from "@/lib/types";
 /**
  * Intake contract types.
  *
- * PURE module — no network, no clock, no `server-only`. Everything here is a
+ * PURE module, no network, no clock, no `server-only`. Everything here is a
  * type or a tiny value so adapters, the route, and the UI can all import it.
  *
  * The structural rule this file exists to enforce: an adapter NEVER performs
@@ -17,7 +17,7 @@ import type { ApplicationForm, Job } from "@/lib/types";
 /* ------------------------------------------------------------------ */
 
 /**
- * Why intake could not produce a Job. Coarse on purpose — the route maps each
+ * Why intake could not produce a Job. Coarse on purpose, the route maps each
  * to one user-safe sentence, exactly as `HarvestErrorKind` does.
  */
 export type IntakeErrorKind =
@@ -102,7 +102,7 @@ export interface AdapterOutput {
  * Unverified scraps pulled off a page we could not fully parse.
  *
  * These may NEVER reach a persisted `Job`. They exist to prefill an editable
- * review form the user must confirm first — that confirmation is what turns a
+ * review form the user must confirm first, that confirmation is what turns a
  * guess into a user-provided fact.
  */
 export interface IntakePartial {
@@ -139,7 +139,7 @@ export type IntakeFallback = "paste-job" | "paste-questions";
 /**
  * The single shape the route always returns.
  *
- * Partial success is `ok: true` with `form.completeness: "none"` — that is the
+ * Partial success is `ok: true` with `form.completeness: "none"`: that is the
  * NORMAL Lever/Ashby/Workday path, not an error. `ok: false` means we have no
  * Job at all.
  */
@@ -175,7 +175,7 @@ export type IntakeResult =
  * failure and hands the user a working alternative instead of guessing.
  */
 export const PASTE_JOB_MESSAGE =
-  "We couldn't read this posting — paste the details instead.";
+  "We couldn't read this posting, paste the details instead.";
 
 /** Map a thrown value to a concise, user-safe message. Mirrors Harvest. */
 export function intakeSafeMessage(err: unknown): string {
@@ -184,15 +184,15 @@ export function intakeSafeMessage(err: unknown): string {
       case "unsafe-url":
         return "That link doesn't look like a public job posting URL.";
       case "unsupported-source":
-        return "We don't read that job board yet — paste the details instead.";
+        return "We don't read that job board yet, paste the details instead.";
       case "blocked":
-        return "That posting is behind a login, so we can't read it — paste the details instead.";
+        return "That posting is behind a login, so we can't read it, paste the details instead.";
       case "not-found":
         return "That posting couldn't be found. It may have been closed or the link may be wrong.";
       case "rate-limited":
-        return "That job board is rate limiting us — try again shortly.";
+        return "That job board is rate limiting us, try again shortly.";
       case "timeout":
-        return "That posting took too long to load — try again.";
+        return "That posting took too long to load, try again.";
       case "unreadable":
         return PASTE_JOB_MESSAGE;
       default:

@@ -64,7 +64,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               Demo mode
             </span>
             <p className="mt-1 leading-relaxed">
-              Running on deterministic cached data — no API keys required.
+              Running on deterministic cached data, no API keys required.
             </p>
           </div>
         </div>

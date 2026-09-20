@@ -6,7 +6,7 @@ import { Sparkles, ArrowRight } from "lucide-react";
 import { Button, Pill } from "@/components/ui/primitives";
 
 /**
- * Sign-in — DEMO MODE mock.
+ * Sign-in, DEMO MODE mock.
  * No credentials are collected or submitted. The email field is decorative
  * (never read, never posted). The only real action is navigation into the
  * demo app. Nothing here touches the network.
@@ -41,7 +41,7 @@ export default function SignIn() {
           <form
             className="space-y-4"
             onSubmit={(e) => {
-              // Demo mock — never submits credentials anywhere.
+              // Demo mock, never submits credentials anywhere.
               e.preventDefault();
               router.push("/dashboard");
             }}
@@ -65,7 +65,7 @@ export default function SignIn() {
                 <Pill className="bg-slate-50 text-slate-500 ring-slate-200">
                   Demo
                 </Pill>
-                No password needed — this is a mock sign-in.
+                No password needed, this is a mock sign-in.
               </p>
             </div>
 

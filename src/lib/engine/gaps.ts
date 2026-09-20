@@ -28,7 +28,7 @@ export function computeGaps(candidate: Candidate, job: Job): Gap[] {
   for (const req of job.requirements) {
     if (req.kind === "responsibility") continue;
     if (!req.skillKey) {
-      // Age and work-eligibility lines are facts only the user can confirm —
+      // Age and work-eligibility lines are facts only the user can confirm,
       // not skills, and not something evidence could ever "cover".
       if (ELIGIBILITY.test(req.text)) continue;
       const row = coverage.get(req.id);
@@ -85,7 +85,7 @@ export function computeGaps(candidate: Candidate, job: Job): Gap[] {
 
     /* --- Debugging: the skill IS demonstrated (cache simulator) but the resume
        frames it as "implemented a simulator", not as low-level debugging. This is
-       a framing gap, so it surfaces even when the skill is strongly evidenced —
+       a framing gap, so it surfaces even when the skill is strongly evidenced,
        checked BEFORE the "comfortably met" skip below. --- */
     if (req.skillKey === "systems_debug" && rank >= 2) {
       gaps.push({
@@ -103,12 +103,12 @@ export function computeGaps(candidate: Candidate, job: Job): Gap[] {
           effort: "quick",
         },
         evidenceNote:
-          "Strong source-backed evidence exists (cachesim repo) — this is a framing gap, not a skill gap.",
+          "Strong source-backed evidence exists (cachesim repo), this is a framing gap, not a skill gap.",
       });
       continue;
     }
 
-    // Requirement is comfortably met — no gap.
+    // Requirement is comfortably met, no gap.
     if (rank >= 2 && match.confidence !== "low") continue;
 
     /* --- Docker / CI / cloud: on a team with no DevOps, this IS the job. --- */
@@ -144,7 +144,7 @@ export function computeGaps(candidate: Candidate, job: Job): Gap[] {
           kind: "build-project",
           summary: "Ship one small CUDA exercise to turn interest into proof",
           detail:
-            "The candidate is interested in GPU/parallel work but has no public CUDA artifact. A weekend project — e.g. a CUDA vector-add or tiled matrix-multiply with a short write-up — converts a weak inference into source-backed evidence and directly answers the 'GPU programming a plus' line.",
+            "The candidate is interested in GPU/parallel work but has no public CUDA artifact. A weekend project, e.g. a CUDA vector-add or tiled matrix-multiply with a short write-up, converts a weak inference into source-backed evidence and directly answers the 'GPU programming a plus' line.",
           expectedImpact: "strong",
           effort: "moderate",
         },

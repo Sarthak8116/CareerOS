@@ -18,7 +18,7 @@ import { DocumentCard } from "@/components/PackageDocumentCard";
  * could quietly get wrong in the user's favour:
  *
  *  1. UNSUPPORTED CLAIMS BLOCK EXPORT. A cover letter is free prose about a
- *     real person — the easiest place in this product to invent a job, a
+ *     real person, the easiest place in this product to invent a job, a
  *     metric or an enthusiasm. Every unsupported sentence is shown and must be
  *     resolved (owned or removed) before the .zip is offered.
  *  2. "COMPLETE" IS A CLAIM. It is only rendered when the data supports it:
@@ -37,7 +37,7 @@ import { DocumentCard } from "@/components/PackageDocumentCard";
  */
 
 /* ------------------------------------------------------------------ */
-/* Derivations — read off the package, never stored alongside it        */
+/* Derivations, read off the package, never stored alongside it        */
 /* ------------------------------------------------------------------ */
 
 /** Documents that actually carry text into the archive. */
@@ -72,14 +72,14 @@ export function PackageReview({
   const unresolved = useMemo(() => unresolvedClaims(pkg), [pkg]);
   /* WHAT THE ARCHIVE WILL ACTUALLY CONTAIN, asked of the zipper rather than
      restated here. `includedDocuments` also drops any document whose content
-     is empty — so a document the user edits down to nothing silently would not
+     is empty, so a document the user edits down to nothing silently would not
      be in the .zip while this page still showed it as part of the package.
      Deriving the answer from the same function that builds the archive is the
      only way the review surface and the export cannot disagree. */
   const archived = useMemo(() => new Set(includedDocuments(pkg)), [pkg]);
   const gaps = pkg.missing;
   /* "Complete" is only said when BOTH signals agree. A package that claims
-     complete while naming gaps is a defect somewhere upstream — it is not the
+     complete while naming gaps is a defect somewhere upstream, it is not the
      UI's business to smooth that over in the reassuring direction. */
   const readsComplete = pkg.completeness === "complete" && gaps.length === 0;
   const exportBlocked = unresolved.length > 0;
@@ -99,7 +99,7 @@ export function PackageReview({
       <Card>
         <CardHeader
           title="Your application package"
-          subtitle={`${pkg.folderName} — read it back before you send it anywhere.`}
+          subtitle={`${pkg.folderName}, read it back before you send it anywhere.`}
           action={
             readsComplete ? (
               <Pill className="bg-emerald-50 text-emerald-700 ring-emerald-600/20">
@@ -154,7 +154,7 @@ export function PackageReview({
           </div>
         )}
 
-        {/* A deliberate omission, not a failure — so it isn't styled as one. */}
+        {/* A deliberate omission, not a failure, so it isn't styled as one. */}
         {pkg.excludedSections.length > 0 && (
           <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-slate-200 bg-slate-50 p-3">
             <ShieldCheck
@@ -166,7 +166,7 @@ export function PackageReview({
               <span className="font-medium text-slate-700">
                 {formatList(pkg.excludedSections)}
               </span>
-              . CareerOS doesn&apos;t read or pre-fill those questions —
+              . CareerOS doesn&apos;t read or pre-fill those questions,
               you&apos;ll complete them on the employer&apos;s site.
             </p>
           </div>
@@ -205,7 +205,7 @@ export function PackageReview({
 }
 
 /* ------------------------------------------------------------------ */
-/* Export — offered only once nothing is claiming more than it can      */
+/* Export, offered only once nothing is claiming more than it can      */
 /* ------------------------------------------------------------------ */
 
 function ExportBar({
@@ -249,7 +249,7 @@ function ExportBar({
         </Button>
         {!blocked && partial && (
           <span className="text-xs text-slate-500">
-            You can download the partial package — the gaps above are still
+            You can download the partial package, the gaps above are still
             yours to fill.
           </span>
         )}

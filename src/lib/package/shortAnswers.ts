@@ -12,13 +12,13 @@ import {
 } from "@/lib/package/personalInfo";
 
 /**
- * Short answers — the form's own questions, paired with the answer library.
+ * Short answers, the form's own questions, paired with the answer library.
  *
  * THE DISTINCTION THIS FILE EXISTS TO PROTECT: an answer pulled from the
  * library is "reused". One written for this posting is "drafted". Collapsing
  * them would tell the user CareerOS wrote something for this job when it
  * pulled it from a drawer. Nothing here drafts, so nothing here is ever
- * labelled "drafted" — every answer is either reused verbatim, with the
+ * labelled "drafted", every answer is either reused verbatim, with the
  * library question it came from named in the file, or it is left for the user
  * with the question quoted and an explicit "you must write this".
  *
@@ -38,7 +38,7 @@ export interface AnsweredQuestion {
  *
  * The first library entry that reads as the same question wins; library order
  * is the user's own, so this is stable and explicable. A near-miss is NOT a
- * match — an unanswered question costs the user a note, whereas a wrong
+ * match, an unanswered question costs the user a note, whereas a wrong
  * "reused" answer costs them the application.
  */
 export function matchAnswers(
@@ -58,7 +58,7 @@ export function matchAnswers(
  *
  * Personal-details questions go to the personal-info sheet and resume /
  * cover-letter uploads to their own documents, so they are not counted here
- * twice — a question must appear in exactly one document or the package's
+ * twice, a question must appear in exactly one document or the package's
  * `missing` list would double-count it.
  */
 export function shortAnswerQuestions(
@@ -76,7 +76,7 @@ export function shortAnswerQuestions(
 function requirementLabel(question: ApplicationQuestion): string {
   if (question.required === true) return "Required";
   if (question.required === false) return "Optional";
-  // ABSENT means we did not read whether it is required — not that it is not.
+  // ABSENT means we did not read whether it is required, not that it is not.
   return "CareerOS could not read whether this is required";
 }
 
@@ -112,14 +112,14 @@ export function buildShortAnswers(input: {
     return {
       status: "needs-you",
       content:
-        `# Short answers — ${input.jobTitle} at ${input.company}\n\n` +
+        `# Short answers, ${input.jobTitle} at ${input.company}\n\n` +
         "CareerOS could not read this application's questions, so none are " +
-        "listed here. Open the employer's form and answer whatever it asks — " +
+        "listed here. Open the employer's form and answer whatever it asks, " +
         "saving those answers to your answer library will let CareerOS reuse " +
         "them next time.\n",
       claims: [],
       missing: [
-        "This application's questions — CareerOS could not read the form, so none were answered.",
+        "This application's questions, CareerOS could not read the form, so none were answered.",
       ],
       answered,
     };
@@ -137,7 +137,7 @@ export function buildShortAnswers(input: {
     }
     return [
       header,
-      `*${requirementLabel(question)} · YOU MUST WRITE THIS — no saved answer matched.*`,
+      `*${requirementLabel(question)} · YOU MUST WRITE THIS, no saved answer matched.*`,
       "",
       "> (your answer)",
     ].join("\n");
@@ -148,13 +148,13 @@ export function buildShortAnswers(input: {
   return {
     status: unanswered.length > 0 ? "needs-you" : "reused",
     content:
-      `# Short answers — ${input.jobTitle} at ${input.company}\n\n` +
+      `# Short answers, ${input.jobTitle} at ${input.company}\n\n` +
       "Answers marked as reused came from your answer library exactly as you " +
-      "saved them. CareerOS did not rewrite them for this posting — read each " +
+      "saved them. CareerOS did not rewrite them for this posting, read each " +
       "one against this job before you paste it.\n\n" +
       `${sections.join("\n\n")}\n`,
     // The user wrote every one of these. They are theirs, not ours, and no
-    // evidence row backs them — "user-provided" is the only honest label.
+    // evidence row backs them, "user-provided" is the only honest label.
     claims: answered
       .filter((a): a is Required<AnsweredQuestion> => Boolean(a.source))
       .map((a) => ({
@@ -163,7 +163,7 @@ export function buildShortAnswers(input: {
       })),
     missing: unanswered.map(
       ({ question }) =>
-        `An answer to "${question.prompt}" — no saved answer matched, so you must write it.`,
+        `An answer to "${question.prompt}", no saved answer matched, so you must write it.`,
     ),
     answered,
   };

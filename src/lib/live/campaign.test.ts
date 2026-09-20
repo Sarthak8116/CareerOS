@@ -7,26 +7,26 @@ import { demoJob } from "@/lib/demo/job";
 import { demoPeople } from "@/lib/demo/people";
 
 /**
- * buildLiveCampaign — the résumé-truncation provenance behaviour
+ * buildLiveCampaign, the résumé-truncation provenance behaviour
  * (coder-nemotron's suggestion, worth testing): when fewer résumé pages were
  * sent than the PDF actually has, the campaign's `activity` feed must carry
  * an honest, high-confidence "conflict" entry saying so, positioned BEFORE
- * any conclusion the analysis model drew — a campaign that reads as if it
+ * any conclusion the analysis model drew, a campaign that reads as if it
  * saw the whole résumé when it only saw part of one is exactly the silent
  * dishonesty the honesty contract (careeros/contract/cross-cutting-rules,
  * rule 1-2) forbids.
  *
  * The route (src/app/api/campaign/route.ts) DERIVES `truncated` server-side
- * as `pages.length < totalPages` and never trusts the client's own flag —
+ * as `pages.length < totalPages` and never trusts the client's own flag,
  * verified by reading the route directly, a one-line computation not worth a
  * duplicate test. What's tested here is that buildLiveCampaign, GIVEN that
  * derived flag, actually surfaces it honestly rather than dropping it.
  *
- * `fetch` is mocked throughout — fixtures for LiveCandidate/LiveJob/
+ * `fetch` is mocked throughout, fixtures for LiveCandidate/LiveJob/
  * LiveAnalysis are built by running the same PURE demo engine the deterministic
  * path uses (computeFit/computeGaps/computeTasks/computeActivity), since
  * LiveCandidate/LiveJob are exactly Candidate/Job minus `id` (and `source` for
- * Job) — the demo fixtures already satisfy those schemas.
+ * Job), the demo fixtures already satisfy those schemas.
  */
 
 const ENV_KEY = "NVIDIA_API_KEY";
@@ -58,13 +58,13 @@ function chatContent(content: string) {
   return jsonResponse({ choices: [{ message: { content } }] });
 }
 
-/** LiveCandidate = Candidate.omit({id}).extend({evidence}) — demoCandidate already has evidence. */
+/** LiveCandidate = Candidate.omit({id}).extend({evidence}), demoCandidate already has evidence. */
 function liveCandidateFixture() {
   const { id: _id, ...rest } = demoCandidate;
   return rest;
 }
 
-/** LiveJob = Job.omit({id, source}).extend({requirements}) — demoJob already has requirements. */
+/** LiveJob = Job.omit({id, source}).extend({requirements}), demoJob already has requirements. */
 function liveJobFixture() {
   const { id: _id, source: _source, ...rest } = demoJob;
   return rest;
@@ -88,7 +88,7 @@ function liveAnalysisFixture() {
   };
 }
 
-describe("buildLiveCampaign — résumé-truncation provenance", () => {
+describe("buildLiveCampaign, résumé-truncation provenance", () => {
   it("puts an honest, high-confidence 'Résumé Reader' conflict entry FIRST in activity when the résumé was truncated, and states the limit in the trusted TASK text (not the untrusted fence)", async () => {
     const fetchMock = vi
       .fn()

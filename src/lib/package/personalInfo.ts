@@ -15,7 +15,7 @@ import type {
  * a phone number, so those fields say so in plain language and appear in the
  * package's `missing` list rather than being filled with something plausible.
  *
- * The status is "reused", never "drafted" — this sheet was pulled from the
+ * The status is "reused", never "drafted", this sheet was pulled from the
  * user's profile, not written for this posting, and saying otherwise would
  * claim work the product did not do.
  *
@@ -77,8 +77,8 @@ const LABELS: Record<ApplicationAutofillKey, string> = {
 
 /** Why a field is blank. Worded for the user, not for a log. */
 const NOT_STORED: Partial<Record<ApplicationAutofillKey, string>> = {
-  email: "CareerOS does not store your email address — add it yourself.",
-  phone: "CareerOS does not store your phone number — add it yourself.",
+  email: "CareerOS does not store your email address, add it yourself.",
+  phone: "CareerOS does not store your phone number, add it yourself.",
 };
 
 export interface PersonalField {
@@ -154,8 +154,8 @@ export function personalField(
   const note =
     NOT_STORED[key] ??
     (key === "first-name" || key === "last-name"
-      ? "Your profile stores one full name that does not split cleanly — enter this yourself."
-      : "Not in your CareerOS profile — add it yourself.");
+      ? "Your profile stores one full name that does not split cleanly, enter this yourself."
+      : "Not in your CareerOS profile, add it yourself.");
   return { key, label, note };
 }
 
@@ -213,19 +213,19 @@ export function buildPersonalInfo(input: {
       : "CareerOS could not read this application's own fields, so these are the ones applications usually ask for. Check the employer's form for anything else.",
     "",
     ...fields.map((f) =>
-      f.value ? `- **${f.label}:** ${f.value}` : `- **${f.label}:** — ${f.note}`,
+      f.value ? `- **${f.label}:** ${f.value}` : `- **${f.label}:** ${f.note}`,
     ),
   ];
 
   return {
     status: blank.length > 0 ? "needs-you" : "reused",
     content: `${lines.join("\n")}\n`,
-    // Profile fields are facts the USER gave us. They are never "evidenced" —
-    // no evidence row backs your phone number — and never "unsupported" either.
+    // Profile fields are facts the USER gave us. They are never "evidenced",
+    // no evidence row backs your phone number, and never "unsupported" either.
     claims: filled.map((f) => ({
       text: `${f.label}: ${f.value}`,
       support: "user-provided" as const,
     })),
-    missing: blank.map((f) => `${f.label} — ${f.note}`),
+    missing: blank.map((f) => `${f.label}, ${f.note}`),
   };
 }

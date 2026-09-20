@@ -18,7 +18,7 @@ import { slugId } from "@/lib/utils";
 /**
  * Pure mapping from validated raw Harvest records into the app's own shapes.
  *
- * No network, no Date.now(), no Math.random — `fetchedAt` is always passed in,
+ * No network, no Date.now(), no Math.random, `fetchedAt` is always passed in,
  * so the same inputs always produce the same output and the mapping is fully
  * testable from fixtures.
  *
@@ -64,7 +64,7 @@ function fullName(profile: HarvestProfile): string | undefined {
 /**
  * Is this role still current?
  *
- * The live actor sends `endDate: { text: "Present" }` for ongoing roles — the
+ * The live actor sends `endDate: { text: "Present" }` for ongoing roles, the
  * key EXISTS but carries no month/year. Treating "has an endDate" as "ended"
  * silently pushed every current role aside and fell back to the headline,
  * producing titles like "Passionate about micro-services…" instead of
@@ -86,7 +86,7 @@ function currentTitle(profile: HarvestProfile): string | undefined {
   const experience = profile.experience ?? [];
   const current = experience.find((e) => e.position && isCurrentRole(e));
   // If nothing reads as current, the most recent listed position still beats a
-  // headline — LinkedIn orders experience newest-first.
+  // headline, LinkedIn orders experience newest-first.
   const mostRecent = experience.find((e) => e.position);
 
   return (
@@ -106,7 +106,7 @@ function locationText(profile: HarvestProfile): string | undefined {
 }
 
 /* ------------------------------------------------------------------ */
-/* Role classification — which contacts matter for a job application   */
+/* Role classification, which contacts matter for a job application   */
 /* ------------------------------------------------------------------ */
 
 export type ContactRole =
@@ -164,11 +164,11 @@ const ROLE_ACCESSIBILITY: Record<ContactRole, Level> = {
 };
 
 const ROLE_DESCRIPTION: Record<ContactRole, string> = {
-  recruiter: "Recruiting or talent — likely screens applications for this role",
+  recruiter: "Recruiting or talent, likely screens applications for this role",
   "hiring-manager": "Senior leader in the org this role sits in",
-  "engineering-manager": "Engineering manager — plausibly the hiring manager",
+  "engineering-manager": "Engineering manager, plausibly the hiring manager",
   "team-lead": "Senior IC or lead on a team adjacent to this role",
-  engineer: "Engineer at the company — closest to the day-to-day work",
+  engineer: "Engineer at the company, closest to the day-to-day work",
   other: "Works at the company; relevance to this role is unclear",
 };
 
@@ -176,7 +176,7 @@ const ROLE_DESCRIPTION: Record<ContactRole, string> = {
  * Map one validated LinkedIn profile into the app's `Person` shape.
  *
  * Returns `undefined` when the record lacks the minimum to be a useful,
- * attributable contact (a name and a title) — dropped, not rendered.
+ * attributable contact (a name and a title), dropped, not rendered.
  */
 export function profileToPerson(
   profile: HarvestProfile,
@@ -195,7 +195,7 @@ export function profileToPerson(
     title,
     company: opts.companyName,
     inferredRole: ROLE_DESCRIPTION[role],
-    // What LinkedIn states vs. what we are guessing — spelled out for the user.
+    // What LinkedIn states vs. what we are guessing, spelled out for the user.
     connection:
       "No existing connection. Employer and title are from their public LinkedIn profile; " +
       "their involvement in this specific role is an inference.",
@@ -219,7 +219,7 @@ export function profileToPerson(
  * Map the candidate's OWN profile into evidence-graph records.
  *
  * Used by the onboarding LinkedIn step. Everything here is the user's own
- * public profile, so `publicProof` is true and the source is `linkedin` — but
+ * public profile, so `publicProof` is true and the source is `linkedin`: but
  * trust stays `source-backed`, not `verified`: LinkedIn shows what someone
  * typed about themselves, which is not the same as confirmed.
  */
@@ -252,7 +252,7 @@ export function profileToEvidence(profile: HarvestProfile): Evidence[] {
     const detail = [degree, field].filter(Boolean).join(", ");
     evidence.push({
       id: slugId("ev", `linkedin:edu:${school}`),
-      claim: detail ? `${detail} — ${school}` : school,
+      claim: detail ? `${detail} · ${school}` : school,
       category: "education",
       sourceType: "linkedin",
       sourceReference: profile.linkedinUrl,
@@ -302,7 +302,7 @@ export function companyToFacts(
     description: clean(company.description, 1200),
     website: company.website ?? undefined,
     industries: (company.industries ?? [])
-      // The live API returns objects here, the docs claim strings — handle both.
+      // The live API returns objects here, the docs claim strings, handle both.
       .map((i) => clean(typeof i === "string" ? i : (i.name ?? i.title), 80))
       .filter((i): i is string => !!i),
     specialities: (company.specialities ?? [])

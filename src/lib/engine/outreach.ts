@@ -46,7 +46,7 @@ export function classifyOutreachRole(person: Person): OutreachRole {
   return "networking";
 }
 
-/** Channel choice per role — deterministic. */
+/** Channel choice per role, deterministic. */
 function channelForRole(role: OutreachRole): "email" | "linkedin" {
   return role === "recruiter" ? "email" : "linkedin";
 }
@@ -81,7 +81,7 @@ function resolveEvidence(
 /** One sentence of self-introduction, from the candidate's own profile only. */
 function introFor(candidate: Candidate): string {
   const headline = candidate.headline.trim();
-  if (headline) return `I'm ${firstNameOf(candidate.name)} — ${headline.replace(/\.$/, "")}.`;
+  if (headline) return `I'm ${firstNameOf(candidate.name)}, ${headline.replace(/\.$/, "")}.`;
   const degree = candidate.degree.trim();
   const university = candidate.university.trim();
   if (degree && university) {
@@ -92,7 +92,7 @@ function introFor(candidate: Candidate): string {
 
 /**
  * When none of the job-keyed skills resolve, fall back to the strongest thing
- * the candidate actually recorded — never to a description of a background.
+ * the candidate actually recorded, never to a description of a background.
  */
 function strongestEvidence(
   candidate: Candidate,
@@ -193,7 +193,7 @@ export function generateOutreach(input: {
   const warnings = scanMessageRisks(copy);
   if (person.trust === "weak-inference" || person.confidence === "low") {
     warnings.push(
-      `Relationship/role is a weak inference (${person.trust}, confidence ${person.confidence}) — keep every claim tentative and verify before acting.`,
+      `Relationship/role is a weak inference (${person.trust}, confidence ${person.confidence}), keep every claim tentative and verify before acting.`,
     );
   }
 
@@ -214,7 +214,7 @@ export function generateOutreach(input: {
   const claimsToVerify = buildClaimsToVerify(person);
   if (person.email) {
     // The provider checked that the mailbox answers. That is NOT confirmation
-    // that it belongs to this person or that they read it — so it goes in the
+    // that it belongs to this person or that they read it, so it goes in the
     // verify list every time, never presented as a verified address.
     claimsToVerify.push(
       `Email address "${person.email.address}" was ${person.email.status}. Confirm it is the right person before sending.`,
@@ -222,7 +222,7 @@ export function generateOutreach(input: {
   }
   if ((person.recentActivity?.length ?? 0) > 0) {
     claimsToVerify.push(
-      "Post excerpts are quoted from their public LinkedIn activity — re-read the original before referencing it, in case the excerpt lost context.",
+      "Post excerpts are quoted from their public LinkedIn activity, re-read the original before referencing it, in case the excerpt lost context.",
     );
   }
 

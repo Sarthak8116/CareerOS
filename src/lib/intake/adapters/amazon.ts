@@ -11,7 +11,7 @@ import {
 } from "@/lib/intake/map";
 
 /**
- * amazon.jobs — Amazon's own careers site.
+ * amazon.jobs, Amazon's own careers site.
  *
  * The posting is server-rendered but carries no JSON-LD, so the generic
  * adapter (which refuses to guess at markup) cannot read it. The markup is

@@ -24,7 +24,7 @@ import type { Campaign } from "@/lib/types";
 /**
  * Guided demo intro (build directive §13 `/demo`, P0 #20 "preloaded demo works").
  * On mount we ensure the deterministic NVIDIA campaign is seeded, then hand the
- * viewer a short tour of the five things worth looking at — each deep-linking
+ * viewer a short tour of the five things worth looking at, each deep-linking
  * into a real sub-route of the seeded campaign. No fabricated numbers: every
  * label here comes from the seeded campaign itself.
  */
@@ -43,7 +43,7 @@ const STOPS: Stop[] = [
     icon: Target,
     label: "Fit",
     title: "Evidence-backed fit",
-    body: "See how each requirement is scored against Ava's real projects and coursework — labeled by strength and confidence.",
+    body: "See how each requirement is scored against Ava's real projects and coursework, labeled by strength and confidence.",
     path: "",
   },
   {
@@ -57,7 +57,7 @@ const STOPS: Stop[] = [
     icon: Sparkles,
     label: "Gap → Action",
     title: "Every gap becomes one next step",
-    body: "Turn each weakness into the single best action — a rewrite, a small project, an outreach — tracked on the overview.",
+    body: "Turn each weakness into the single best action, a rewrite, a small project, an outreach, tracked on the overview.",
     path: "",
   },
   {
@@ -157,7 +157,7 @@ export default function DemoPage() {
             <span className="font-medium text-slate-800">
               {demo.job.company}
             </span>
-            . Everything below is real, deterministic output — no sign-up and no
+            . Everything below is real, deterministic output, no sign-up and no
             API keys. Follow the five stops, then open the full campaign.
           </p>
           <div className="mt-7">

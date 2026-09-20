@@ -12,7 +12,7 @@ import {
 } from "@/lib/types/campaign";
 
 /* ================================================================== */
-/* PHASE 3 CONTRACTS — shared schemas for the parallel agent fleet.    */
+/* PHASE 3 CONTRACTS, shared schemas for the parallel agent fleet.    */
 /* Defined centrally (build directive §9: agree schemas before impl).  */
 /* ================================================================== */
 
@@ -185,7 +185,7 @@ export const JobComparison = z.object({
 export type JobComparison = z.infer<typeof JobComparison>;
 
 /* ================================================================== */
-/* PHASE 5 CONTRACTS — broader product (saved jobs, answers, GitHub).  */
+/* PHASE 5 CONTRACTS, broader product (saved jobs, answers, GitHub).  */
 /* ================================================================== */
 
 /* --- Saved jobs (§5.2) --- */
@@ -241,18 +241,18 @@ export const GitHubProfileAnalysis = z.object({
 export type GitHubProfileAnalysis = z.infer<typeof GitHubProfileAnalysis>;
 
 /* ================================================================== */
-/* P2 CONTRACTS — the application package (the downloadable .zip).     */
+/* P2 CONTRACTS, the application package (the downloadable .zip).     */
 /* Frozen before implementation; additive to everything above.         */
 /* ================================================================== */
 
 /**
  * What a sentence in a generated document actually rests on.
  *
- *  - "evidenced"     — it cites an Evidence row in the candidate's graph.
- *  - "user-provided" — it restates something the user themselves supplied
+ *  - "evidenced"    , it cites an Evidence row in the candidate's graph.
+ *  - "user-provided", it restates something the user themselves supplied
  *                      (a stored profile field, a saved answer, their own
  *                      stated intent to apply). Not evidence, but not ours.
- *  - "unsupported"   — nothing backs it. The UI flags these BEFORE export is
+ *  - "unsupported"  , nothing backs it. The UI flags these BEFORE export is
  *                      offered; a package may legitimately contain them, but
  *                      the user must see them first.
  */
@@ -266,8 +266,8 @@ export type PackageClaimSupport = z.infer<typeof PackageClaimSupport>;
 /**
  * One factual statement from a generated document, with what backs it.
  *
- * Cover-letter prose is the highest-risk generation in this product — free
- * text about a real person — so every sentence carries one of these rather
+ * Cover-letter prose is the highest-risk generation in this product, free
+ * text about a real person, so every sentence carries one of these rather
  * than the document carrying a single overall verdict.
  */
 export const PackageClaim = z.object({
@@ -291,11 +291,11 @@ export type PackageDocumentKind = z.infer<typeof PackageDocumentKind>;
  * calling a library answer "drafted" would claim the product wrote something
  * for this posting when it pulled it from a drawer.
  *
- *  - "drafted"       — CareerOS produced this FOR this posting.
- *  - "reused"        — pulled from the answer library / stored profile as-is.
- *  - "needs-you"     — the application asks for it and we could not supply it;
+ *  - "drafted"      , CareerOS produced this FOR this posting.
+ *  - "reused"       , pulled from the answer library / stored profile as-is.
+ *  - "needs-you"    , the application asks for it and we could not supply it;
  *                      the file says exactly what the user must write.
- *  - "not-requested" — we read the WHOLE form and it does not ask for this.
+ *  - "not-requested", we read the WHOLE form and it does not ask for this.
  *                      Only a form whose completeness is "complete" can say
  *                      this; anything less says "needs-you" and asks.
  */
@@ -309,7 +309,7 @@ export type PackageDocumentStatus = z.infer<typeof PackageDocumentStatus>;
 
 export const PackageDocument = z.object({
   kind: PackageDocumentKind,
-  /** SANITIZED — derives from scraped title/company. See lib/package/filenames.ts. */
+  /** SANITIZED, derives from scraped title/company. See lib/package/filenames.ts. */
   fileName: z.string(),
   status: PackageDocumentStatus,
   content: z.string(),
@@ -320,7 +320,7 @@ export type PackageDocument = z.infer<typeof PackageDocument>;
 /**
  * Everything the posting asks for, assembled into one downloadable folder.
  *
- * `completeness` is DERIVED from `missing` and must never be set directly —
+ * `completeness` is DERIVED from `missing` and must never be set directly,
  * see `deriveCompleteness` in `lib/package/build.ts`, which is the only place
  * that computes it. "Complete" is a claim about the employer's form, not a
  * label we get to apply because four files exist.
@@ -329,14 +329,14 @@ export const ApplicationPackage = z.object({
   campaignId: z.string(),
   jobId: z.string(),
   builtAt: z.string(),
-  /** SANITIZED — the single folder every entry lives under. */
+  /** SANITIZED, the single folder every entry lives under. */
   folderName: z.string(),
   documents: z.array(PackageDocument),
   /** DERIVED from `missing`. Never assign this directly. */
   completeness: z.enum(["complete", "partial"]),
   /** Plain-language sentences: what the form asks for that we did NOT produce. */
   missing: z.array(z.string()),
-  /** Carried through from ApplicationForm — the EEO block we never parse. */
+  /** Carried through from ApplicationForm, the EEO block we never parse. */
   excludedSections: z.array(z.string()),
 });
 export type ApplicationPackage = z.infer<typeof ApplicationPackage>;

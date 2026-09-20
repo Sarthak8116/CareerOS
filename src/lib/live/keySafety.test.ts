@@ -6,38 +6,38 @@ import path from "node:path";
  * Key-handling guards for the Nemotron provider swap (P2.5).
  *
  * FROZEN CONTRACT (careeros/contract/p2.5-nemotron-provider): four distinct
- * keys — NVIDIA_API_KEY_PARSE / _NANO / _SUPER / _LIGHTNING — read from
+ * keys, NVIDIA_API_KEY_PARSE / _NANO / _SUPER / _LIGHTNING, read from
  * process.env, server-only, never logged, never returned to the client.
  * Anthropic's ANTHROPIC_API_KEY is being removed entirely.
  *
  * This suite does NOT hardcode which file ends up reading the keys. It scans
  * every non-test .ts/.tsx file under src/ for a file that READS an
- * NVIDIA_API_KEY* var (a literal `process.env.NVIDIA_API_KEY_X` expression —
+ * NVIDIA_API_KEY* var (a literal `process.env.NVIDIA_API_KEY_X` expression,
  * the form nemotron.ts actually uses, see its `ownKey`/`configuredKeys`) and
  * asserts, for every file it finds:
  *
  * Deliberately NOT selected on merely naming a var: jobs/live/page.tsx is a
  * `"use client"` page that (at one point) printed a variable NAME in its
- * "live mode is off" copy so a user could set it — it cannot import
+ * "live mode is off" copy so a user could set it, it cannot import
  * server-only (that throws in a client bundle) and doing so on a bare mention
  * would be a false positive, not a real guard. Reading is the property that
  * matters; naming a var in UI copy is not a leak.
  *
  *   1. `import "server-only";` is the literal first line (excluding Next.js
  *      `app/api/**\/route.ts` handlers, which are inherently server-only and
- *      by this codebase's own convention — see the harvest routes — don't
+ *      by this codebase's own convention, see the harvest routes, don't
  *      carry the guard themselves; they call into a guarded lib module).
  *   2. No console.log/warn/error/info/debug call anywhere in the file.
  *   3. No line naming an NVIDIA_API_KEY* env var also appears on the same
- *      line as a console.* call or a NextResponse.json(...) call — the
+ *      line as a console.* call or a NextResponse.json(...) call, the
  *      cheap, reliable half of "never logged / never client-visible" that a
  *      static scan can actually prove without guessing at a specific
  *      env-lookup style (dynamic `process.env[name]` via a name table is a
  *      legitimate pattern here and must not be flagged as if it were a leak).
  *
- * The much stronger property — that the key VALUE itself, not just its env
+ * The much stronger property, that the key VALUE itself, not just its env
  * var name, never survives an error round-trip (e.g. an API echoing back an
- * Authorization header, or a network exception message) — can't be proven
+ * Authorization header, or a network exception message), can't be proven
  * by reading source; it's asserted behaviorally with a canary value in
  * nemotron.test.ts's "key material never survives an error round-trip"
  * suite. Treat the two as complementary, not redundant.
@@ -45,7 +45,7 @@ import path from "node:path";
  * Mirrors src/lib/harvest/client.test.ts's "server-only guard" tests for the
  * Harvest client, extended because the Nemotron swap touches FOUR keys
  * across (at least) a provider module, a campaign builder, and a
- * cover-letter generator — more surface than one client file.
+ * cover-letter generator, more surface than one client file.
  *
  * If this file finds zero matching source files, the swap hasn't landed yet:
  * we emit a single it.todo rather than a vacuous pass, so the gap is visible
@@ -85,7 +85,7 @@ describe("Nemotron key-handling guards", () => {
   if (files.length === 0) {
     it.todo(
       "no module under src/ reads (process.env.NVIDIA_API_KEY*) an NVIDIA key " +
-        "yet — the Nemotron provider swap (contract: " +
+        "yet, the Nemotron provider swap (contract: " +
         "careeros/contract/p2.5-nemotron-provider) hasn't landed. Re-run once " +
         "coder-nemotron reports; this suite auto-discovers whichever file(s) " +
         "they created.",

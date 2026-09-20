@@ -19,7 +19,7 @@ import { canonicalPostingUrl } from "@/lib/intake/urls";
 import { slugId } from "@/lib/utils";
 
 /**
- * Generic adapter — any board we don't have a dedicated adapter for.
+ * Generic adapter, any board we don't have a dedicated adapter for.
  *
  * It reads ONLY server-rendered schema.org JSON-LD (`<script
  * type="application/ld+json">` with `"@type": "JobPosting"`). If a page has
@@ -31,7 +31,7 @@ import { slugId } from "@/lib/utils";
  * Job at all. Page text is used only as unverified PREFILL on the failure path,
  * where the user must confirm it before anything is saved.
  *
- * JSON-LD is inconsistent across the industry — it is present on Ashby's apply
+ * JSON-LD is inconsistent across the industry, it is present on Ashby's apply
  * pages and absent from Lever's, and most career sites are client-rendered
  * SPAs that inject any SEO markup after load, invisible to a plain fetch. So a
  * miss here is the expected case, not a bug.
@@ -43,7 +43,7 @@ const EMPLOYMENT_BY_SCHEMA: Record<string, Job["employmentType"]> = {
   CONTRACTOR: "contract",
   TEMPORARY: "contract",
   INTERN: "internship",
-  // PART_TIME, VOLUNTEER, PER_DIEM and OTHER deliberately absent — our enum
+  // PART_TIME, VOLUNTEER, PER_DIEM and OTHER deliberately absent, our enum
   // has no honest member for them, so they stay unstated and survive verbatim
   // in `employmentTypeRaw`.
 };
@@ -155,7 +155,7 @@ export const genericAdapter: IntakeAdapter = {
       : undefined;
 
     // TELECOMMUTE is schema.org's explicit remote marker. Anything else leaves
-    // the field unstated — we never read remoteness out of description prose.
+    // the field unstated, we never read remoteness out of description prose.
     const remote: Job["remote"] | undefined =
       raw.jobLocationType && /telecommute/i.test(raw.jobLocationType)
         ? "remote"

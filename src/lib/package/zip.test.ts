@@ -6,14 +6,14 @@ import { buildPackageZip, packageEntries, includedDocuments, packageZipName, REA
 /**
  * The REAL export pipeline: a scraped job title → `buildApplicationPackage`
  * → `buildPackageZip` → real JSZip bytes. This is the "wired in" proof the
- * P2 contract asks for — not the sanitizer alone (see filenames.test.ts) and
+ * P2 contract asks for, not the sanitizer alone (see filenames.test.ts) and
  * not the builder alone (see build.test.ts), but the two of them actually
  * connected end to end, producing bytes a real extractor would read.
  *
  * Method note (see filenames.test.ts for the full explanation): entry names
  * are read from the ZIP's raw LOCAL FILE HEADER records, not from
  * `JSZip.loadAsync(...).files`, because `loadAsync` silently normalizes
- * literal ".." path components while building its own folder tree — a false
+ * literal ".." path components while building its own folder tree, a false
  * "safe" reading for a name that is not actually safe in the bytes.
  */
 
@@ -119,7 +119,7 @@ function buildPkg(title: string, company: string): ApplicationPackage {
   }).package;
 }
 
-describe("packageEntries — the manifest that goes into the archive", () => {
+describe("packageEntries, the manifest that goes into the archive", () => {
   it("includes a README plus every document that carries content", () => {
     const pkg = buildPkg("Systems Software Engineer", "Acme Corp");
     const entries = packageEntries(pkg);
@@ -142,7 +142,7 @@ describe("packageEntries — the manifest that goes into the archive", () => {
   });
 });
 
-describe("buildPackageZip — end-to-end real archive from a HOSTILE scraped posting", () => {
+describe("buildPackageZip, end-to-end real archive from a HOSTILE scraped posting", () => {
   it("a malicious job title and company never reach the archive bytes unsanitized", async () => {
     const pkg = buildPkg("../../etc/evil", "..\\..\\Windows\\System32");
     const bytes = await buildPackageZip(pkg);
@@ -199,7 +199,7 @@ describe("buildPackageZip — end-to-end real archive from a HOSTILE scraped pos
 });
 
 describe("packageZipName", () => {
-  it("is the sanitized folderName plus .zip — never the raw job title", () => {
+  it("is the sanitized folderName plus .zip, never the raw job title", () => {
     const pkg = buildPkg("../../etc/evil", "Acme Corp");
     const name = packageZipName(pkg);
     expect(name).toBe(`${pkg.folderName}.zip`);

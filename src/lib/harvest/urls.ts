@@ -38,7 +38,7 @@ export function canonicalLinkedInUrl(url: string): string {
  * Best-effort company page URL from a company name.
  *
  * LinkedIn company slugs are usually the lowercased, hyphenated name. This is a
- * GUESS — when it is wrong the company lookup simply returns nothing and the
+ * GUESS, when it is wrong the company lookup simply returns nothing and the
  * caller keeps its existing fallback, so a bad guess costs one failed call and
  * never produces wrong data.
  */

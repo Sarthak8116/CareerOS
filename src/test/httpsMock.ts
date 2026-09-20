@@ -10,7 +10,7 @@ import type { Mock } from "vitest";
  * the DNS-rebinding window. That makes `global.fetch` useless as a test seam,
  * so these helpers stand in for the transport instead.
  *
- * Each test file still needs its own hoisted mock — `vi.mock` is hoisted above
+ * Each test file still needs its own hoisted mock, `vi.mock` is hoisted above
  * imports, so the factory cannot reference anything from here:
  *
  *   vi.mock("node:https", () => ({ default: { request: vi.fn() } }));
@@ -35,7 +35,7 @@ export interface StubbedResponse {
 /** What the code under test asked for, captured for assertions. */
 export interface CapturedRequest {
   url: string;
-  /** The `lookup` the request was made with — the SSRF guard. */
+  /** The `lookup` the request was made with, the SSRF guard. */
   lookup?: unknown;
   headers?: Record<string, unknown>;
 }
@@ -44,7 +44,7 @@ export interface CapturedRequest {
  * Point the mocked `https.request` at a canned response.
  *
  * Returns the list of captured requests, which grows as the code under test
- * makes them — one entry per redirect hop.
+ * makes them, one entry per redirect hop.
  */
 export function respondWith(
   request: Mock,

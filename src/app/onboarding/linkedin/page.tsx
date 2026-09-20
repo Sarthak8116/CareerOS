@@ -89,7 +89,7 @@ export default function ImportLinkedin() {
   const [error, setError] = useState<string | null>(null);
   const [liveProfile, setLiveProfile] = useState<LiveProfile | null>(null);
   const [liveEvidence, setLiveEvidence] = useState<Evidence[]>([]);
-  /** What actually persisted — reported honestly, not as "imported everything". */
+  /** What actually persisted, reported honestly, not as "imported everything". */
   const [saved, setSaved] = useState<{ added: number; updated: number } | null>(null);
   const [connectionImport, setConnectionImport] = useState<{
     count: number;
@@ -132,7 +132,7 @@ export default function ImportLinkedin() {
       setLiveEvidence(evidence);
 
       // PERSIST it. Without this the import is display-only and evaporates on
-      // reload — the profile store exists precisely to stop that.
+      // reload, the profile store exists precisely to stop that.
       const merged = addEvidence(evidence);
       fillProfileFields({
         name: data.profile?.name,
@@ -168,9 +168,9 @@ export default function ImportLinkedin() {
 
   const importedFields: { label: string; value: string }[] = liveProfile
     ? [
-        { label: "Name", value: liveProfile.name || "—" },
-        { label: "Headline", value: liveProfile.headline || "—" },
-        { label: "Location", value: liveProfile.location || "—" },
+        { label: "Name", value: liveProfile.name || "n/a" },
+        { label: "Headline", value: liveProfile.headline || "n/a" },
+        { label: "Location", value: liveProfile.location || "n/a" },
         {
           label: "Saved to profile",
           value: saved
@@ -184,7 +184,7 @@ export default function ImportLinkedin() {
         { label: "Headline", value: demoCandidate.headline },
         { label: "Location", value: demoCandidate.location },
         { label: "Education", value: `${demoCandidate.degree}, ${demoCandidate.university}` },
-        { label: "LinkedIn", value: demoCandidate.links.linkedin ?? "—" },
+        { label: "LinkedIn", value: demoCandidate.links.linkedin ?? "n/a" },
       ];
 
   const showResults = imported || !!liveProfile;
@@ -230,12 +230,12 @@ export default function ImportLinkedin() {
               <span className="font-medium text-slate-800">Import my profile</span>{" "}
               to read your own public LinkedIn profile and turn your experience,
               education, and skills into evidence. Only your public profile is
-              read — no email lookup, and nothing is posted on your behalf.
+              read, no email lookup, and nothing is posted on your behalf.
             </>
           ) : (
             <>
               LinkedIn has no import API here, so the real app takes a paste or a
-              data export — never scraping. In this demo, pick{" "}
+              data export, never scraping. In this demo, pick{" "}
               <span className="font-medium text-slate-800">Use sample profile</span>{" "}
               to see the fields we&apos;d pull in. Nothing connects to LinkedIn.
             </>
@@ -334,7 +334,7 @@ export default function ImportLinkedin() {
             <p className="text-xs text-slate-500">
               Only your public profile is read, and no email lookup is performed.
               Imported items become evidence marked{" "}
-              <span className="font-medium text-slate-600">source-backed</span> —
+              <span className="font-medium text-slate-600">source-backed</span>,
               LinkedIn shows what someone wrote about themselves, which is not the
               same as confirmed.
             </p>
@@ -396,7 +396,7 @@ export default function ImportLinkedin() {
             <p className="mt-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50/60 p-3 text-sm text-amber-800">
               <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
               This profile will be compared against your resume to flag any
-              inconsistencies — mismatched titles, dates, or claims — before it
+              inconsistencies, mismatched titles, dates, or claims, before it
               becomes evidence.
             </p>
           </div>

@@ -14,8 +14,8 @@ import { harvestEnabled } from "@/lib/harvest/client";
  * This is the one place where a live campaign stops saying "Hiring manager,
  * <team>" and starts naming real, sourced people.
  *
- * FAILURE POLICY: enrichment is strictly additive and never fatal. Any error —
- * a wrong company slug, a rate limit, a timeout — returns the campaign
+ * FAILURE POLICY: enrichment is strictly additive and never fatal. Any error,
+ * a wrong company slug, a rate limit, a timeout, returns the campaign
  * unchanged, so the user still gets the full model-built campaign with the
  * role-based network it already had. A campaign is never lost to a scraper.
  *
@@ -46,7 +46,7 @@ export async function enrichWithLinkedIn(
       companyLinkedinUrl: companyUrl,
     });
 
-    // Use the company's CANONICAL url once we have it — the guessed slug may
+    // Use the company's CANONICAL url once we have it, the guessed slug may
     // have redirected, and posts/employees should key off the real page.
     const resolvedUrl = facts?.linkedinUrl ?? companyUrl;
 
@@ -77,7 +77,7 @@ export async function enrichWithLinkedIn(
       activity.push({
         agent: "Source Verifier",
         message:
-          "Shared school, employer or city is an overlap, not a confirmed connection — and reporting lines are not established. Verify before referencing any of it.",
+          "Shared school, employer or city is an overlap, not a confirmed connection, and reporting lines are not established. Verify before referencing any of it.",
         kind: "conflict",
         confidence: "high",
       });
@@ -95,7 +95,7 @@ export async function enrichWithLinkedIn(
 
     return {
       ...campaign,
-      // Real, sourced contacts beat role-based placeholders — but only when we
+      // Real, sourced contacts beat role-based placeholders, but only when we
       // actually found some.
       people: contacts.length > 0 ? contacts : campaign.people,
       activity,

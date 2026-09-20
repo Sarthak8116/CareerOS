@@ -62,7 +62,7 @@ export function OutreachGrounding({
         </div>
       )}
 
-      {/* Evidence used — source-backed pills */}
+      {/* Evidence used, source-backed pills */}
       {selected.evidenceUsed.length > 0 && (
         <div className="mt-4">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
@@ -81,7 +81,7 @@ export function OutreachGrounding({
         </div>
       )}
 
-      {/* Claims to verify — amber caution (+ any live lookup caveats) */}
+      {/* Claims to verify, amber caution (+ any live lookup caveats) */}
       {claimsToVerify.length > 0 && (
         <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/70 p-3">
           <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-amber-700">
@@ -144,7 +144,7 @@ export function OutreachGrounding({
   );
 }
 
-/** Second, explicit step before anything leaves — nothing sends on one click. */
+/** Second, explicit step before anything leaves, nothing sends on one click. */
 export function SendConfirmPanel({
   recipient,
   viaGmail,
@@ -170,7 +170,7 @@ export function SendConfirmPanel({
               This is addressed to <span className="font-medium">{recipient}</span>
               {viaGmail ? " via Gmail" : ""}.{" "}
               {handsOff
-                ? "It opens the draft in your own Gmail — you press Send there. CareerOS never sends on your behalf."
+                ? "It opens the draft in your own Gmail, you press Send there. CareerOS never sends on your behalf."
                 : "In demo mode no real email is sent."}
             </p>
           </div>

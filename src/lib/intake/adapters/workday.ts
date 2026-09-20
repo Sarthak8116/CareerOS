@@ -24,7 +24,7 @@ import { slugId } from "@/lib/utils";
  *
  * The public page is a JS shell; the data lives at an internal CXS endpoint
  * derived by inserting `/wday/cxs/{tenant}/` before the site id. When that
- * 404s the tenant/site pair was not derivable and we fall back to paste — we
+ * 404s the tenant/site pair was not derivable and we fall back to paste, we
  * never retry with guessed site ids, because a guess that happens to resolve
  * would attribute the WRONG company's posting.
  *
@@ -45,7 +45,7 @@ function employmentFromTimeType(
   if (normalized.startsWith("intern")) return "internship";
   if (normalized === "fulltime") return "full-time";
   if (normalized === "contract" || normalized === "contractor") return "contract";
-  // "Part time" intentionally unmapped — no honest member exists for it.
+  // "Part time" intentionally unmapped, no honest member exists for it.
   return undefined;
 }
 
@@ -99,7 +99,7 @@ export const workdayAdapter: IntakeAdapter = {
       };
     }
 
-    // Raw HTML — NOT entity-escaped, so it must not be decoded.
+    // Raw HTML, NOT entity-escaped, so it must not be decoded.
     const descriptionHtml = info.jobDescription ?? "";
     const descriptionFull =
       clean(htmlToText(descriptionHtml), DESCRIPTION_FULL_MAX) ?? "";

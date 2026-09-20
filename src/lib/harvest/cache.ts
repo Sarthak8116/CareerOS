@@ -4,8 +4,8 @@ import "server-only";
  * Server-side Harvest response cache.
  *
  * Every Apify call costs money, so nothing is fetched twice inside the TTL.
- * Entries are keyed by the stable identity of the thing fetched — a LinkedIn
- * profile URL, a company identifier — and carry the `fetchedAt` stamp that ends
+ * Entries are keyed by the stable identity of the thing fetched, a LinkedIn
+ * profile URL, a company identifier, and carry the `fetchedAt` stamp that ends
  * up in the record's provenance, so a cached record is never presented as
  * fresher than it is.
  *
@@ -70,7 +70,7 @@ export function writeCache<T>(key: string, value: T, fetchedAt: string): void {
 
 /**
  * Reuse a cached response if there is one, otherwise fetch and cache it.
- * Returns the value alongside the `fetchedAt` that belongs in provenance —
+ * Returns the value alongside the `fetchedAt` that belongs in provenance,
  * for a cache hit that is the ORIGINAL fetch time, not now.
  */
 export async function withCache<T>(

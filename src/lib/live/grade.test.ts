@@ -13,7 +13,7 @@ describe("gradeAnswer", () => {
       question: "Tell me about a hard bug.",
       answer,
       answerHints: ["Use STAR"],
-      evidenceToUse: ["ev_cachesim — Built a CPU cache simulator"],
+      evidenceToUse: ["ev_cachesim: Built a CPU cache simulator"],
     });
     expect(out.strongerAnswer).toBe("c");
     const call = parseStructured.mock.calls[0][0];

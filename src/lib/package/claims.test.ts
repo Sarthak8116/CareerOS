@@ -3,11 +3,11 @@ import type { Candidate, Evidence } from "@/lib/types";
 import { groundSentences, profileValues, countUnsupported, type GroundedSentence } from "./claims";
 
 /**
- * The cover letter is the highest-risk generation in this product — free
+ * The cover letter is the highest-risk generation in this product, free
  * prose about a real person (see `careeros/contract/p2-application-package`).
  * `groundSentences` is the mechanism that stops an unsupported sentence from
  * reaching the document unflagged, and it does it by REUSING
- * `engine/resume.ts`'s `verifyClaims` rather than inventing softer rules —
+ * `engine/resume.ts`'s `verifyClaims` rather than inventing softer rules,
  * these tests exercise that reuse directly, plus the two additions the
  * module makes on top of it (numeric-precision and role-demotion), which the
  * module's own header says must only ever be STRICTER, never looser.
@@ -50,7 +50,7 @@ function sentence(overrides: Partial<GroundedSentence>): GroundedSentence {
   return { text: "placeholder", role: "intent", ...overrides };
 }
 
-describe("groundSentences — evidence-role sentences", () => {
+describe("groundSentences, evidence-role sentences", () => {
   it("marks a cited, unembellished evidence sentence as evidenced", () => {
     const cand = candidate();
     const claims = groundSentences(
@@ -110,9 +110,9 @@ describe("groundSentences — evidence-role sentences", () => {
     expect(claims[0].support).toBe("unsupported");
   });
 
-  it("STRICTER THAN verifyClaims: a sentence adds numeric precision the cited (public-proof) evidence does not contain — unsupported", () => {
+  it("STRICTER THAN verifyClaims: a sentence adds numeric precision the cited (public-proof) evidence does not contain, unsupported", () => {
     // verifyClaims alone would not flag this evidence (publicProof: true means
-    // hasInventedMetric's `!ev.publicProof` guard never fires) — this is the
+    // hasInventedMetric's `!ev.publicProof` guard never fires), this is the
     // module's OWN, stricter addition on top of the reused pass.
     const cand = candidate({
       evidence: [evidence({ id: "ev_4", claim: "Built a caching layer for the checkout service.", publicProof: true })],
@@ -152,7 +152,7 @@ describe("groundSentences — evidence-role sentences", () => {
   });
 });
 
-describe("groundSentences — role demotion (mislabelled sentences cannot slip through)", () => {
+describe("groundSentences, role demotion (mislabelled sentences cannot slip through)", () => {
   it("a 'profile' sentence that actually restates a stored profile value is user-provided", () => {
     const claims = groundSentences(
       [sentence({ text: "I'm based in Austin, TX.", role: "profile" })],
@@ -163,7 +163,7 @@ describe("groundSentences — role demotion (mislabelled sentences cannot slip t
 
   it("a 'profile' sentence that does NOT restate a profile value is demoted to evidence and, uncited, is unsupported", () => {
     // Deliberately free of any first-person experience verb or metric, so
-    // this isolates the THIRD demotion branch (profile mismatch alone) —
+    // this isolates the THIRD demotion branch (profile mismatch alone),
     // not the ASSERTS_EXPERIENCE / hasMetric branches exercised elsewhere.
     const claims = groundSentences(
       [sentence({ text: "I studied at Cambridge.", role: "profile" })],
@@ -171,7 +171,7 @@ describe("groundSentences — role demotion (mislabelled sentences cannot slip t
     );
     // The role label said "profile"; the content restates nothing the
     // candidate's stored profile actually contains, and demotion is a
-    // ONE-WAY street — it must not be trusted merely because the generator
+    // ONE-WAY street, it must not be trusted merely because the generator
     // called it a profile fact.
     expect(claims[0].support).toBe("unsupported");
   });
@@ -201,13 +201,13 @@ describe("groundSentences — role demotion (mislabelled sentences cannot slip t
       candidate(),
     );
     // No evidenceId was ever attached, because the generator thought this was
-    // safe "intent" prose — demotion is exactly what catches that.
+    // safe "intent" prose, demotion is exactly what catches that.
     expect(claims[0].support).toBe("unsupported");
   });
 
   it("an 'intent' sentence carrying a bare metric is demoted to evidence and unsupported", () => {
     const claims = groundSentences(
-      [sentence({ text: "That kind of impact — a 25% lift — is what excites me.", role: "intent" })],
+      [sentence({ text: "That kind of impact, a 25% lift, is what excites me.", role: "intent" })],
       candidate(),
     );
     expect(claims[0].support).toBe("unsupported");
@@ -223,7 +223,7 @@ describe("groundSentences — role demotion (mislabelled sentences cannot slip t
   });
 });
 
-describe("groundSentences — ordering, multiplicity, and independence from doc order", () => {
+describe("groundSentences, ordering, multiplicity, and independence from doc order", () => {
   it("returns exactly one PackageClaim per input sentence, in the same order", () => {
     const cand = candidate();
     const sentences = [

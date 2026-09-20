@@ -27,7 +27,7 @@ describe("computeRequirementCoverage", () => {
 
   it("distinguishes a wording gap from a thin-evidence gap", () => {
     // CUDA: the words are there ("GPU", "CUDA") but only a stated interest
-    // backs them. A rewrite cannot fix that — a project can.
+    // backs them. A rewrite cannot fix that, a project can.
     const cuda = byId.get("req_cuda")!;
     expect(cuda.state).toBe("partially-covered");
     expect(cuda.weakness).toBe("evidence-strength");

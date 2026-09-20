@@ -26,7 +26,7 @@ describe("server-only guard", () => {
   it("never logs the token or embeds it in a client-visible string", () => {
     const source = read("client.ts");
     expect(source).not.toMatch(/console\.(log|warn|error|info)/);
-    // The token is read from the environment only — never inlined.
+    // The token is read from the environment only, never inlined.
     expect(source).not.toMatch(/apify_api_[A-Za-z0-9]/);
   });
 
@@ -51,7 +51,7 @@ describe("feature flag", () => {
     else process.env.APIFY_TOKEN = originalToken;
   });
 
-  it("is off with no env vars — demo mode never reaches the network", async () => {
+  it("is off with no env vars, demo mode never reaches the network", async () => {
     const { harvestEnabled } = await import("@/lib/harvest/client");
     expect(harvestEnabled()).toBe(false);
   });

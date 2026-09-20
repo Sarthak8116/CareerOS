@@ -23,7 +23,7 @@ const sourcedContact: Person = {
   name: "Priya Raman",
   title: "Engineering Manager, GPU Systems Software",
   company: "NVIDIA",
-  inferredRole: "Engineering manager — plausibly the hiring manager",
+  inferredRole: "Engineering manager, plausibly the hiring manager",
   connection:
     "No existing connection. Employer and title are from their public LinkedIn profile; their involvement in this specific role is an inference.",
   commonality: "Both attended University of Illinois Urbana-Champaign",
@@ -53,7 +53,7 @@ const sourcedContact: Person = {
 };
 
 describe("email labeling", () => {
-  it("only accepts the unconfirmed label — 'verified' is not representable", () => {
+  it("only accepts the unconfirmed label, 'verified' is not representable", () => {
     expect(
       UnconfirmedEmail.safeParse({
         address: "a@b.com",
@@ -105,7 +105,7 @@ describe("overlap is never presented as a connection", () => {
     const fact = message.personalizationFacts.find((f) =>
       f.includes("University of Illinois"),
     )!;
-    expect(fact).toMatch(/inferred — not confirmed/);
+    expect(fact).toMatch(/inferred, not confirmed/);
     expect(
       message.claimsToVerify.some((c) => /Shared-background point/.test(c)),
     ).toBe(true);

@@ -21,9 +21,9 @@ import workdayBroken from "@/lib/intake/__fixtures__/workday-broken.json";
  *
  * No network: every adapter is pure by construction, so a fixture plus an
  * injected `fetchedAt` fully determines its output. These assertions are
- * written against the quirks that actually exist in live data — the leading
+ * written against the quirks that actually exist in live data, the leading
  * space in an Ashby title, Lever's epoch timestamps, Workday's relative
- * "Posted Today" — because those are the ones that silently corrupt a Job.
+ * "Posted Today", because those are the ones that silently corrupt a Job.
  */
 
 const FETCHED_AT = "2026-09-19T12:00:00.000Z";
@@ -71,7 +71,7 @@ describe("greenhouse", () => {
     expect(FormSchema.safeParse(out.form).success).toBe(true);
   });
 
-  it("entity-decodes the description exactly once — no markup survives as text", () => {
+  it("entity-decodes the description exactly once, no markup survives as text", () => {
     const description = out.job!.description;
     // The raw fixture literally contains "&lt;div class=&quot;...". If the
     // decode is skipped the user reads "&lt;div&gt;" soup; if the decode runs
@@ -102,7 +102,7 @@ describe("greenhouse", () => {
     expect(out.job!.unstated ?? []).not.toContain("employmentType");
   });
 
-  it("drops input_hidden fields — Longitude is not an application question", () => {
+  it("drops input_hidden fields, Longitude is not an application question", () => {
     const prompts = out.form.questions.map((q) => q.prompt);
     expect(prompts).not.toContain("Longitude");
     expect(prompts).not.toContain("Latitude");
@@ -138,7 +138,7 @@ describe("greenhouse", () => {
     expect(out.form.completeness).toBe("complete");
     expect(out.form.resume).toBe("required");
     // The fixture has no cover_letter field, and the form is complete, so this
-    // is a FACT about the employer — not an absence of knowledge.
+    // is a FACT about the employer, not an absence of knowledge.
     expect(out.form.coverLetter).toBe("not-requested");
   });
 
@@ -152,7 +152,7 @@ describe("greenhouse", () => {
     expect(serialized).not.toMatch(/transgender/i);
     expect(serialized).not.toMatch(/veteran|disability/i);
     // Every EEO prompt in the fixture is absent from the output by wording, not
-    // merely by category — the category for them no longer exists at all.
+    // merely by category, the category for them no longer exists at all.
     for (const dq of demographic) {
       expect(serialized).not.toContain(dq.label);
     }
@@ -204,7 +204,7 @@ describe("lever", () => {
     ).toBe(true);
   });
 
-  it("says UNKNOWN about the application form — never not-requested", () => {
+  it("says UNKNOWN about the application form, never not-requested", () => {
     expect(out.form.completeness).toBe("none");
     expect(out.form.resume).toBe("unknown");
     expect(out.form.coverLetter).toBe("unknown");
@@ -281,7 +281,7 @@ describe("workday", () => {
     expect(out.job!.postedAt).toBeUndefined();
     // The wording is preserved as an assumption rather than silently dropped.
     expect(out.assumptions.join(" ")).toContain("Posted Today");
-    // `postedAt` is optional and simply ABSENT — it holds no placeholder, so
+    // `postedAt` is optional and simply ABSENT, it holds no placeholder, so
     // there is no false impression to correct and it belongs in neither map
     // (same treatment as `deadline`). The fact the user needs reaches them
     // through `assumptions`, which is the channel for notes that are not about

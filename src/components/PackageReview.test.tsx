@@ -16,7 +16,7 @@ import {
 /**
  * The four ways this surface could lie, each with a test that catches it:
  *
- *  1. Offering the .zip while a sentence is still unsupported — shipping an
+ *  1. Offering the .zip while a sentence is still unsupported, shipping an
  *     invented job, metric or enthusiasm about a real person.
  *  2. Saying "complete" over a package that names gaps.
  *  3. Rendering a library answer as though it were drafted for this posting.
@@ -84,7 +84,7 @@ const expectDownloadDisabled = (yes: boolean) =>
 /* 1. Unsupported claims gate the export                               */
 /* ------------------------------------------------------------------ */
 
-describe("PackageReview — an unsupported claim blocks the download", () => {
+describe("PackageReview, an unsupported claim blocks the download", () => {
   it("disables the download and says how many sentences are unbacked", () => {
     render(<Harness initial={pkg()} />);
     expectDownloadDisabled(true);
@@ -120,7 +120,7 @@ describe("PackageReview — an unsupported claim blocks the download", () => {
     expectDownloadDisabled(true);
   });
 
-  it("a 'not-requested' document cannot gate the export — it carries no text", () => {
+  it("a 'not-requested' document cannot gate the export, it carries no text", () => {
     render(
       <Harness
         initial={pkg({
@@ -148,7 +148,7 @@ describe("PackageReview — an unsupported claim blocks the download", () => {
     fireEvent.click(screen.getByRole("button", { name: /this is true/i }));
 
     expectDownloadDisabled(false);
-    // Relabelled honestly — it is the user's claim now, not an evidenced one.
+    // Relabelled honestly, it is the user's claim now, not an evidenced one.
     expect(screen.getByText("You provided this")).toBeTruthy();
     expect(screen.queryByText("Unsupported")).toBeNull();
 
@@ -156,7 +156,7 @@ describe("PackageReview — an unsupported claim blocks the download", () => {
     expect(onExport).toHaveBeenCalledTimes(1);
   });
 
-  it("resolves ONE claim per click — there is no bulk attestation", () => {
+  it("resolves ONE claim per click, there is no bulk attestation", () => {
     /* These sentences were drafted by a model, not written by the user, so
        attesting is a judgement about a specific sentence. A control that
        cleared several at once would turn several judgements into one unread
@@ -182,11 +182,11 @@ describe("PackageReview — an unsupported claim blocks the download", () => {
     // Each unsupported claim gets its own button, named for its own sentence.
     expect(screen.getAllByRole("button", { name: /this is true/i })).toHaveLength(3);
     expect(
-      screen.getByRole("button", { name: /this is true — it's mine: “B\.”/i }),
+      screen.getByRole("button", { name: /this is true, it's mine: “B\.”/i }),
     ).toBeTruthy();
 
     fireEvent.click(
-      screen.getByRole("button", { name: /this is true — it's mine: “B\.”/i }),
+      screen.getByRole("button", { name: /this is true, it's mine: “B\.”/i }),
     );
 
     // Exactly one resolved; the other two still stand and still block export.
@@ -229,7 +229,7 @@ describe("PackageReview — an unsupported claim blocks the download", () => {
     expect(
       screen.getByText(/isn't a whole sentence in the document/i),
     ).toBeTruthy();
-    // The longer, evidenced sentence is intact — not a headless fragment.
+    // The longer, evidenced sentence is intact, not a headless fragment.
     expect(document.body.textContent).toContain(
       "I built the payments pipeline at my last internship.",
     );
@@ -245,7 +245,7 @@ describe("PackageReview — an unsupported claim blocks the download", () => {
 
     expectDownloadDisabled(false);
     expect(screen.queryByText(/“I have always loved this company\.”/)).toBeNull();
-    // The prose itself no longer contains it — not just the claim row.
+    // The prose itself no longer contains it, not just the claim row.
     expect(document.body.textContent).not.toContain(
       "I have always loved this company.",
     );
@@ -258,14 +258,14 @@ describe("PackageReview — an unsupported claim blocks the download", () => {
 /* 2. "Complete" is a claim                                            */
 /* ------------------------------------------------------------------ */
 
-describe("PackageReview — honest completeness", () => {
+describe("PackageReview, honest completeness", () => {
   it("names every gap from missing[] rather than summarising them", () => {
     render(
       <Harness
         initial={pkg({
           documents: [doc({ claims: [claim()] })],
           missing: [
-            "A portfolio link — the form asks for one and we have none on file.",
+            "A portfolio link, the form asks for one and we have none on file.",
             "Answer to: Why do you want to work here?",
           ],
         })}
@@ -328,7 +328,7 @@ describe("PackageReview — honest completeness", () => {
 /* 3. Reused is not drafted                                            */
 /* ------------------------------------------------------------------ */
 
-describe("PackageReview — reused vs drafted", () => {
+describe("PackageReview, reused vs drafted", () => {
   it("says a library answer was not written for this posting", () => {
     render(
       <Harness
@@ -402,7 +402,7 @@ describe("PackageReview — reused vs drafted", () => {
 /* 4. excludedSections is a neutral fact                               */
 /* ------------------------------------------------------------------ */
 
-describe("PackageReview — excludedSections", () => {
+describe("PackageReview, excludedSections", () => {
   it("states the omission without warning vocabulary or gap framing", () => {
     render(
       <Harness
@@ -433,7 +433,7 @@ describe("PackageReview — excludedSections", () => {
 /* Editing                                                             */
 /* ------------------------------------------------------------------ */
 
-describe("PackageReview — editing a document", () => {
+describe("PackageReview, editing a document", () => {
   it("saves an edit and drops the claims that edit removed", () => {
     render(<Harness initial={pkg()} />);
     fireEvent.click(screen.getByRole("button", { name: /^edit$/i }));
@@ -444,7 +444,7 @@ describe("PackageReview — editing a document", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
 
-    // The deleted sentence's claim is gone with it — the two cannot drift.
+    // The deleted sentence's claim is gone with it, the two cannot drift.
     expect(screen.queryByText("Unsupported")).toBeNull();
     expectDownloadDisabled(false);
     // The surviving claim keeps its label rather than being re-judged.
@@ -479,7 +479,7 @@ describe("PackageReview — editing a document", () => {
   it("says so when an edit empties a document, because the .zip will then have no such file", () => {
     /* `includedDocuments` (the zipper's own rule) omits empty documents. If
        the review surface kept showing one as part of the package, the user
-       would be told a file is in the archive that isn't — the review going
+       would be told a file is in the archive that isn't, the review going
        decorative. */
     render(<Harness initial={pkg({ documents: [doc({ claims: [claim()] })] })} />);
     expect(screen.queryByText(/there will be no/i)).toBeNull();
@@ -494,7 +494,7 @@ describe("PackageReview — editing a document", () => {
     expect(notice.textContent).toContain("cover-letter.md");
   });
 
-  it("a not-requested document offers no editor — there is nothing to edit", () => {
+  it("a not-requested document offers no editor, there is nothing to edit", () => {
     render(
       <Harness
         initial={pkg({
@@ -551,7 +551,7 @@ describe("removeSentence", () => {
     const out = removeSentence(content, "I am excited about this role.");
     expect(out).toBe("Later in the letter: I am excited about this role.");
     /* The sentence is STILL asserted inside the surviving one, so the claim is
-       still made and must stay flagged — blocking export — rather than being
+       still made and must stay flagged, blocking export, rather than being
        dropped because one copy of it went away. */
     expect(
       claimsStillMade(out, [
@@ -584,7 +584,7 @@ describe("removeSentence", () => {
     }
   });
 
-  it("splitUnits reconstructs the input exactly — the property whole-unit removal rests on", () => {
+  it("splitUnits reconstructs the input exactly, the property whole-unit removal rests on", () => {
     for (const content of [
       "One. Two! Three?",
       "Dear team,\n\nA sentence.\n\nRegards",

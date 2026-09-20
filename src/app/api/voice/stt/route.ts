@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Expected a recorded answer." }, { status: 400 });
   }
   if (!(audio instanceof Blob) || audio.size === 0) {
-    return NextResponse.json({ error: "That recording was empty — try again." }, { status: 400 });
+    return NextResponse.json({ error: "That recording was empty, try again." }, { status: 400 });
   }
   if (audio.size > MAX_AUDIO_BYTES) {
     return NextResponse.json({ error: "That recording is too long. Keep answers under a few minutes." }, { status: 413 });

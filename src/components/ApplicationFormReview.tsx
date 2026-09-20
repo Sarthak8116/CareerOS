@@ -7,7 +7,7 @@ import { formFromPastedQuestions } from "@/lib/intake/paste";
 import { Button, Card, CardHeader, Pill } from "@/components/ui/primitives";
 
 /**
- * What this application actually asks for — and, where we couldn't read it, an
+ * What this application actually asks for, and, where we couldn't read it, an
  * honest admission plus a way for the user to supply it by hand.
  *
  * Two distinctions carry the honesty here:
@@ -15,7 +15,7 @@ import { Button, Card, CardHeader, Pill } from "@/components/ui/primitives";
  *     "unknown" is an ADMISSION about us. They must never look alike.
  *   - `completeness` describes the QUESTION SET, not per-field requiredness.
  *     A complete form can still leave a résumé's mandatory status unstated,
- *     which means "it asks for one, but doesn't say if it's required" — not
+ *     which means "it asks for one, but doesn't say if it's required", not
  *     "optional", and not an error.
  */
 
@@ -70,7 +70,7 @@ export function ApplicationFormReview({
         subtitle={
           readable
             ? "Read off the apply page. Correct anything we got wrong."
-            : "The job itself parsed fine — only the application questions are out of reach."
+            : "The job itself parsed fine, only the application questions are out of reach."
         }
         action={
           form.source === "pasted" ? (
@@ -105,7 +105,7 @@ export function ApplicationFormReview({
         </dl>
       )}
 
-      {/* A deliberate omission, not a failure — so it isn't styled as one. */}
+      {/* A deliberate omission, not a failure, so it isn't styled as one. */}
       {form.excludedSections.length > 0 && (
         <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-slate-200 bg-slate-50 p-3">
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
@@ -114,7 +114,7 @@ export function ApplicationFormReview({
             <span className="font-medium text-slate-700">
               {formatList(form.excludedSections)}
             </span>
-            . CareerOS doesn&apos;t read or pre-fill those questions — you&apos;ll
+            . CareerOS doesn&apos;t read or pre-fill those questions, you&apos;ll
             complete them on the employer&apos;s site.
           </p>
         </div>
@@ -169,7 +169,7 @@ export function ApplicationFormReview({
 }
 
 /* ---------------------------------------------------------------- */
-/* One requirement — fact vs. admission vs. "asked but unstated"      */
+/* One requirement, fact vs. admission vs. "asked but unstated"      */
 /* ---------------------------------------------------------------- */
 
 function RequirementRow({
@@ -203,18 +203,18 @@ function describeRequirement(status: string, complete: boolean) {
          mandatory is a different claim from "we couldn't read the form". */
       return complete
         ? {
-            text: "Asked for — the form doesn't say whether it's mandatory",
+            text: "Asked for, the form doesn't say whether it's mandatory",
             className: "text-amber-700",
           }
         : {
-            text: "Unknown — we couldn't read the form",
+            text: "Unknown, we couldn't read the form",
             className: "text-amber-700",
           };
   }
 }
 
 /* ---------------------------------------------------------------- */
-/* One question — editable, because the user outranks the parser      */
+/* One question, editable, because the user outranks the parser      */
 /* ---------------------------------------------------------------- */
 
 function QuestionRow({
@@ -315,7 +315,7 @@ function QuestionRow({
 }
 
 /* ---------------------------------------------------------------- */
-/* Manual paste — the way past a login wall                          */
+/* Manual paste, the way past a login wall                          */
 /* ---------------------------------------------------------------- */
 
 function PasteQuestions({
@@ -327,7 +327,7 @@ function PasteQuestions({
 }: {
   jobId: string;
   applyUrl?: string;
-  /** The board this apply page belongs to — recorded, never guessed. */
+  /** The board this apply page belongs to, recorded, never guessed. */
   adapter?: string;
   disabled: boolean;
   onParsed: (form: ApplicationForm) => void;
@@ -371,7 +371,7 @@ function PasteQuestions({
         Paste the application questions
       </label>
       <p className="mt-0.5 text-xs text-slate-400">
-        Copy the questions off the apply page and paste them here — one per line.
+        Copy the questions off the apply page and paste them here, one per line.
         We&apos;ll read them back to you before anything is saved.
       </p>
       <textarea

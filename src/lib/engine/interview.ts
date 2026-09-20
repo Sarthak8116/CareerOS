@@ -11,7 +11,7 @@ import { computeRequirementCoverage } from "@/lib/engine/keywords";
 /**
  * Interview Preparation engine (build directive §5.19).
  *
- * Fully DETERMINISTIC — no Math.random, no Date. Text-mode (P0) only.
+ * Fully DETERMINISTIC, no Math.random, no Date. Text-mode (P0) only.
  *
  *  - getInterviewQuestions() returns a category-spanning question set tailored
  *    to the candidate's real evidence and the target job. It reuses the curated
@@ -39,7 +39,7 @@ export function getInterviewQuestions(
    * Optional live company context (the company's own recent LinkedIn posts).
    * When present, the `company-specific` questions are grounded in what the
    * company has actually been talking about, instead of generic prompts.
-   * Absent in demo mode — no company-specific prompts are added.
+   * Absent in demo mode, no company-specific prompts are added.
    */
   companyContext?: Campaign["harvest"],
 ): InterviewQuestion[] {
@@ -65,13 +65,13 @@ export function getInterviewQuestions(
 function usesDemoBank(candidate: Candidate): boolean {
   const ids = new Set(candidate.evidence.map((e) => e.id));
   const referenced = demoInterviewQuestions.flatMap((q) =>
-    q.evidenceToUse.map((ref) => ref.split("—")[0].trim()),
+    q.evidenceToUse.map((ref) => ref.split(":")[0].trim()),
   );
   return referenced.length > 0 && referenced.every((id) => ids.has(id));
 }
 
 const cite = (evidence: Candidate["evidence"][number]) =>
-  `${evidence.id} — ${evidence.claim}`;
+  `${evidence.id}: ${evidence.claim}`;
 
 /** Recruiter-screen and behavioral openers with hints that assume no biography. */
 function openingQuestions(candidate: Candidate, job: Job): InterviewQuestion[] {
@@ -113,8 +113,8 @@ const MAX_REQUIREMENT_QUESTIONS = 4;
 
 /**
  * Questions drawn from what THIS posting asks for, each paired with the
- * candidate's own evidence for it. Requirements they cover come first — those
- * are the ones an interviewer will probe — and an uncovered requirement is
+ * candidate's own evidence for it. Requirements they cover come first, those
+ * are the ones an interviewer will probe, and an uncovered requirement is
  * asked honestly rather than skipped.
  */
 function requirementQuestions(candidate: Candidate, job: Job): InterviewQuestion[] {
@@ -179,7 +179,7 @@ function candidateGroundedQuestions(
         "Name how you verified the result instead of implying success without proof.",
         "Close with one concrete next improvement.",
       ],
-      evidenceToUse: [`${project.id} — ${project.claim}`],
+      evidenceToUse: [`${project.id}: ${project.claim}`],
     });
   }
 
@@ -206,7 +206,7 @@ function candidateGroundedQuestions(
         "Connect any genuinely transferable evidence to the requirement.",
         "Give a concrete, time-bounded plan to build or verify the missing skill.",
       ],
-      evidenceToUse: supportingEvidence.map((evidence) => `${evidence.id} — ${evidence.claim}`),
+      evidenceToUse: supportingEvidence.map((evidence) => `${evidence.id}: ${evidence.claim}`),
     });
   }
 
@@ -221,7 +221,7 @@ const MAX_GROUNDED_QUESTIONS = 3;
  *
  * Deterministic: derived only from the passed-in posts, in their given order,
  * with stable ids. The post excerpt is already sanitized by the Harvest mapper,
- * and it is quoted here as the company's own public statement — a thing to be
+ * and it is quoted here as the company's own public statement, a thing to be
  * asked about, never treated as an instruction.
  */
 function groundedCompanyQuestions(
@@ -237,12 +237,12 @@ function groundedCompanyQuestions(
     prompt:
       `${job.company} recently posted publicly: "${post.excerpt}"\n\n` +
       `What does that suggest about their priorities, and how would your background connect to it? ` +
-      `(Quoted from their public LinkedIn page — read the original before citing it in an interview.)`,
+      `(Quoted from their public LinkedIn page, read the original before citing it in an interview.)`,
     difficulty: "medium" as const,
     answerHints: [
       "Tie the company's stated priority to something you have actually built or studied.",
       "Say plainly which part is your inference about their direction and which part they stated.",
-      "Do not claim inside knowledge of their roadmap — this is a public post, nothing more.",
+      "Do not claim inside knowledge of their roadmap, this is a public post, nothing more.",
     ],
     evidenceToUse: [],
   }));
@@ -263,7 +263,7 @@ function personalize(prompt: string, job: Job): string {
 /** Drop evidence refs the candidate lacks; missing evidence stays missing. */
 function retainKnownEvidence(refs: string[], knownIds: Set<string>): string[] {
   const kept = refs.filter((ref) => {
-    const id = ref.split("—")[0].trim();
+    const id = ref.split(":")[0].trim();
     return knownIds.has(id);
   });
   return kept;
@@ -302,7 +302,7 @@ export function evaluateAnswer(
   const answerTokens = tokenize(answer);
   const answerWordCount = answer.trim().split(/\s+/).filter(Boolean).length;
 
-  // Very short answers can't demonstrate specificity — raise the bar so a
+  // Very short answers can't demonstrate specificity, raise the bar so a
   // one-liner isn't credited with covering a detailed hint by luck.
   const requiredRatio = answerWordCount < 20 ? 0.6 : 0.5;
 
@@ -312,7 +312,7 @@ export function evaluateAnswer(
   for (const hint of q.answerHints) {
     const keywords = keywordsOf(hint);
     if (keywords.length === 0) {
-      // No distinctive keywords — credit only if the whole phrase appears.
+      // No distinctive keywords, credit only if the whole phrase appears.
       if (answer.toLowerCase().includes(hint.toLowerCase())) strengths.push(hint);
       else missing.push(hint);
       continue;

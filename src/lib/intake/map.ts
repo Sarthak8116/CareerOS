@@ -13,7 +13,7 @@ import type { HeadingList } from "@/lib/intake/html";
 /**
  * Pure mapping from validated raw board records into the app's own shapes.
  *
- * No network, no `Date.now()`, no `Math.random` — `fetchedAt` is always passed
+ * No network, no `Date.now()`, no `Math.random`: `fetchedAt` is always passed
  * in, so the same fixture always produces byte-identical output and every
  * adapter is testable offline.
  *
@@ -33,7 +33,7 @@ import type { HeadingList } from "@/lib/intake/html";
 /** Sentinel for a required `Job` string the posting never stated. */
 export const UNKNOWN_TEXT = "Unknown";
 
-/** `Job.description` cap — matches `store.ts:jobFromPastedText`. */
+/** `Job.description` cap, matches `store.ts:jobFromPastedText`. */
 export const JOB_DESCRIPTION_MAX = 4000;
 
 /** Uncapped-ish description handed to the live analyzer. */
@@ -48,7 +48,7 @@ export const DESCRIPTION_FULL_MAX = 24_000;
  *
  * Adapters clean many strings per posting and every flag has to reach
  * `warnings`, so the collector accumulates rather than returning flags per
- * call. Flags are ADVISORY — they never change how text is handled (always as
+ * call. Flags are ADVISORY, they never change how text is handled (always as
  * data), only how loudly the UI cautions.
  */
 export interface Cleaner {
@@ -78,7 +78,7 @@ export function createCleaner(): Cleaner {
       const { clean: safe, flags } = sanitizeUntrusted(value);
       for (const flag of flags) seen.add(flag);
       // `sanitizeUntrusted` strips tags and then HTML-escapes what is left.
-      // Nothing in this app injects raw HTML — React escapes on render — so
+      // Nothing in this app injects raw HTML, React escapes on render, so
       // keeping the escape only made postings display as "Bachelor&#39;s" and
       // "R&amp;D". Tags are already gone; restore the five characters.
       const trimmed = unescapeText(safe).trim();
@@ -109,7 +109,7 @@ const TRAILING_WORKPLACE = /\s*\((?:remote|hybrid|on-?site)[^)]*\)\s*$/i;
  * Trimming is not cosmetic: real Ashby data ships " Security Engineer, Cloud"
  * with a leading space. We strip requisition ids and trailing workplace tags
  * because they are metadata rather than the role name, but we NEVER rewrite the
- * role into a canonical family — inventing "Software Engineer II" from
+ * role into a canonical family, inventing "Software Engineer II" from
  * "Principal Block and File Storage Software Engineer" would be a claim the
  * posting never made.
  */
@@ -121,7 +121,7 @@ export function normalizeTitle(title: string): string {
   return out || title.trim();
 }
 
-/** Leading seniority tokens. Order matters — longest/most specific first. */
+/** Leading seniority tokens. Order matters, longest/most specific first. */
 const SENIORITY_TOKENS: { pattern: RegExp; label: string }[] = [
   { pattern: /^(?:senior\s+)?principal\b/i, label: "Principal" },
   { pattern: /^distinguished\b/i, label: "Distinguished" },
@@ -139,7 +139,7 @@ const SENIORITY_TOKENS: { pattern: RegExp; label: string }[] = [
  * Seniority from an EXPLICIT leading title token only.
  *
  * Returns `undefined` when the title carries no token. We do not infer
- * seniority from years-of-experience prose — "5+ years" is a requirement, not
+ * seniority from years-of-experience prose, "5+ years" is a requirement, not
  * a level, and mapping one to the other would be a guess.
  */
 export function seniorityFromTitle(title: string): string | undefined {
@@ -165,7 +165,7 @@ const SPONSORSHIP_OFFERED =
  *
  * This is a claim about the employer and a hard blocker for a candidate who
  * needs a visa, so the bar stays high: silence means "unclear", never
- * "not-offered". Denial is checked first — a posting that says both usually
+ * "not-offered". Denial is checked first, a posting that says both usually
  * means "available for some roles, not this one".
  */
 export function sponsorshipFromText(text: string): Job["sponsorship"] {
@@ -201,8 +201,8 @@ const HEADING_KINDS: { kind: JobRequirement["kind"]; pattern: RegExp }[] = [
  * Classify a list by its HEADING, never by reading the items.
  *
  * Returns `undefined` for an unrecognised heading, and the caller then emits
- * NOTHING for that list. Dropping a real requirement is recoverable — the user
- * sees the full description either way — whereas mislabelling a "Benefits"
+ * NOTHING for that list. Dropping a real requirement is recoverable, the user
+ * sees the full description either way, whereas mislabelling a "Benefits"
  * bullet as a requirement would send the gap engine chasing a fiction.
  */
 export function classifyHeading(
@@ -217,7 +217,7 @@ export function classifyHeading(
 /**
  * Turn heading-anchored lists into requirements.
  *
- * `skillKey` is ALWAYS omitted — mapping text to a canonical skill is the
+ * `skillKey` is ALWAYS omitted, mapping text to a canonical skill is the
  * skills engine's job, and guessing it here would put an unearned claim into
  * the contract.
  */
@@ -287,7 +287,7 @@ export interface BuiltJob {
  *
  * Returns `undefined` when there is no title or no company: a posting we cannot
  * even name is not a Job. The caller then fails honestly and offers paste. A
- * FETCHED posting never receives the "Imported role" placeholder — that belongs
+ * FETCHED posting never receives the "Imported role" placeholder, that belongs
  * only to the paste path, where the user typed the words themselves.
  */
 export function buildJob(draft: JobDraft): BuiltJob | undefined {
@@ -354,8 +354,8 @@ export function buildJob(draft: JobDraft): BuiltJob | undefined {
     defaulted(
       "employmentType",
       draft.employmentTypeRaw
-        ? `This posting describes the employment type as "${draft.employmentTypeRaw}", which doesn't map to one of our categories — shown as full-time.`
-        : "This posting does not state an employment type — shown as full-time.",
+        ? `This posting describes the employment type as "${draft.employmentTypeRaw}", which doesn't map to one of our categories, shown as full-time.`
+        : "This posting does not state an employment type, shown as full-time.",
     );
   } else {
     origins.employmentType ??= "stated";
@@ -372,14 +372,14 @@ export function buildJob(draft: JobDraft): BuiltJob | undefined {
   }
 
   // `postedAt` and `deadline` are OPTIONAL on `Job` and simply absent when the
-  // posting does not state them — they hold no placeholder, so there is no
+  // posting does not state them, they hold no placeholder, so there is no
   // false impression to correct and they are marked in neither map. That is
   // what `unstated` is for: stopping a substituted value ("Unknown", a best-fit
   // enum) from reading as fact. Nothing renders for an absent date at all.
   //
-  // The one case where an absent date genuinely matters — Workday reporting
+  // The one case where an absent date genuinely matters, Workday reporting
   // "Posted Today", which we refuse to convert into a real date using our own
-  // clock — is carried by `assumptions`, which is the channel for notes that
+  // clock, is carried by `assumptions`, which is the channel for notes that
   // are not about a placeholder.
   if (draft.postedAt) origins.postedAt = "stated";
   if (draft.deadline) origins.deadline = "stated";

@@ -2,7 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 
-/* The six agents that assemble a campaign — shown while building. */
+/* The six agents that assemble a campaign, shown while building. */
 export const BUILD_AGENTS = [
   "Job Parser",
   "Company Researcher",
@@ -16,7 +16,7 @@ export const BUILD_AGENTS = [
  * Animated "agents are working" state shown while a campaign builds.
  *
  * Lifted out of /jobs so the link-intake review step can reuse it unchanged.
- * Only show this for an actual campaign build — the intake fetch is a single
+ * Only show this for an actual campaign build, the intake fetch is a single
  * request, and dressing it in six agent names would imply work that isn't
  * happening.
  */

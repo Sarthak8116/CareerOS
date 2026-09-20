@@ -31,7 +31,7 @@ import { parseStructured } from "@/lib/live/nemotron";
 export const MODEL_ADAPTER_KEY = "nemotron";
 export const MODEL_ADAPTER_LABEL = "NVIDIA Nemotron (page reader)";
 
-/** Below this there is no posting to read — typically a JavaScript shell. */
+/** Below this there is no posting to read, typically a JavaScript shell. */
 const MIN_PAGE_TEXT = 400;
 const MAX_REQUIREMENTS = 30;
 
@@ -121,7 +121,7 @@ export async function readPostingWithModel(input: {
     },
     assumptions: [
       "No site-specific reader matched this page, so NVIDIA Nemotron (nemotron-3.5-lightning) read it. " +
-        "Only details that appear word-for-word on the page were kept — check every field before you build.",
+        "Only details that appear word-for-word on the page were kept, check every field before you build.",
     ],
   });
 

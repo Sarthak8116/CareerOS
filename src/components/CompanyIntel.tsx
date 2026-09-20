@@ -5,7 +5,7 @@ import { LevelPill } from "@/components/pills";
 /**
  * Presentational view for cached company intelligence (build directive §5.6).
  *
- * Everything shown is categorical or narrative — no invented numbers. When a
+ * Everything shown is categorical or narrative, no invented numbers. When a
  * company hasn't been researched the engine returns empty arrays and honest,
  * low-confidence prose; this view degrades gracefully to reflect that instead
  * of implying certainty.
@@ -75,7 +75,7 @@ export function CompanyIntelView({ intel }: { intel: CompanyIntel }) {
       <Card>
         <CardHeader
           title={`What ${intel.company} actually does`}
-          subtitle="Cached research — read the sources below before relying on any claim."
+          subtitle="Cached research, read the sources below before relying on any claim."
         />
         <div className="space-y-4">
           <Prose>{intel.description}</Prose>
@@ -122,7 +122,7 @@ export function CompanyIntelView({ intel }: { intel: CompanyIntel }) {
         <Card>
           <CardHeader
             title="What this team is optimizing for"
-            subtitle="Where their attention goes — align your story with it."
+            subtitle="Where their attention goes, align your story with it."
           />
           <BulletList items={intel.priorities} />
         </Card>
@@ -139,7 +139,7 @@ export function CompanyIntelView({ intel }: { intel: CompanyIntel }) {
         </Card>
       )}
 
-      {/* Talking points — framed as "Sound informed: …" */}
+      {/* Talking points, framed as "Sound informed: …" */}
       {intel.talkingPoints.length > 0 && (
         <Card>
           <CardHeader
@@ -160,7 +160,7 @@ export function CompanyIntelView({ intel }: { intel: CompanyIntel }) {
         </Card>
       )}
 
-      {/* Risks — amber-toned */}
+      {/* Risks, amber-toned */}
       {intel.risks.length > 0 && (
         <Card className="border border-amber-200 bg-amber-50/50">
           <CardHeader
@@ -188,7 +188,7 @@ export function CompanyIntelView({ intel }: { intel: CompanyIntel }) {
       <Card>
         <CardHeader
           title="Sources"
-          subtitle="Every claim above traces back to these — check them yourself."
+          subtitle="Every claim above traces back to these, check them yourself."
         />
         {intel.sources.length === 0 ? (
           <EmptyState

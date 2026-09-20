@@ -2,16 +2,16 @@ import { describe, it, expect, vi, afterEach, type Mock } from "vitest";
 import { EventEmitter } from "node:events";
 
 /**
- * fetch.ts — the ONLY module in intake that touches the network.
+ * fetch.ts, the ONLY module in intake that touches the network.
  *
  * REWRITTEN for the P1 DNS-rebinding fix: fetch.ts no longer uses global
- * `fetch()` — it connects via `https.request` with a custom `lookup` option
+ * `fetch()`: it connects via `https.request` with a custom `lookup` option
  * (`guardedLookup`), which is what makes the validated address and the
  * connected address the SAME resolution. These tests target that real
  * mechanism directly:
  *
  *  - `guardedLookup` is unit-tested in isolation (it's exported specifically
- *    so this is possible) — this is "the connect-time lookup IS our guarded
+ *    so this is possible), this is "the connect-time lookup IS our guarded
  *    lookup" proof, not a structural inference about what fetch() receives.
  *  - a wiring test confirms `https.request` is actually given `guardedLookup`
  *    as its `lookup` option, so the unit test above is connected to the real
@@ -56,10 +56,10 @@ function allowPreCheck() {
 }
 
 /* ------------------------------------------------------------------ */
-/* guardedLookup — the actual mechanism that closes DNS rebinding      */
+/* guardedLookup, the actual mechanism that closes DNS rebinding      */
 /* ------------------------------------------------------------------ */
 
-describe("guardedLookup — the lookup the SOCKET actually connects through", () => {
+describe("guardedLookup, the lookup the SOCKET actually connects through", () => {
   it("passes through a public address unchanged (array form, options.all)", async () => {
     const { guardedLookup } = await import("@/lib/intake/fetch");
     mockedDnsLookup.mockImplementation((_hostname: string, _options: unknown, cb: (...a: unknown[]) => void) => {
@@ -72,7 +72,7 @@ describe("guardedLookup — the lookup the SOCKET actually connects through", ()
     expect(callback).toHaveBeenCalledWith(null, [{ address: "93.184.216.34", family: 4 }], undefined);
   });
 
-  it("BLOCKS a private address (array form) — the callback never receives it", async () => {
+  it("BLOCKS a private address (array form), the callback never receives it", async () => {
     const { guardedLookup, BLOCKED_ADDRESS_CODE } = await import("@/lib/intake/fetch");
     mockedDnsLookup.mockImplementation((_hostname: string, _options: unknown, cb: (...a: unknown[]) => void) => {
       cb(null, [{ address: "169.254.169.254", family: 4 }]);
@@ -104,7 +104,7 @@ describe("guardedLookup — the lookup the SOCKET actually connects through", ()
   });
 
   it("BLOCKS a private address given in the single-address callback form (options.all falsy)", async () => {
-    // Node calls the lookup differently depending on options.all — mishandling
+    // Node calls the lookup differently depending on options.all, mishandling
     // this shape would silently skip the check for the non-`all` call style.
     const { guardedLookup, BLOCKED_ADDRESS_CODE } = await import("@/lib/intake/fetch");
     mockedDnsLookup.mockImplementation((_hostname: string, _options: unknown, cb: (...a: unknown[]) => void) => {
@@ -145,7 +145,7 @@ describe("guardedLookup — the lookup the SOCKET actually connects through", ()
   });
 });
 
-describe("guardedLookup is actually wired into the request — not just tested in isolation", () => {
+describe("guardedLookup is actually wired into the request, not just tested in isolation", () => {
   afterEach(resetAll);
 
   it("https.request is called with { lookup: guardedLookup }", async () => {
@@ -196,7 +196,7 @@ function fakeResponse(status: number, headers: Record<string, string | undefined
   res.statusCode = status;
   res.headers = headers;
   // A real IncomingMessage's destroy() triggers 'close' once the stream
-  // actually tears down — httpsGet relies on that to settle the promise
+  // actually tears down, httpsGet relies on that to settle the promise
   // when it destroys the response at the byte cap.
   res.destroy = vi.fn(() => {
     queueMicrotask(() => res.emit("close"));
@@ -225,10 +225,10 @@ function mockSuccessfulRequest(status: number, body: string, headers: Record<str
 }
 
 /* ------------------------------------------------------------------ */
-/* safeFetch — transport-level behavior above the connect layer        */
+/* safeFetch, transport-level behavior above the connect layer        */
 /* ------------------------------------------------------------------ */
 
-describe("safeFetch — basic transport", () => {
+describe("safeFetch, basic transport", () => {
   afterEach(resetAll);
 
   it("returns status, body and content-type for a normal response", async () => {
@@ -318,7 +318,7 @@ describe("safeFetch — basic transport", () => {
   it("maps a connect-time block (guardedLookup firing on the real request) onto 'unsafe-url'", async () => {
     // Defense-in-depth check: even if assertSafeUrl's pre-check somehow let a
     // bad host through, the connect-time guard independently blocks it, and
-    // that failure is what safeFetch must surface — not a generic upstream
+    // that failure is what safeFetch must surface, not a generic upstream
     // error that would obscure what actually happened.
     allowPreCheck();
     mockedRequest.mockImplementation(() => {
@@ -354,7 +354,7 @@ describe("safeFetch — basic transport", () => {
   });
 });
 
-describe("safeFetch — a slow upstream times out rather than hanging forever", () => {
+describe("safeFetch, a slow upstream times out rather than hanging forever", () => {
   afterEach(() => {
     resetAll();
   });
@@ -365,7 +365,7 @@ describe("safeFetch — a slow upstream times out rather than hanging forever", 
       const req = fakeRequest();
       req.setTimeout = vi.fn((_ms: number, cb: () => void) => {
         // Fire the timeout callback immediately, as fetch.ts's own handler
-        // would once TIMEOUT_MS elapses — deterministic, no fake-timer/event
+        // would once TIMEOUT_MS elapses, deterministic, no fake-timer/event
         // loop interplay with the mocked EventEmitter needed.
         cb();
       });

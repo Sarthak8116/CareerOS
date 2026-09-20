@@ -18,7 +18,7 @@ import type { GraphNode, GraphNodeType, OpportunityGraph } from "@/lib/types";
  *
  * Renders the honest, deterministic graph produced by `buildOpportunityGraph`
  * so it is USEFUL, not decorative: the *warmest path* into the role (alumni
- * route) is made visually obvious — brand-ringed nodes + animated brand edges —
+ * route) is made visually obvious, brand-ringed nodes + animated brand edges,
  * and a filter lets you isolate the path, the people, or the evidence chain.
  *
  * Layout is deterministic: nodes are grouped into columns by type and stacked
@@ -148,7 +148,7 @@ export function OpportunityGraphView({ graph }: { graph: OpportunityGraph }) {
     return m;
   }, [graph.nodes]);
 
-  /* Deterministic column layout — computed once for the whole graph so
+  /* Deterministic column layout, computed once for the whole graph so
      positions never jump when the filter changes. */
   const allNodes: Node[] = useMemo(() => {
     const colCount: Record<number, number> = {};
@@ -288,7 +288,7 @@ export function OpportunityGraphView({ graph }: { graph: OpportunityGraph }) {
         </ul>
       </div>
 
-      {/* Warmest path, in words — accessible alternative to the highlight. */}
+      {/* Warmest path, in words, accessible alternative to the highlight. */}
       {warmestLabels.length > 0 && (
         <p className="mb-3 text-sm text-slate-600">
           <span className="font-semibold text-brand-700">Warmest path in:</span>{" "}

@@ -16,7 +16,7 @@ const Body = z.object({
 /** POST → { strengths, missing, strongerAnswer } graded by nemotron-3-super. */
 export async function POST(req: Request) {
   if (!liveModeAvailable()) {
-    return NextResponse.json({ error: "Model grading is off — no NVIDIA key is configured." }, { status: 503 });
+    return NextResponse.json({ error: "Model grading is off, no NVIDIA key is configured." }, { status: 503 });
   }
   let parsed;
   try {

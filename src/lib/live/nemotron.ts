@@ -6,7 +6,7 @@ import type { z } from "zod";
  * SERVER-ONLY NVIDIA Nemotron access (build directive §10 AI, §15 security).
  *
  * Replaces the Anthropic client. The endpoint is OpenAI-compatible, so this is
- * a plain `fetch` against /v1/chat/completions — no SDK, which also removes the
+ * a plain `fetch` against /v1/chat/completions, no SDK, which also removes the
  * only package that demanded zod ^3.25||^4 against this repo's pinned 3.24.1.
  *
  * API keys are read from the environment and NEVER reach the browser
@@ -22,7 +22,7 @@ const REQUEST_TIMEOUT_MS = 120_000;
 
 /** Verified present in the live model list. */
 export const NEMOTRON_MODELS = {
-  /** Document VLM. Reads page IMAGES only — it rejects text input. */
+  /** Document VLM. Reads page IMAGES only, it rejects text input. */
   parse: "nvidia/nemotron-parse",
   /** Fast reasoning model. Job-posting parsing. */
   lightning: "nvidia/nemotron-3.5-lightning-30b-a3b",
@@ -42,20 +42,20 @@ export const LIVE_MODEL_LABEL = "NVIDIA Nemotron";
  *
  * `nemotron-parse` is an OCR/document model: it takes page images and returns
  * the document's text. It cannot be given a JSON Schema, so the résumé call
- * site is two steps — PARSE reads the pages, then this model shapes what it
+ * site is two steps, PARSE reads the pages, then this model shapes what it
  * read.
  *
  * SUPER, not the smaller model, deliberately. The evidence graph is the most
  * honesty-critical structure in the app: fit, gaps, tasks and every claim in a
  * cover letter ground in it. Weak shaping fails as missed evidence, wrong trust
- * labels, or invented strength ratings — two of those are honesty failures, not
+ * labels, or invented strength ratings, two of those are honesty failures, not
  * quality ones. One extra call per campaign is the right price.
  */
 export const RESUME_SHAPER: NemotronRole = "super";
 
 /**
  * Reads page images when PARSE cannot. Must be MULTIMODAL, which is why this is
- * NANO (omni) and NOT whatever RESUME_SHAPER happens to be — the two were one
+ * NANO (omni) and NOT whatever RESUME_SHAPER happens to be, the two were one
  * constant while the shaper was nano, and pointing a text-only model at page
  * images would fail every page and report it as an unreadable résumé.
  */
@@ -95,7 +95,7 @@ function configuredKeys(): string[] {
     .filter((value) => value.length > 0);
 }
 
-/** Live mode is on when ANY key is present — one key reaches every model. */
+/** Live mode is on when ANY key is present, one key reaches every model. */
 export function liveModeAvailable(): boolean {
   return configuredKeys().length > 0;
 }
@@ -103,14 +103,14 @@ export function liveModeAvailable(): boolean {
 /**
  * The model's own key when present, any other configured key otherwise.
  * VERIFIED: one key reaches all 82 models, so the split exists only to spread
- * the rate limit — and a user who consolidates to a single key still works.
+ * the rate limit, and a user who consolidates to a single key still works.
  */
 function apiKey(role: NemotronRole): string {
   const own = ownKey(role);
   if (own) return own;
   const shared = configuredKeys()[0];
   if (shared) return shared;
-  throw new Error("No NVIDIA API key is set — live mode unavailable.");
+  throw new Error("No NVIDIA API key is set, live mode unavailable.");
 }
 
 /**
@@ -147,13 +147,13 @@ interface ChatResponse {
  * MEASURED, and the reason both flags exist: Lightning and Nano are REASONING
  * models. With neither flag they answer with "Here's a thinking process:" prose
  * instead of JSON. With `response_format` alone they return valid JSON but
- * still run the reasoning pass hidden in `reasoning_content` — 11.9s instead of
+ * still run the reasoning pass hidden in `reasoning_content`: 11.9s instead of
  * 0.6s. Both go on every structured call, Super included.
  *
  * `thinking: false` is sent to every model EXCEPT parse, including on the plain
  * -text transcription call: a hidden reasoning pass costs the same 17x there,
  * and its preamble would land in the transcript. `response_format` is sent only
- * when JSON is actually wanted — a transcription must come back as prose.
+ * when JSON is actually wanted, a transcription must come back as prose.
  */
 async function chat(opts: {
   role: NemotronRole;
@@ -193,7 +193,7 @@ async function chat(opts: {
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    // Status is kept — the routes map 401/429 to user-safe copy.
+    // Status is kept, the routes map 401/429 to user-safe copy.
     throw new Error(
       `Nemotron ${opts.role} returned ${res.status}. ${scrub(body.slice(0, 500))}`.trim(),
     );
@@ -319,7 +319,7 @@ export async function parseStructured<T extends z.ZodTypeAny>(opts: {
  * MEASURED: `nemotron-parse` accepts base64 image data URLs and rejects both
  * plain text and PDFs ("Supported formats: JPEG, PNG, BMP, TIFF, WEBP"). PDFs
  * are therefore rasterised IN THE BROWSER (pdfjs-dist) and arrive here as page
- * images — which also means the user's PDF never leaves their machine.
+ * images, which also means the user's PDF never leaves their machine.
  */
 const PAGE_IMAGE =
   /^data:image\/(png|jpeg|jpg|webp|bmp|tiff);base64,[A-Za-z0-9+/]+={0,2}$/;
@@ -340,7 +340,7 @@ const TRANSCRIBE_INSTRUCTION =
  * One request per page: page-size limits and per-request image caps are not
  * worth guessing at, and a per-page request means one unreadable page does not
  * cost the rest of the document. A page that cannot be read is marked as such
- * in the transcript rather than silently dropped — "we could not read this" and
+ * in the transcript rather than silently dropped, "we could not read this" and
  * "this page was blank" are different facts.
  *
  * If PARSE cannot read a single page, NANO (multimodal) is tried on the whole
@@ -371,7 +371,7 @@ export async function readDocumentPages(opts: {
     for (let i = 0; i < opts.pages.length; i++) {
       const content: ContentPart[] =
         role === "parse"
-          ? // PARSE rejects text input entirely — images only.
+          ? // PARSE rejects text input entirely, images only.
             [{ type: "image_url", image_url: { url: opts.pages[i] } }]
           : [
               { type: "text", text: TRANSCRIBE_INSTRUCTION },

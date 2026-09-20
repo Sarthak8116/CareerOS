@@ -98,7 +98,7 @@ export default function JobSearchPage() {
 
       <p className="mt-4 flex items-start gap-2 rounded-xl border border-brand-100 bg-brand-50/60 p-3 text-sm text-brand-900">
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
-        Demo search runs over a small cached pool of roles — no live listings are
+        Demo search runs over a small cached pool of roles, no live listings are
         fetched. Filtering happens entirely in your browser.
       </p>
 

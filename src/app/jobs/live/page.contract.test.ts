@@ -9,13 +9,13 @@ import path from "node:path";
  *
  *  1. First, `/api/campaign` switched from `resumePdfBase64` (raw PDF) to
  *     page images: nemotron-parse rejects PDFs outright (MEASURED,
- *     careeros/contract/p2.5-nemotron-provider — 400 on PDF base64), so
+ *     careeros/contract/p2.5-nemotron-provider, 400 on PDF base64), so
  *     pages are now rasterised client-side (src/lib/resume/rasterize.ts)
  *     and never leave the user's machine as a document.
  *  2. Mid-swap, the two sides briefly disagreed on the SHAPE of that change:
  *     page.tsx posted `{ jobText, resume: { pages, totalPages, truncated,
  *     truncatedReason } }` while route.ts still read a flat
- *     `body.resumePages` array — every submission 400'd with "Please
+ *     `body.resumePages` array, every submission 400'd with "Please
  *     upload your résumé as a PDF" even with a valid key, because the route
  *     never saw a page. That was observed directly (not inferred) and has
  *     since been fixed: route.ts now Zod-validates
@@ -24,7 +24,7 @@ import path from "node:path";
  *
  * The first test below calls the route handler directly with the shape
  * page.tsx currently sends, using a real 1x1 PNG so it clears the PNG-magic-
- * byte check too, and asserts the request gets PAST body validation — i.e.
+ * byte check too, and asserts the request gets PAST body validation, i.e.
  * proves the wire shapes agree, behaviorally, rather than trusting a string
  * match on field names that already drifted once. `fetch` is stubbed to
  * reject so this can never make a live call.
@@ -35,7 +35,7 @@ const PAGE_SOURCE = readFileSync(
   "utf8",
 );
 
-// A real, minimal 1x1 PNG — required so the route's PNG-magic-byte check
+// A real, minimal 1x1 PNG, required so the route's PNG-magic-byte check
 // (hasPngSignature) passes, not just its regex shape check.
 const PNG_1PX =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=";
@@ -86,17 +86,17 @@ describe("POST /api/campaign accepts the exact body jobs/live/page.tsx sends", (
     const res = await POST(req);
     const data = await res.json();
 
-    // It must NOT be rejected at the body-validation gate (400) — that would
+    // It must NOT be rejected at the body-validation gate (400), that would
     // mean the route can't see the pages the page actually sends. Given the
     // network stub, it's expected to fail LATER inside buildLiveCampaign
-    // (502, "could not read that résumé" — the model call itself failed,
+    // (502, "could not read that résumé", the model call itself failed,
     // which is a legitimate message here, not a validation rejection).
     expect(res.status).not.toBe(400);
     expect(res.status).toBe(502);
   });
 });
 
-describe("jobs/live page — stale-copy regressions that are already fixed (guard against reintroduction)", () => {
+describe("jobs/live page, stale-copy regressions that are already fixed (guard against reintroduction)", () => {
   it("does not tell the user to set ANTHROPIC_API_KEY", () => {
     expect(PAGE_SOURCE).not.toMatch(/ANTHROPIC_API_KEY/);
     expect(PAGE_SOURCE).not.toMatch(/Anthropic/i);

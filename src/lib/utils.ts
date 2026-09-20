@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/** Deterministic short id for demo entities (no Math.random — stable across renders). */
+/** Deterministic short id for demo entities (no Math.random, stable across renders). */
 export function slugId(prefix: string, seed: string) {
   let h = 0;
   for (let i = 0; i < seed.length; i++) {

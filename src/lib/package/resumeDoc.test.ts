@@ -7,7 +7,7 @@ import { buildResumeDocument, relevantEvidence } from "./resumeDoc";
  * assert them as intended rather than treat them as bugs to fix:
  *
  *  1. A resume-requesting form always adds a `missing` entry naming that the
- *     package contains a Markdown draft, not a formatted file — so real
+ *     package contains a Markdown draft, not a formatted file, so real
  *     packages are "partial" far more often than not, on purpose.
  *  2. Copying distrusted evidence (weak-inference / unknown trust) into the
  *     resume verbatim does NOT launder it into something evidenced. The same
@@ -92,7 +92,7 @@ function form(overrides: Partial<ApplicationForm> = {}): ApplicationForm {
 /* Deliberate behavior #1: the "not a real file" disclosure            */
 /* ------------------------------------------------------------------ */
 
-describe("buildResumeDocument — the Markdown-not-a-file disclosure (intentional)", () => {
+describe("buildResumeDocument, the Markdown-not-a-file disclosure (intentional)", () => {
   it("always names the gap when the form REQUIRES a resume, even with a full, strong evidence graph", () => {
     const doc = buildResumeDocument({
       candidate: candidate(),
@@ -132,7 +132,7 @@ describe("buildResumeDocument — the Markdown-not-a-file disclosure (intentiona
       form: form({ resume: "unknown", completeness: "none" }),
     });
     // "unknown" is an admission about US, not a fact about the form asking
-    // for a resume — buildResumeDocument still drafts one (best effort), but
+    // for a resume, buildResumeDocument still drafts one (best effort), but
     // must not claim a fact ("this is missing a file") it cannot support.
     expect(doc.missing).toEqual([]);
   });
@@ -144,7 +144,7 @@ describe("buildResumeDocument — the Markdown-not-a-file disclosure (intentiona
   });
 
   it("this is the honest reason 'complete' is hard to reach: a resume-requiring package can never be gap-free while this entry exists", () => {
-    // Not asserting deriveCompleteness here (that's build.ts's contract) —
+    // Not asserting deriveCompleteness here (that's build.ts's contract),
     // just pinning down the fact this module contributes an entry that ANY
     // completeness derivation must count, so "complete" cannot silently
     // ignore an unformatted resume.
@@ -161,7 +161,7 @@ describe("buildResumeDocument — the Markdown-not-a-file disclosure (intentiona
 /* Deliberate behavior #2: distrust survives verbatim copying          */
 /* ------------------------------------------------------------------ */
 
-describe("buildResumeDocument — copying evidence does not launder trust (intentional)", () => {
+describe("buildResumeDocument, copying evidence does not launder trust (intentional)", () => {
   it("weak-inference evidence, quoted verbatim, still grades unsupported", () => {
     const doc = buildResumeDocument({
       candidate: candidate({
@@ -200,11 +200,11 @@ describe("buildResumeDocument — copying evidence does not launder trust (inten
 });
 
 /* ------------------------------------------------------------------ */
-/* Assembly — nothing rewritten, ordering, structure                   */
+/* Assembly, nothing rewritten, ordering, structure                   */
 /* ------------------------------------------------------------------ */
 
-describe("buildResumeDocument — assembly", () => {
-  it("every evidence claim appears in the content VERBATIM — nothing is rewritten", () => {
+describe("buildResumeDocument, assembly", () => {
+  it("every evidence claim appears in the content VERBATIM, nothing is rewritten", () => {
     const ev = evidence({ claim: "Reduced build time by exactly this exact wording, unaltered." });
     const doc = buildResumeDocument({ candidate: candidate({ evidence: [ev] }), job: job() });
     expect(doc.content).toContain(ev.claim);

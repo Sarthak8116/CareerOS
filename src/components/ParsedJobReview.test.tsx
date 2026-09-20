@@ -5,14 +5,14 @@ import { ParsedJobReview } from "@/components/ParsedJobReview";
 
 /**
  * The invariant these tests protect: EVERY field in `job.unstated` reaches the
- * user somehow — through its own editable input, or through the catch-all line
+ * user somehow, through its own editable input, or through the catch-all line
  * for fields this card has no input for.
  *
  * The catch-all branch is deliberately expected to be empty in normal operation
  * (every placeholder-bearing field currently has an input), which is exactly
  * why it needs a test: defensive code with no test reads as dead code and gets
  * deleted. If `unstated` ever grows a field nobody renders, the alternative to
- * this branch is the value vanishing silently — which is the failure this whole
+ * this branch is the value vanishing silently, which is the failure this whole
  * design exists to prevent.
  */
 
@@ -20,7 +20,7 @@ import { ParsedJobReview } from "@/components/ParsedJobReview";
  * Rendered through `react-dom/server` into a jsdom node rather than through
  * @testing-library/react: the repo ships @testing-library/react but not its
  * required @testing-library/dom peer, so RTL cannot currently load. These are
- * static-output assertions, so nothing here needs RTL's interaction helpers —
+ * static-output assertions, so nothing here needs RTL's interaction helpers,
  * going through a real DOM node also gets us entity decoding and text
  * extraction for free.
  */
@@ -63,7 +63,7 @@ function renderReview(j: Job): string {
   return host.textContent ?? "";
 }
 
-describe("ParsedJobReview — every unstated field reaches the user", () => {
+describe("ParsedJobReview, every unstated field reaches the user", () => {
   it("surfaces a field that has no input of its own, via the catch-all", () => {
     // `description` has no editable input on this card. Without the catch-all
     // branch it would land in `unstated` and be shown nowhere at all.
@@ -100,7 +100,7 @@ describe("ParsedJobReview — every unstated field reaches the user", () => {
   });
 });
 
-describe("ParsedJobReview — silent posting vs. unrepresentable value", () => {
+describe("ParsedJobReview, silent posting vs. unrepresentable value", () => {
   it("(a) reads as 'not stated' when the posting said nothing", () => {
     const text = renderReview(job({ unstated: ["employmentType"] }));
 
@@ -124,7 +124,7 @@ describe("ParsedJobReview — silent posting vs. unrepresentable value", () => {
   });
 
   it("keeps the posting's own wording on screen once the value is confirmed", () => {
-    // Not in `unstated` — the user has set it — but the raw string is still a
+    // Not in `unstated`: the user has set it, but the raw string is still a
     // true fact about the posting, so it stays as a plain note.
     const text = renderReview(
       job({ employmentTypeRaw: "Regular Full Time (Salary)" }),

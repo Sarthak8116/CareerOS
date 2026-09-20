@@ -9,7 +9,7 @@ import {
 } from "./personalInfo";
 
 /**
- * The personal-information sheet — the module whose entire job is to NEVER
+ * The personal-information sheet, the module whose entire job is to NEVER
  * invent a field the profile doesn't hold. Every test here either shows a
  * real value passing through unchanged, or shows a missing value producing a
  * plain note instead of a guess.
@@ -64,7 +64,7 @@ function form(overrides: Partial<ApplicationForm> = {}): ApplicationForm {
   };
 }
 
-describe("personalField — every key reads only the stored profile, never invents", () => {
+describe("personalField, every key reads only the stored profile, never invents", () => {
   it("returns the exact stored value for straightforward fields", () => {
     const cand = candidate();
     expect(personalField("name", cand)).toEqual({ key: "name", label: "Full name", value: "Jordan Rivera" });
@@ -94,14 +94,14 @@ describe("personalField — every key reads only the stored profile, never inven
     expect(portfolio.note).toMatch(/not in your careeros profile/i);
   });
 
-  it("email and phone are NEVER returned, regardless of candidate — CareerOS never stores them", () => {
+  it("email and phone are NEVER returned, regardless of candidate, CareerOS never stores them", () => {
     const cand = candidate();
     const email = personalField("email", cand);
     expect(email.value).toBeUndefined();
-    expect(email.note).toBe("CareerOS does not store your email address — add it yourself.");
+    expect(email.note).toBe("CareerOS does not store your email address, add it yourself.");
     const phone = personalField("phone", cand);
     expect(phone.value).toBeUndefined();
-    expect(phone.note).toBe("CareerOS does not store your phone number — add it yourself.");
+    expect(phone.note).toBe("CareerOS does not store your phone number, add it yourself.");
   });
 
   it("splits a clean two-token name into first/last", () => {
@@ -110,7 +110,7 @@ describe("personalField — every key reads only the stored profile, never inven
     expect(personalField("last-name", cand).value).toBe("Rivera");
   });
 
-  it("refuses to guess at a single-token name — no invented split", () => {
+  it("refuses to guess at a single-token name, no invented split", () => {
     const cand = candidate({ name: "Madonna" });
     const first = personalField("first-name", cand);
     const last = personalField("last-name", cand);
@@ -120,13 +120,13 @@ describe("personalField — every key reads only the stored profile, never inven
     expect(last.note).toMatch(/does not split cleanly/i);
   });
 
-  it("refuses to guess at a name with more than two tokens — ambiguous, not ours to resolve", () => {
+  it("refuses to guess at a name with more than two tokens, ambiguous, not ours to resolve", () => {
     const cand = candidate({ name: "Maria del Carmen Gonzalez Ruiz" });
     expect(personalField("first-name", cand).value).toBeUndefined();
     expect(personalField("last-name", cand).value).toBeUndefined();
   });
 
-  it("treats a stored 'Unknown' placeholder the same as absent — never presents it as a real value", () => {
+  it("treats a stored 'Unknown' placeholder the same as absent, never presents it as a real value", () => {
     // `location`/`seniority`-style "Unknown" placeholders exist elsewhere in
     // the schema (see Job.unstated); personalField applies the same rule to
     // whatever it's handed.
@@ -215,7 +215,7 @@ describe("requestedPersonalKeys", () => {
   });
 });
 
-describe("buildPersonalInfo — status, claims, and missing all trace back to what requestedPersonalKeys asked for", () => {
+describe("buildPersonalInfo, status, claims, and missing all trace back to what requestedPersonalKeys asked for", () => {
   it("is 'not-requested' with no content, claims, or missing when the form asks for nothing here", () => {
     const doc = buildPersonalInfo({
       candidate: candidate(),
@@ -263,7 +263,7 @@ describe("buildPersonalInfo — status, claims, and missing all trace back to wh
     ]);
   });
 
-  it("a blank field produces NO claim — nothing is asserted about a value that doesn't exist", () => {
+  it("a blank field produces NO claim, nothing is asserted about a value that doesn't exist", () => {
     const doc = buildPersonalInfo({
       candidate: candidate(),
       form: form({ questions: [question({ id: "q1", autofillKey: "email" })] }),
@@ -286,7 +286,7 @@ describe("buildPersonalInfo — status, claims, and missing all trace back to wh
     expect(defaultedDoc.content).toMatch(/could not read this application's own fields/i);
   });
 
-  it("with no form at all, still never invents — falls back to defaults and flags blanks the same way", () => {
+  it("with no form at all, still never invents, falls back to defaults and flags blanks the same way", () => {
     const doc = buildPersonalInfo({ candidate: candidate(), form: undefined });
     expect(doc.status).not.toBe("not-requested");
     // email/phone are always in DEFAULT_KEYS and never stored, so always blank.
@@ -295,7 +295,7 @@ describe("buildPersonalInfo — status, claims, and missing all trace back to wh
   });
 });
 
-describe("PERSONAL_AUTOFILL_KEYS / DOCUMENT_AUTOFILL_KEYS — no overlap", () => {
+describe("PERSONAL_AUTOFILL_KEYS / DOCUMENT_AUTOFILL_KEYS, no overlap", () => {
   it("a key belongs to exactly one of the two sets, never both", () => {
     for (const key of PERSONAL_AUTOFILL_KEYS) {
       expect(DOCUMENT_AUTOFILL_KEYS.has(key)).toBe(false);

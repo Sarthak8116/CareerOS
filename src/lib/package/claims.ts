@@ -3,7 +3,7 @@ import { verifyClaims } from "@/lib/engine/resume";
 import { INVENTED_METRIC_PATTERNS } from "@/lib/demo/resume";
 
 /**
- * Grounding for generated prose — the honesty pass over a cover letter.
+ * Grounding for generated prose, the honesty pass over a cover letter.
  *
  * Free prose about a real person is the riskiest thing this product emits, so
  * every sentence is graded individually and the grading REUSES the existing
@@ -26,11 +26,11 @@ import { INVENTED_METRIC_PATTERNS } from "@/lib/demo/resume";
 /**
  * What a sentence is doing, as declared by the generator.
  *
- *  - "evidence" — asserts something about the candidate's work or skills.
+ *  - "evidence", asserts something about the candidate's work or skills.
  *                 Must cite an Evidence id or it is unsupported.
- *  - "profile"  — restates a stored profile field (name, headline, degree).
+ *  - "profile" , restates a stored profile field (name, headline, degree).
  *                 Must literally contain one of those values.
- *  - "intent"   — about the role, the company, or the act of applying.
+ *  - "intent"  , about the role, the company, or the act of applying.
  *                 Must assert nothing about the candidate's background.
  */
 export type SentenceRole = "evidence" | "profile" | "intent";
@@ -44,7 +44,7 @@ export interface GroundedSentence {
 
 /**
  * First-person assertions about work history. Used ONLY to demote a sentence
- * into the stricter bucket — it can never promote one — so a phrasing this
+ * into the stricter bucket, it can never promote one, so a phrasing this
  * misses still has to survive the citation check, and a phrasing it catches
  * merely has to be cited. Failing open is therefore not silent leakage.
  */
@@ -123,7 +123,7 @@ const FLAG_ID = /^flag_(?:metric|unsupported|weak|buzz)_(ltr_\d+)$/;
  * evidence graph. Returns one PackageClaim per sentence, in order.
  *
  * Uncited "evidence" sentences are given trust "unknown", which is precisely
- * the condition `verifyClaims` already treats as unsupported — that is the
+ * the condition `verifyClaims` already treats as unsupported, that is the
  * reuse, not a re-implementation of it.
  */
 export function groundSentences(

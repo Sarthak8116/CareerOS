@@ -14,7 +14,7 @@ import {
  * ZIP SLIP REGRESSION.
  *
  * `folderName` and every `fileName` derive from a job title and company that
- * came off a scraped posting. JSZip writes entry names verbatim — handed
+ * came off a scraped posting. JSZip writes entry names verbatim, handed
  * "../../etc/evil" it produces exactly that. These tests are the proof that
  * nothing untrusted can ever reach an archive entry with its separators,
  * traversal, or dots intact.
@@ -35,7 +35,7 @@ const HOSTILE = [
   "%2e%2e%2fetc",
 ];
 
-describe("sanitizeSegment — the untrusted-input whitelist", () => {
+describe("sanitizeSegment, the untrusted-input whitelist", () => {
   it("never emits a path separator, a dot, or a traversal sequence", () => {
     for (const raw of HOSTILE) {
       const out = sanitizeSegment(raw, FOLDER_FALLBACK);
@@ -94,7 +94,7 @@ describe("package names built from a hostile posting", () => {
     expect(folder.length).toBeLessThanOrEqual(FOLDER_MAX);
   });
 
-  it("fileName carries exactly one dot — the extension we appended", () => {
+  it("fileName carries exactly one dot, the extension we appended", () => {
     const name = documentFileName("cover-letter", job);
     expect(name.split(".")).toHaveLength(2);
     expect(name.endsWith(".md")).toBe(true);
@@ -109,7 +109,7 @@ describe("package names built from a hostile posting", () => {
   });
 });
 
-describe("assertSafeEntryPath — the last line of defence", () => {
+describe("assertSafeEntryPath, the last line of defence", () => {
   it("accepts exactly folder/file", () => {
     expect(assertSafeEntryPath("NVIDIA-Intern/resume-NVIDIA.md")).toBe(
       "NVIDIA-Intern/resume-NVIDIA.md",
@@ -134,22 +134,22 @@ describe("assertSafeEntryPath — the last line of defence", () => {
 });
 
 /**
- * REAL ZIP PROOF (added by tester — see message to coder-package).
+ * REAL ZIP PROOF (added by tester, see message to coder-package).
  *
  * The tests above prove the sanitizer is correct IN ISOLATION. That is a
  * different claim from "nothing unsafe reaches a real archive's bytes", and
  * team-lead's brief specifically asked for the second one.
  *
- * IMPORTANT METHOD NOTE: the obvious way to check this — `JSZip.loadAsync(buf)`
- * then `Object.keys(reloaded.files)` — is NOT a valid proof. `loadAsync`
+ * IMPORTANT METHOD NOTE: the obvious way to check this, `JSZip.loadAsync(buf)`
+ * then `Object.keys(reloaded.files)`: is NOT a valid proof. `loadAsync`
  * builds its own in-memory folder tree and, as a side effect of that (not a
  * documented security feature), silently resolves literal ".." path
  * components on the forward-slash-delimited form while doing so. A first
  * pass at this exact check used `reloaded.files` and got a false "safe"
- * reading for a MALICIOUS, UNSANITIZED name — verified directly against
+ * reading for a MALICIOUS, UNSANITIZED name, verified directly against
  * jszip 3.10.2. The ground truth is the raw bytes JSZip actually wrote: the
- * ZIP's LOCAL FILE HEADER records (what a conforming third-party extractor —
- * Python `zipfile`, `unzip`, 7-Zip, `adm-zip`, ...— reads), read independent
+ * ZIP's LOCAL FILE HEADER records (what a conforming third-party extractor,
+ * Python `zipfile`, `unzip`, 7-Zip, `adm-zip`, ... -  reads), read independent
  * of any higher-level zip library's own parsing.
  */
 
@@ -170,7 +170,7 @@ function readRawLocalFileNames(buffer: Buffer): string[] {
   return names;
 }
 
-describe("real JSZip archive — proves the vulnerability and the fix", () => {
+describe("real JSZip archive, proves the vulnerability and the fix", () => {
   it("PROVES the vulnerability: an unsanitized name really is written verbatim into the archive bytes", async () => {
     const zip = new JSZip();
     zip.file("../../etc/evil", "malicious payload");

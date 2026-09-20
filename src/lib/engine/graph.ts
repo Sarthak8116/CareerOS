@@ -27,7 +27,7 @@ import { matchSkill } from "@/lib/engine/skills";
  *    labeled as such. Nothing inferred is presented as confirmed.
  *
  * ---------------------------------------------------------------------------
- * NODE-ID SCHEME (stable; the UI references these — esp. for warmestPath)
+ * NODE-ID SCHEME (stable; the UI references these, esp. for warmestPath)
  * ---------------------------------------------------------------------------
  *   candidate   candidate.id                       e.g. "cand_ave"
  *   job         job.id                             e.g. "job_nvidia_syssw"
@@ -61,7 +61,7 @@ const WARMTH_RANK: Record<NonNullable<Person["warmth"]>["level"], number> = {
 };
 
 /**
- * Edge wording per overlap kind. Each names WHAT is shared — never "knows" or
+ * Edge wording per overlap kind. Each names WHAT is shared, never "knows" or
  * "is connected to", which the data does not support.
  */
 const WARMTH_EDGE_LABEL: Record<
@@ -230,7 +230,7 @@ export function buildOpportunityGraph(input: {
   );
   addEdge(teamId, companyId, "part of", job.team ? "source-backed" : "strong-inference");
 
-  // candidate studied at university — a fact the user supplied.
+  // candidate studied at university, a fact the user supplied.
   addEdge(candidateId, universityId, "studied at", "user-provided");
 
   /* ------------------------------------------------------------------ */
@@ -252,7 +252,7 @@ export function buildOpportunityGraph(input: {
   // Candidate -> skill: demonstrates (or "interested in" when only weak signal).
   for (const key of skillKeys) {
     const supportIds = matchSkill(key, candidate).supportingEvidenceIds;
-    if (supportIds.length === 0) continue; // no honest link — leave the gap visible
+    if (supportIds.length === 0) continue; // no honest link, leave the gap visible
 
     const supporting = candidate.evidence.filter((e) => supportIds.includes(e.id));
     const best = supporting.reduce((a, b) =>
@@ -281,7 +281,7 @@ export function buildOpportunityGraph(input: {
   /* People edges (who to contact, and how warm the path is)             */
   /* ------------------------------------------------------------------ */
 
-  // Detect the alumni connection (shared university) — heuristic, honestly labeled.
+  // Detect the alumni connection (shared university), heuristic, honestly labeled.
   const isAlumnusOf = (p: Person) =>
     /alumn/i.test(p.connection) ||
     /univers|alma\s*mater/i.test(`${p.connection} ${p.commonality ?? ""}`);
@@ -290,7 +290,7 @@ export function buildOpportunityGraph(input: {
    * Pick the warmest contact.
    *
    * When live contacts carry overlap-scored `warmth`, use the highest-scoring
-   * one — that is a measured overlap rather than a regex guess. With no warmth
+   * one, that is a measured overlap rather than a regex guess. With no warmth
    * data (demo mode, or a live run without enrichment) this falls back to the
    * original alumni heuristic, so existing behavior is untouched.
    */
@@ -334,7 +334,7 @@ export function buildOpportunityGraph(input: {
       addEdge(p.id, teamId, "likely on", p.trust);
     }
 
-    // The warmest contact shares something with the candidate — still an
+    // The warmest contact shares something with the candidate, still an
     // inference, and the edge names WHAT is shared rather than implying a tie.
     if (alumnus && p.id === alumnus.id) {
       const topSignal = p.warmth?.signals[0];
@@ -360,7 +360,7 @@ export function buildOpportunityGraph(input: {
   /* Warmest path into the team.                                         */
   /*                                                                      */
   /* Routes through the university only when a school is genuinely shared  */
-  /* — otherwise the hop would assert a link that does not exist:          */
+  /*, otherwise the hop would assert a link that does not exist:          */
   /*   shared school: [candidate -> university -> person -> team -> job]   */
   /*   other overlap: [candidate -> person -> team -> job]                 */
   /* ------------------------------------------------------------------ */

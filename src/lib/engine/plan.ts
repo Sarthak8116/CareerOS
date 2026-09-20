@@ -10,7 +10,7 @@ import type {
 import { ELIGIBILITY } from "@/lib/engine/gaps";
 
 /**
- * Campaign Planner (build directive §5.18) — turns gaps + network into an
+ * Campaign Planner (build directive §5.18), turns gaps + network into an
  * ordered, dependency-aware task list, each with a responsible agent.
  */
 
@@ -66,7 +66,7 @@ export function computeTasks(
   if (firstContact) {
     tasks.push({
       id: "task_outreach_first",
-      title: `Reach out to ${firstContact.name} (${firstContact.connection.split(" —")[0]})`,
+      title: `Reach out to ${firstContact.name} (${firstContact.connection.split(", ")[0]})`,
       category: "outreach",
       priority: "high",
       impact: "strong",
@@ -115,7 +115,7 @@ function interviewPrepTitle(job: Job): string {
 }
 
 /**
- * Agent Activity feed (§7): concise actions/conclusions with confidence —
+ * Agent Activity feed (§7): concise actions/conclusions with confidence,
  * never private model reasoning. This is the "visible swarm" the demo shows.
  */
 export function computeActivity(
@@ -171,7 +171,7 @@ export function computeActivity(
       message:
         gaps.length === 0
           ? "No gaps found against the requirements this posting lists."
-          : `${gaps.length} ${gaps.length === 1 ? "gap" : "gaps"} identified${trueGap ? `, led by: ${trueGap.requirement}` : ""} — each converted to a concrete action.`,
+          : `${gaps.length} ${gaps.length === 1 ? "gap" : "gaps"} identified${trueGap ? `, led by: ${trueGap.requirement}` : ""}, each converted to a concrete action.`,
       kind: "conclusion",
       confidence: "high",
     },

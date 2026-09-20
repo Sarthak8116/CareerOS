@@ -14,8 +14,8 @@ import { overlap } from "@/lib/package/match";
  * The resume document.
  *
  * SCOPE: P2 PACKAGES what already exists. This document is assembled from the
- * candidate's own evidence graph — every bullet is an Evidence claim VERBATIM,
- * with its source reference — and ordered so the work that answers this
+ * candidate's own evidence graph, every bullet is an Evidence claim VERBATIM,
+ * with its source reference, and ordered so the work that answers this
  * posting's requirements comes first. Nothing is rewritten, because rewriting
  * is `engine/resume.ts`'s hardcoded recommendation bank, which is keyed to the
  * demo candidate's evidence ids; dropping that prose into a real person's
@@ -117,7 +117,7 @@ export function buildResumeDocument(input: {
   lines.push(
     "",
     `_Assembled by CareerOS from your recorded evidence for ${job.title} at ${job.company}. ` +
-      "Every line below is something you already recorded — nothing was rewritten or added. " +
+      "Every line below is something you already recorded, nothing was rewritten or added. " +
       "Format it into your own resume file before you upload it._",
     "",
     "## Education",
@@ -151,7 +151,7 @@ export function buildResumeDocument(input: {
   const missing =
     form?.resume === "required" || form?.resume === "optional"
       ? [
-          "A resume file to upload — this package contains a Markdown draft assembled from your evidence, not a formatted PDF the employer's form will accept.",
+          "A resume file to upload, this package contains a Markdown draft assembled from your evidence, not a formatted PDF the employer's form will accept.",
         ]
       : [];
 

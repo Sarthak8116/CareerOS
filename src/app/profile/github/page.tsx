@@ -9,7 +9,7 @@ import { getProfile } from "@/lib/profileStore";
 
 /**
  * §5.15 GitHub analysis page.
- * Runs the deterministic engine over the stored profile — no live API calls.
+ * Runs the deterministic engine over the stored profile, no live API calls.
  */
 export default function GitHubAnalysisPage() {
   const analysis = analyzeGitHub(getProfile());

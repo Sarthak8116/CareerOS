@@ -18,7 +18,7 @@ import { getProfile } from "@/lib/profileStore";
 import type { Evidence, Level } from "@/lib/types";
 
 /**
- * §13 — /profile — Career Workspace overview.
+ * §13, /profile, Career Workspace overview.
  *
  * Profile "completeness" is shown CATEGORICALLY (a LevelPill) rather than as
  * an invented percentage (build directive §16).
@@ -59,7 +59,7 @@ const categoryLabels: Record<Evidence["category"], string> = {
 
 /**
  * Categorical completeness: how much of the profile is backed by public,
- * source-backed proof vs. self-reported. Deliberately coarse — no percentages.
+ * source-backed proof vs. self-reported. Deliberately coarse, no percentages.
  */
 function completenessLevel(evidence: Evidence[]): { level: Level; note: string } {
   const backed = evidence.filter(
@@ -75,7 +75,7 @@ function completenessLevel(evidence: Evidence[]): { level: Level; note: string }
     };
   return {
     level: "limited",
-    note: "Most claims are self-reported — add public proof to strengthen them.",
+    note: "Most claims are self-reported, add public proof to strengthen them.",
   };
 }
 
@@ -230,7 +230,7 @@ export default function ProfilePage() {
               </dl>
             </Card>
 
-            {/* Profile completeness — categorical, not a percentage */}
+            {/* Profile completeness, categorical, not a percentage */}
             <Card>
               <h3 className="text-sm font-semibold text-slate-900">
                 Profile completeness

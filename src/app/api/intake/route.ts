@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 /**
  * P1 job-link intake.
  *
- * The route PARSES ONLY. It never builds a campaign — the UI shows the user
+ * The route PARSES ONLY. It never builds a campaign, the UI shows the user
  * what we read, they confirm or correct it, and only then does the existing
  * client-side campaign creation run. That review step is what turns a
  * placeholder into a user-provided fact, so skipping it would undo the whole
@@ -41,7 +41,7 @@ const STATUS_BY_REASON: Record<IntakeErrorKind, number> = {
 };
 
 /**
- * GET /api/intake — which boards we can read.
+ * GET /api/intake, which boards we can read.
  *
  * A CAPABILITY list, not an availability gate: intake works for any URL, and
  * anything unrecognised falls to the generic adapter and then to paste.
@@ -50,7 +50,7 @@ export function GET() {
   return NextResponse.json({ adapters: adapterCapabilities() });
 }
 
-/** POST /api/intake — read a job posting from a link. */
+/** POST /api/intake, read a job posting from a link. */
 export async function POST(req: Request) {
   let body: { url?: unknown };
   try {
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "That link is too long." }, { status: 413 });
   }
   // Cheap shape check before any network work. `fetch.ts` re-validates and
-  // additionally resolves the host — this is not the security boundary.
+  // additionally resolves the host, this is not the security boundary.
   if (!isFetchableUrlShape(url)) {
     return NextResponse.json(
       { error: "That doesn't look like a job posting link. It should start with https://" },
@@ -79,7 +79,7 @@ export async function POST(req: Request) {
     );
   }
 
-  // `intakeFromUrl` never throws — every failure is a shaped result.
+  // `intakeFromUrl` never throws, every failure is a shaped result.
   const result = await intakeFromUrl(url);
 
   return NextResponse.json(

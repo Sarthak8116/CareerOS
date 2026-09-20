@@ -13,11 +13,11 @@ import { harvestEnabled } from "@/lib/harvest/client";
 import { enrichWithLinkedIn } from "@/lib/live/enrich";
 
 /**
- * Live campaign builder — the real-provider counterpart to DemoCampaignProvider.
+ * Live campaign builder, the real-provider counterpart to DemoCampaignProvider.
  * Runs structured Nemotron calls (read résumé → shape candidate → parse job →
  * analyze) and assembles a Campaign in the SAME schema the whole UI renders.
  *
- * Model per step (the contract's assignment, except the shaper — see below):
+ * Model per step (the contract's assignment, except the shaper, see below):
  *  - nemotron-parse            reads the rasterised résumé pages
  *  - nemotron-3-super          shapes that transcript into candidate+evidence
  *                              (RESUME_SHAPER; see nemotron.ts for why SUPER)
@@ -27,7 +27,7 @@ import { enrichWithLinkedIn } from "@/lib/live/enrich";
  * Trust rules baked into every prompt (build directive §16):
  *  - Ground every claim in the provided evidence; never invent experience.
  *  - Use categorical labels, never fabricated percentages.
- *  - Do NOT invent real named people or email addresses — the hiring network is
+ *  - Do NOT invent real named people or email addresses, the hiring network is
  *    role-based targets the user must still identify and verify.
  */
 
@@ -65,7 +65,7 @@ export async function buildLiveCampaign(input: {
     pages: input.resume.pages,
   });
   // The transcript is the user's own file, but it is still text of unknown
-  // content reaching a model — fence it like any other untrusted input (§15).
+  // content reaching a model, fence it like any other untrusted input (§15).
   const resumeText = sanitizeUntrusted(resume.text).clean;
 
   // What the models were NOT given. A campaign built on part of a résumé that
@@ -151,7 +151,7 @@ export async function buildLiveCampaign(input: {
       "six categorical fit dimensions (role, evidence, preference, network, urgency, improvement) each with an explanation and supporting evidence ids; " +
       "a gap-to-action list that converts each meaningful gap into the single best next action; " +
       "an ordered task list; a short agent-activity feed (actions/evidence/conclusions/conflicts with confidence); a nextAction; and a readiness level. " +
-      "For 'people' (the hiring network), output ROLE-BASED outreach targets only — e.g. name = 'Hiring manager, <team>' with trust 'weak-inference'. " +
+      "For 'people' (the hiring network), output ROLE-BASED outreach targets only, e.g. name = 'Hiring manager, <team>' with trust 'weak-inference'. " +
       "NEVER fabricate real named individuals, reporting lines, or email addresses; the user must identify and verify real people themselves. " +
       HONESTY,
     task:

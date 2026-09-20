@@ -46,7 +46,7 @@ function deriveActions(campaigns: Campaign[]): RecommendedAction[] {
       });
     }
   }
-  // Surface the highest-leverage items first, but keep it honest — no scores.
+  // Surface the highest-leverage items first, but keep it honest, no scores.
   const rank: Record<string, number> = {
     critical: 0,
     high: 1,
@@ -141,7 +141,7 @@ export default function DashboardPage() {
             <Card className="mt-3">
               {actions.length === 0 ? (
                 <p className="text-sm text-slate-500">
-                  You&apos;re all caught up — no open actions across your campaigns.
+                  You&apos;re all caught up, no open actions across your campaigns.
                 </p>
               ) : (
                 <ul className="space-y-4">

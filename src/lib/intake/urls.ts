@@ -5,7 +5,7 @@
  * a URL before posting it), exactly like `harvest/urls.ts`.
  *
  * Detection is by HOSTNAME + PATH SHAPE only. We never guess an ATS from page
- * content, and we never try a board's API on a URL whose shape doesn't match —
+ * content, and we never try a board's API on a URL whose shape doesn't match,
  * a wrong guess costs a failed call and risks attributing one company's posting
  * to another.
  */
@@ -48,7 +48,7 @@ function segments(url: URL): string[] {
 /**
  * Is this URL even worth handing to the fetcher?
  *
- * A shape check only — it says nothing about whether the host is safe to
+ * A shape check only, it says nothing about whether the host is safe to
  * reach. `fetch.ts` owns that decision and re-checks everything; this exists so
  * the UI can disable a button without a round trip.
  */
@@ -80,7 +80,7 @@ export function toUrl(raw: string): URL | undefined {
  * trailing slash removed. Used as the stable identity for `Job.id`, so two
  * links to the same posting produce the same campaign.
  *
- * The PATH case is preserved — Lever and Ashby ids are case-sensitive UUIDs
+ * The PATH case is preserved, Lever and Ashby ids are case-sensitive UUIDs
  * and Workday external paths are mixed-case.
  */
 export function canonicalPostingUrl(raw: string): string | undefined {
@@ -102,7 +102,7 @@ function parseGreenhouse(url: URL): ParsedIntakeUrl | undefined {
   }
   if (!/^(boards|job-boards)(\.eu)?\.greenhouse\.io$/.test(h)) return undefined;
   const parts = segments(url);
-  // [board, "jobs", id] — also tolerate an "embed" prefix Greenhouse still serves.
+  // [board, "jobs", id], also tolerate an "embed" prefix Greenhouse still serves.
   const jobsAt = parts.indexOf("jobs");
   if (jobsAt < 1) return undefined;
   const org = parts[jobsAt - 1];
@@ -158,7 +158,7 @@ const PARSERS = [parseGreenhouse, parseLever, parseAshby, parseWorkday];
 /**
  * Identify the adapter for a URL.
  *
- * Returns the `generic` adapter for anything unrecognised — that adapter looks
+ * Returns the `generic` adapter for anything unrecognised, that adapter looks
  * for embedded JSON-LD and fails honestly when there is none, which is the
  * correct behavior for an unknown board.
  */
@@ -207,7 +207,7 @@ export function ashbyApiUrl(org: string): string {
 /**
  * Workday's internal CXS endpoint, derived by inserting `/wday/cxs/{tenant}/`
  * before the site id. When this 404s the tenant/site pair was not derivable and
- * the caller falls back to paste — we never retry with guessed site ids.
+ * the caller falls back to paste, we never retry with guessed site ids.
  */
 export function workdayApiUrl(
   url: URL,

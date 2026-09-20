@@ -36,7 +36,7 @@ import {
 import { slugId } from "@/lib/utils";
 
 /**
- * Greenhouse adapter — the only P1 board that publishes its whole application
+ * Greenhouse adapter, the only P1 board that publishes its whole application
  * form, which makes it the only one where ABSENCE IS INFORMATIVE: if there is
  * no cover-letter field, the form genuinely does not ask for one.
  *
@@ -96,7 +96,7 @@ function categoryFor(
  * Map one Greenhouse question.
  *
  * Returns `undefined` when every field is hidden (the Longitude/Latitude pair
- * in `location_questions`) or when the label is empty — showing a user
+ * in `location_questions`) or when the label is empty, showing a user
  * "Longitude" as an application question would be nonsense.
  */
 function toQuestion(
@@ -129,7 +129,7 @@ function toQuestion(
     kind,
     category: categoryFor(fieldName, prompt),
     // Greenhouse states this authoritatively, so we set it rather than leaving
-    // it absent — absent would mean "we didn't read it", which is not the case.
+    // it absent, absent would mean "we didn't read it", which is not the case.
     required: raw.required === true,
     ...(options.length > 0 ? { options } : {}),
     ...(helpText ? { helpText } : {}),
@@ -189,7 +189,7 @@ export const greenhouseAdapter: IntakeAdapter = {
       };
     }
 
-    // ENTITY-DECODE FIRST — before tag handling and before the injection
+    // ENTITY-DECODE FIRST, before tag handling and before the injection
     // scanner runs inside `clean`, so a payload hidden as "&lt;system&gt;…"
     // is seen in its real form rather than walking past every rule.
     const decoded = decodeEntities(raw.content ?? "");
@@ -200,7 +200,7 @@ export const greenhouseAdapter: IntakeAdapter = {
     const locationName = clean(raw.location?.name, 200);
 
     // Greenhouse publishes no workplace field. The location string is the only
-    // explicit signal, and we read it ONLY when it names a workplace mode —
+    // explicit signal, and we read it ONLY when it names a workplace mode,
     // never inferred from description prose.
     let remote: "remote" | "hybrid" | undefined;
     if (locationName && /\bremote\b/i.test(locationName)) remote = "remote";
@@ -291,7 +291,7 @@ function emptyForm(
  * Build the full application form.
  *
  * `location_questions` are walked too, but every field in them is hidden
- * plumbing and `toQuestion` drops them — we iterate rather than skip so a
+ * plumbing and `toQuestion` drops them, we iterate rather than skip so a
  * future real question there is not silently lost.
  */
 function buildForm(
@@ -318,7 +318,7 @@ function buildForm(
   // employer's site, but we do not copy the wording, store the options, or put
   // them anywhere a model could later be asked to draft an answer. Not holding
   // the data at all is a stronger guarantee than holding it and promising not
-  // to use it — and un-excluding this later is an additive change, whereas
+  // to use it, and un-excluding this later is an additive change, whereas
   // un-leaking it would not be.
   const excludedSections: string[] = [];
   const demographic = raw?.demographic_questions?.questions ?? [];

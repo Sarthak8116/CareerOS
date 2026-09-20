@@ -3,12 +3,12 @@ import { z } from "zod";
 /**
  * Zod schemas for RAW HarvestAPI actor output.
  *
- * These are the boundary contract — every record from Apify is parsed here and
+ * These are the boundary contract, every record from Apify is parsed here and
  * anything that does not validate is DROPPED, never rendered (build directive
  * §15: validate input at system boundaries).
  *
  * Shapes are taken from REAL captured responses (see `__fixtures__/`), not from
- * the published docs — a live smoke test proved the docs understate reality in
+ * the published docs, a live smoke test proved the docs understate reality in
  * two ways that silently dropped every record:
  *
  *   1. Empty fields come back as `null`, not absent. So every optional field is
@@ -65,14 +65,14 @@ export const HarvestEducation = z.object({
 export type HarvestEducation = z.infer<typeof HarvestEducation>;
 
 /* ------------------------------------------------------------------ */
-/* Profile — linkedin-profile-scraper AND linkedin-company-employees   */
+/* Profile, linkedin-profile-scraper AND linkedin-company-employees   */
 /* (both actors return the same profile item shape)                    */
 /* ------------------------------------------------------------------ */
 
 /**
  * `linkedinUrl` is the only hard requirement: it is the record's identity and
  * its provenance link. A record without one cannot be attributed, so it is
- * dropped. A name is required too — an unnamed contact is not a contact.
+ * dropped. A name is required too, an unnamed contact is not a contact.
  */
 export const HarvestProfile = z.object({
   id: z.string().nullish(),
@@ -88,7 +88,7 @@ export const HarvestProfile = z.object({
   location: HarvestLocation.nullish(),
   /**
    * Docs say a comma-joined string; the live actor returns an ARRAY.
-   * Accept both — callers normalise via `topSkillsList()`.
+   * Accept both, callers normalise via `topSkillsList()`.
    */
   topSkills: z.union([z.string(), z.array(z.string())]).nullish(),
   connectionsCount: z.number().nullish(),
@@ -104,7 +104,7 @@ export const HarvestProfile = z.object({
 export type HarvestProfile = z.infer<typeof HarvestProfile>;
 
 /* ------------------------------------------------------------------ */
-/* Company — linkedin-company                                          */
+/* Company, linkedin-company                                          */
 /* ------------------------------------------------------------------ */
 
 export const HarvestCompanyLocation = z.object({
@@ -153,7 +153,7 @@ export const HarvestCompany = z.object({
 export type HarvestCompany = z.infer<typeof HarvestCompany>;
 
 /* ------------------------------------------------------------------ */
-/* Posts — linkedin-company-posts AND linkedin-profile-posts           */
+/* Posts, linkedin-company-posts AND linkedin-profile-posts           */
 /* (same item shape; we only read the fields we actually surface)      */
 /* ------------------------------------------------------------------ */
 
@@ -161,7 +161,7 @@ export const HarvestPost = z.object({
   type: z.string().nullish(),
   id: z.string().nullish(),
   linkedinUrl: z.string().nullish(),
-  /** Post body. Required — a post with no content has nothing to ground on. */
+  /** Post body. Required, a post with no content has nothing to ground on. */
   content: z.string().min(1),
   author: z
     .object({

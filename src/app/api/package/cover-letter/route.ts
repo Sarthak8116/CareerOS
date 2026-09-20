@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * POST /api/package/cover-letter — draft a cover letter with the live model.
+ * POST /api/package/cover-letter, draft a cover letter with the live model.
  *
  * The candidate and job live in the browser's store, so they arrive in the
  * request body and are validated here at the boundary before anything reads
@@ -56,9 +56,9 @@ export async function POST(req: Request) {
     // Never leak internals (or the key) into a client-visible message.
     const message = err instanceof Error ? err.message : "";
     const safe = /api key|401|403|authentication/i.test(message)
-      ? "Authentication failed — check your NVIDIA API key."
+      ? "Authentication failed, check your NVIDIA API key."
       : /rate|429/i.test(message)
-        ? "Rate limited by the model API — try again shortly."
+        ? "Rate limited by the model API, try again shortly."
         : "The model did not return a usable draft. CareerOS can assemble one from your evidence instead.";
     return NextResponse.json({ error: safe }, { status: 502 });
   }

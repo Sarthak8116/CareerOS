@@ -3,7 +3,7 @@
  *
  * Built by hand rather than checked in as a binary fixture so the tests can
  * state exactly what is on each page and assert that the rendered bytes match.
- * Pages are drawn with vector operators only — filled rectangles — because the
+ * Pages are drawn with vector operators only, filled rectangles, because the
  * base-14 fonts need font data pdf.js fetches over HTTP, which is unavailable
  * under Node. Rectangles render everywhere, and "page N draws N rectangles"
  * gives every page a distinct, countable amount of ink.
@@ -13,7 +13,7 @@ export interface TinyPdfOptions {
   pages?: number;
   width?: number;
   height?: number;
-  /** Emit pages with an empty content stream — nothing at all is drawn. */
+  /** Emit pages with an empty content stream, nothing at all is drawn. */
   blank?: boolean;
   /**
    * Attach a standard-security-handler /Encrypt dictionary with unusable key

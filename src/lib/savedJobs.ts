@@ -7,7 +7,7 @@ import { slugId } from "@/lib/utils";
 /**
  * Demo-mode saved-jobs store (§5.2). Client-only localStorage, mirroring the
  * shape of lib/store.ts: SSR guard, Zod-validated reads, deterministic ids.
- * No runtime timestamps — savedAt is a fixed stamp so the demo stays stable
+ * No runtime timestamps, savedAt is a fixed stamp so the demo stays stable
  * across renders and reloads. The real Supabase-backed store slots in behind
  * the same function signatures later.
  */
@@ -46,7 +46,7 @@ export function getSavedJobs(): SavedJob[] {
 }
 
 /**
- * Save a job by its Job.id. Idempotent — saving the same job twice returns the
+ * Save a job by its Job.id. Idempotent, saving the same job twice returns the
  * existing record (optionally applying any provided overrides) rather than
  * creating a duplicate. Id is deterministic from the jobId.
  */

@@ -42,7 +42,7 @@ describe("readPostingWithModel", () => {
     expect(call.task).not.toContain("Acme");
   });
 
-  it("DROPS anything the model says that the page does not — the page is the authority", async () => {
+  it("DROPS anything the model says that the page does not, the page is the authority", async () => {
     parseStructured.mockResolvedValue({
       isJobPosting: true,
       title: "Senior Firmware Engineer",

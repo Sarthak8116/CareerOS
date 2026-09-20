@@ -5,12 +5,12 @@ import type { LinkedInConnection, Person } from "@/lib/types";
  *
  * PURE, and run in the BROWSER: the connection list comes from the user's own
  * Connections.csv and lives only in their profile store. It is never sent to
- * the server, so this cannot live in `lib/live/*` — a server-side matcher has
+ * the server, so this cannot live in `lib/live/*`: a server-side matcher has
  * nothing to match against.
  *
  * Two grades of match, deliberately not collapsed:
  *  - PROFILE URL: a unique identifier from the user's own export. Labelled
- *    `user-provided` — it is their file saying so, not something we verified.
+ *    `user-provided`: it is their file saying so, not something we verified.
  *  - NAME ONLY: two people can share a name. This is a prompt to check, never
  *    a relationship. It does not raise trust or outreach priority.
  */
@@ -44,7 +44,7 @@ export function applyKnownConnections(
       return {
         ...person,
         connection:
-          "Possible first-degree connection — this name appears in your Connections.csv, " +
+          "Possible first-degree connection, this name appears in your Connections.csv, " +
           "but no profile URL matched. Confirm it is the same person before referencing it.",
       };
     }

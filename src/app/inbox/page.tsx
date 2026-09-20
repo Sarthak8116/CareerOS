@@ -17,7 +17,7 @@ import type { Campaign, Candidate, Person } from "@/lib/types";
  * Campaign Inbox page (build directive §5.20).
  *
  * Flattens every campaign's outreach into one conversation list. Statuses are
- * demo-derived starting states — see CampaignInbox for the honesty note.
+ * demo-derived starting states, see CampaignInbox for the honesty note.
  */
 
 /** Demo-derived starting status: the first-priority contact has a prepared draft. */

@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Integration point 5 — recent public posts for one contact, used as outreach
+ * Integration point 5, recent public posts for one contact, used as outreach
  * personalization material.
  *
  * No-email mode; posts only. Excerpts are already sanitized by the mapper, so

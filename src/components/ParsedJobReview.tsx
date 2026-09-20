@@ -11,7 +11,7 @@ import { Card, CardHeader, Pill } from "@/components/ui/primitives";
  *
  * This step is a contract requirement, not a nicety. Placeholders are only an
  * honest way to represent a silent posting BECAUSE the user sees and confirms
- * them here — an unconfirmed placeholder must never reach an engine dressed up
+ * them here, an unconfirmed placeholder must never reach an engine dressed up
  * as something the posting said.
  *
  * Two cases hide inside `job.unstated`, and collapsing them would reintroduce
@@ -100,20 +100,20 @@ export function ParsedJobReview({
   }
 
   /* Case (b): the posting stated an employment type our enum can't represent.
-     Only employmentType can be in this state — it's the one field with a Raw
+     Only employmentType can be in this state, it's the one field with a Raw
      counterpart and no "unknown" enum member. */
   const rawUnrepresentable =
     unstated.has("employmentType") && !!job.employmentTypeRaw;
 
   /* Anything the posting didn't state that this card has no input for. Listed
-     rather than silently dropped — surfacing it is the whole point. */
+     rather than silently dropped, surfacing it is the whole point. */
   const otherUnstated = [...unstated].filter((f) => !EDITABLE_KEYS.includes(f));
 
   return (
     <Card className="mt-3">
       <CardHeader
         title="Check what we read"
-        subtitle="These values came off the posting. Correct anything that's wrong — nothing is saved until you build."
+        subtitle="These values came off the posting. Correct anything that's wrong, nothing is saved until you build."
         action={
           <Pill className="bg-brand-50 text-brand-700 ring-brand-600/20">
             From link
@@ -121,7 +121,7 @@ export function ParsedJobReview({
         }
       />
 
-      {/* Provenance — where this came from, and when. */}
+      {/* Provenance, where this came from, and when. */}
       <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-400">
         <span>
           Read from {adapterLabel} · {formatFetchedAt(fetchedAt)}
@@ -139,7 +139,7 @@ export function ParsedJobReview({
         )}
       </p>
 
-      {/* Injection flags — advisory, never blocking. */}
+      {/* Injection flags, advisory, never blocking. */}
       {warnings.length > 0 && (
         <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-3">
           <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
@@ -214,7 +214,7 @@ export function ParsedJobReview({
                   {rawUnrepresentable ? (
                     <>
                       The posting says “{job.employmentTypeRaw}”, which
-                      doesn&apos;t map to our categories — confirm the closest
+                      doesn&apos;t map to our categories, confirm the closest
                       match.
                     </>
                   ) : (
@@ -256,7 +256,7 @@ export function ParsedJobReview({
         </div>
       )}
 
-      {/* Requirements the parser found — read-only, it's the posting's own text */}
+      {/* Requirements the parser found, read-only, it's the posting's own text */}
       {job.requirements.length > 0 && (
         <div className="mt-5">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
@@ -334,7 +334,7 @@ function DescriptionPreview({ text }: { text: string }) {
         {text.length.toLocaleString()} characters)
       </button>
       {open && (
-        // Plain text by design — the parser strips markup, so it renders as
+        // Plain text by design, the parser strips markup, so it renders as
         // text with preserved newlines and never as HTML.
         <pre className="mt-2 max-h-72 overflow-y-auto whitespace-pre-wrap rounded-xl border border-slate-200 bg-slate-50 p-3 font-sans text-sm leading-relaxed text-slate-600">
           {text}

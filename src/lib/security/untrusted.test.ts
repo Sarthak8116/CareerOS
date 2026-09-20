@@ -104,7 +104,7 @@ describe("sanitizeUntrusted", () => {
 });
 
 /**
- * REGRESSION — entity-encoded injection evasion.
+ * REGRESSION, entity-encoded injection evasion.
  *
  * Detection used to run on the raw string, so "&#73;gnore all previous
  * instructions" read as an instruction to a model but matched no literal
@@ -148,7 +148,7 @@ describe("entity-encoded injection", () => {
     expect(flags.length).toBeGreaterThan(0);
   });
 
-  it("still escapes on the way out — decoding is detection-only", () => {
+  it("still escapes on the way out, decoding is detection-only", () => {
     const { clean } = sanitizeUntrusted("&#73;gnore this <script>x</script>");
     expect(clean).not.toContain("<script");
     expect(clean).not.toContain("<");

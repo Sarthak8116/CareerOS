@@ -13,7 +13,7 @@ const features = [
   {
     icon: Target,
     title: "Evidence-backed fit",
-    body: "Every conclusion is grounded in your real projects, GitHub, and coursework — labeled by strength and confidence, never invented.",
+    body: "Every conclusion is grounded in your real projects, GitHub, and coursework, labeled by strength and confidence, never invented.",
   },
   {
     icon: Network,
@@ -23,12 +23,12 @@ const features = [
   {
     icon: Sparkles,
     title: "Gap-to-action engine",
-    body: "Turns each weakness into the single best next step — a rewrite, a small project, an outreach — instead of generic criticism.",
+    body: "Turns each weakness into the single best next step, a rewrite, a small project, an outreach, instead of generic criticism.",
   },
   {
     icon: Send,
     title: "Approved outreach",
-    body: "Draft personalized, evidence-backed messages and send through Gmail — only ever with your explicit approval.",
+    body: "Draft personalized, evidence-backed messages and send through Gmail, only ever with your explicit approval.",
   },
 ];
 
@@ -72,7 +72,7 @@ export default function Landing() {
             </ButtonLink>
           </div>
           <p className="mt-4 text-sm text-slate-400">
-            Runs in demo mode with a real sample campaign — no sign-up, no API keys.
+            Runs in demo mode with a real sample campaign, no sign-up, no API keys.
           </p>
         </div>
 
@@ -108,7 +108,7 @@ export default function Landing() {
 
       <footer className="border-t border-slate-200 py-8">
         <div className="mx-auto max-w-6xl px-6 text-center text-sm text-slate-400">
-          CareerOS — foundation + first vertical slice. Demo-mode build.
+          CareerOS, foundation + first vertical slice. Demo-mode build.
           <Link href="/dashboard" className="ml-2 font-medium text-brand-600 hover:underline">
             Enter the app →
           </Link>

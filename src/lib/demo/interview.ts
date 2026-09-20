@@ -3,15 +3,15 @@ import type { InterviewQuestion } from "@/lib/types";
 /**
  * Deterministic interview question bank (build directive §5.19).
  *
- * Text-mode (P0) only. Tuned for the demo campaign — Ava Chen (systems + ML
+ * Text-mode (P0) only. Tuned for the demo campaign, Ava Chen (systems + ML
  * undergrad) interviewing for the NVIDIA GPU Systems Software internship.
  *
  * Every question spans one of the §5.19 categories. Technical / domain / system
  * questions are specific to systems + GPU (memory hierarchy, caching,
  * concurrency, CUDA basics). Project questions reference the candidate's real
- * repos — the cache simulator (ev_cachesim) and neural-mini (ev_nn).
+ * repos, the cache simulator (ev_cachesim) and neural-mini (ev_nn).
  *
- * `evidenceToUse` entries are "<evidenceId> — <claim>" so they double as the
+ * `evidenceToUse` entries are "<evidenceId>, <claim>" so they double as the
  * evidence-graph reference AND a human-readable line the engine can drop into a
  * model answer without needing the Candidate at evaluation time.
  */
@@ -31,9 +31,9 @@ export const demoInterviewQuestions: InterviewQuestion[] = [
       "Keep it under two minutes and end on why this team specifically",
     ],
     evidenceToUse: [
-      "ev_cachesim — Built a CPU cache simulator modeling associativity + replacement policies",
-      "ev_nn — Implemented a small neural-network training library from scratch (NumPy)",
-      "ev_gpu — Interested in GPU/parallel computing — no shipped CUDA project yet",
+      "ev_cachesim: Built a CPU cache simulator modeling associativity + replacement policies",
+      "ev_nn: Implemented a small neural-network training library from scratch (NumPy)",
+      "ev_gpu: Interested in GPU/parallel computing, no shipped CUDA project yet",
     ],
   },
   {
@@ -50,9 +50,9 @@ export const demoInterviewQuestions: InterviewQuestion[] = [
       "Close with the fix, the verification, and what you learned",
     ],
     evidenceToUse: [
-      "ev_cachesim — Built a CPU cache simulator modeling associativity + replacement policies",
-      "ev_os_course — Completed Operating Systems + Computer Architecture coursework",
-      "ev_linux — Comfortable with Linux, git, and command-line workflows",
+      "ev_cachesim: Built a CPU cache simulator modeling associativity + replacement policies",
+      "ev_os_course: Completed Operating Systems + Computer Architecture coursework",
+      "ev_linux: Comfortable with Linux, git, and command-line workflows",
     ],
   },
   {
@@ -69,8 +69,8 @@ export const demoInterviewQuestions: InterviewQuestion[] = [
       "Mention replacement policy (LRU) and spatial/temporal locality",
     ],
     evidenceToUse: [
-      "ev_cachesim — Built a CPU cache simulator modeling associativity + replacement policies",
-      "ev_os_course — Completed Operating Systems + Computer Architecture coursework",
+      "ev_cachesim: Built a CPU cache simulator modeling associativity + replacement policies",
+      "ev_os_course: Completed Operating Systems + Computer Architecture coursework",
     ],
   },
   {
@@ -87,8 +87,8 @@ export const demoInterviewQuestions: InterviewQuestion[] = [
       "Note the performance cost of contention and lock granularity",
     ],
     evidenceToUse: [
-      "ev_c — Systems programming in C (cache simulator, memory allocator)",
-      "ev_os_course — Completed Operating Systems + Computer Architecture coursework",
+      "ev_c: Systems programming in C (cache simulator, memory allocator)",
+      "ev_os_course: Completed Operating Systems + Computer Architecture coursework",
     ],
   },
   {
@@ -105,8 +105,8 @@ export const demoInterviewQuestions: InterviewQuestion[] = [
       "State a concrete improvement: e.g. add write-back/write-allocate or a second policy",
     ],
     evidenceToUse: [
-      "ev_cachesim — Built a CPU cache simulator modeling associativity + replacement policies",
-      "ev_c — Systems programming in C (cache simulator, memory allocator)",
+      "ev_cachesim: Built a CPU cache simulator modeling associativity + replacement policies",
+      "ev_c: Systems programming in C (cache simulator, memory allocator)",
     ],
   },
   {
@@ -123,8 +123,8 @@ export const demoInterviewQuestions: InterviewQuestion[] = [
       "Name a limitation: no autograd graph, manual gradients, CPU-bound",
     ],
     evidenceToUse: [
-      "ev_nn — Implemented a small neural-network training library from scratch (NumPy)",
-      "ev_py — Proficient in Python (3+ years, coursework + projects)",
+      "ev_nn: Implemented a small neural-network training library from scratch (NumPy)",
+      "ev_py: Proficient in Python (3+ years, coursework + projects)",
     ],
   },
   {
@@ -141,8 +141,8 @@ export const demoInterviewQuestions: InterviewQuestion[] = [
       "Mention symbolication and reporting the top-N with confidence about sampling error",
     ],
     evidenceToUse: [
-      "ev_c — Systems programming in C (cache simulator, memory allocator)",
-      "ev_linux — Comfortable with Linux, git, and command-line workflows",
+      "ev_c: Systems programming in C (cache simulator, memory allocator)",
+      "ev_linux: Comfortable with Linux, git, and command-line workflows",
     ],
   },
   {
@@ -159,8 +159,8 @@ export const demoInterviewQuestions: InterviewQuestion[] = [
       "Uncoalesced access serializes memory and kills throughput",
     ],
     evidenceToUse: [
-      "ev_gpu — Interested in GPU/parallel computing — no shipped CUDA project yet",
-      "ev_nn — Implemented a small neural-network training library from scratch (NumPy)",
+      "ev_gpu: Interested in GPU/parallel computing, no shipped CUDA project yet",
+      "ev_nn: Implemented a small neural-network training library from scratch (NumPy)",
     ],
   },
   {
@@ -177,9 +177,9 @@ export const demoInterviewQuestions: InterviewQuestion[] = [
       "Reframe: the fundamentals that make GPU work hard are ones you already have",
     ],
     evidenceToUse: [
-      "ev_gpu — Interested in GPU/parallel computing — no shipped CUDA project yet",
-      "ev_c — Systems programming in C (cache simulator, memory allocator)",
-      "ev_os_course — Completed Operating Systems + Computer Architecture coursework",
+      "ev_gpu: Interested in GPU/parallel computing, no shipped CUDA project yet",
+      "ev_c: Systems programming in C (cache simulator, memory allocator)",
+      "ev_os_course: Completed Operating Systems + Computer Architecture coursework",
     ],
   },
 ];

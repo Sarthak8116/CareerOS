@@ -20,7 +20,7 @@ import { slugId } from "@/lib/utils";
  *
  * Ashby publishes no single-posting endpoint, so we fetch the whole board and
  * filter by the id in the URL. `includeCompensation=true` is required or the
- * `compensation` key is ABSENT rather than null — which reads identically to
+ * `compensation` key is ABSENT rather than null, which reads identically to
  * "this employer publishes no pay range" and would silently lose real data.
  *
  * Its `workplaceType` is CAPITALISED ("Hybrid") where Lever's is lowercase, so
@@ -121,7 +121,7 @@ export const ashbyAdapter: IntakeAdapter = {
     const workplace = raw.workplaceType?.toLowerCase() ?? "";
     let remote = REMOTE_BY_WORKPLACE[workplace];
     // `isRemote` is a weaker signal than an explicit workplaceType, so it only
-    // fills a gap — it never overrides what the employer selected.
+    // fills a gap, it never overrides what the employer selected.
     if (!remote && raw.isRemote === true) remote = "remote";
 
     const employmentType = employmentFromAshby(raw.employmentType);

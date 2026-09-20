@@ -15,7 +15,7 @@ import {
  * Lean schemas the live provider asks Claude to fill. Top-level entity ids
  * (candidate, job, campaign) are assigned SERVER-SIDE after validation, so the
  * model never has to invent them. Everything else reuses the app's canonical
- * Zod schemas — the same contract the demo path uses.
+ * Zod schemas, the same contract the demo path uses.
  */
 
 export const LiveCandidate = Candidate.omit({ id: true }).extend({
@@ -34,7 +34,7 @@ export const LiveAnalysis = z.object({
   fit: z.array(FitDimension),
   gaps: z.array(Gap),
   tasks: z.array(CampaignTask),
-  /** Role-based outreach targets only — never fabricated real identities (§16). */
+  /** Role-based outreach targets only, never fabricated real identities (§16). */
   people: z.array(Person),
   activity: z.array(AgentActivity),
 });

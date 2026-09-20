@@ -19,7 +19,7 @@ import { resetOutreachStates } from "@/lib/outreachStore";
 /**
  * Demo-mode persistence (build directive: campaign persists and reloads, §17
  * P0 #19). Client-only localStorage store, seeded with the deterministic
- * NVIDIA campaign. No database and no keys — the real Supabase-backed store
+ * NVIDIA campaign. No database and no keys, the real Supabase-backed store
  * slots in behind the same function signatures later.
  */
 
@@ -68,7 +68,7 @@ async function buildDemoCampaign(): Promise<Campaign> {
 
 /**
  * Ensures the seed campaign exists, then returns all campaigns.
- * Idempotent — safe to call on every page mount.
+ * Idempotent, safe to call on every page mount.
  */
 export async function ensureSeededCampaigns(): Promise<Campaign[]> {
   let campaigns = readRaw();
@@ -106,15 +106,15 @@ export async function createCampaignFromJob(
     /**
      * The USER's profile, not the demo candidate.
      *
-     * Everything the campaign asserts — fit dimensions, gaps, tasks,
-     * readiness — is computed from this. Passing `demoCandidate` here meant a
+     * Everything the campaign asserts, fit dimensions, gaps, tasks,
+     * readiness, is computed from this. Passing `demoCandidate` here meant a
      * real user's campaign analysed someone else's evidence and presented the
      * result as being about them, which is the product's central promise
      * inverted rather than a cosmetic mix-up.
      *
      * `getProfile()` falls back to `demoCandidate` when nothing has been
      * imported, so demo mode is unchanged. Do not reintroduce a second copy of
-     * that fallback decision here — the store owns it.
+     * that fallback decision here, the store owns it.
      */
     candidate: getProfile(),
     job,
@@ -160,7 +160,7 @@ export async function setTaskStatus(
  *
  * "You approve or deny each one" is only true if the answer survives a reload,
  * so the decision lives on the campaign rather than in component state. The
- * recommendation itself is not stored — it is recomputed from the candidate's
+ * recommendation itself is not stored, it is recomputed from the candidate's
  * evidence, and only the decision is the user's.
  *
  * Setting a recommendation back to "pending" REMOVES it from the map: pending
@@ -190,7 +190,7 @@ export async function setResumeRecommendationStatus(
 export function jobFromPastedText(title: string, company: string, text: string): Job {
   const id = slugId("job", `${company}:${title}`);
   // Pasted job text is UNTRUSTED (§15). Sanitize it and treat the result purely
-  // as DATA — never as instructions. Flags are advisory (surfaced to console).
+  // as DATA, never as instructions. Flags are advisory (surfaced to console).
   const { clean, flags } = sanitizeUntrusted(text);
   if (flags.length > 0 && typeof console !== "undefined") {
     console.warn("[CareerOS] Untrusted job text flagged:", flags);

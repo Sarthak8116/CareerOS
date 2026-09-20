@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 /**
  * Cross-campaign tasks board (§13 /tasks). Flattens every campaign's task
  * list into one scannable, priority-sorted view grouped by campaign, with a
- * status filter. Categorical throughout — no fake progress numbers.
+ * status filter. Categorical throughout, no fake progress numbers.
  */
 
 type Filter = "all" | "open" | "done";

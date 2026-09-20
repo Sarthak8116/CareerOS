@@ -3,7 +3,7 @@ import type { ApplicationAnswer, ApplicationForm, ApplicationQuestion } from "@/
 import { matchAnswers, shortAnswerQuestions, buildShortAnswers } from "./shortAnswers";
 
 /**
- * Short answers — the module whose entire job is to keep "reused" and
+ * Short answers, the module whose entire job is to keep "reused" and
  * "drafted" from ever collapsing (nothing here drafts, ever) and to be
  * honest about a near-miss: an unmatched question costs the user a note, a
  * WRONG "reused" match costs them the application.
@@ -73,7 +73,7 @@ describe("matchAnswers", () => {
     expect(result[0]).toEqual({ question: result[0].question });
   });
 
-  it("the FIRST matching library entry wins, in library order — stable and explicable", () => {
+  it("the FIRST matching library entry wins, in library order, stable and explicable", () => {
     const question = q({ id: "q1", prompt: "Why do you want to work here?" });
     const first = answer({ id: "ans_first", question: "Why do you want to work here?", answer: "First answer." });
     const second = answer({ id: "ans_second", question: "Why do you want to work here?", answer: "Second answer." });
@@ -92,7 +92,7 @@ describe("matchAnswers", () => {
   });
 });
 
-describe("shortAnswerQuestions — routes personal-info and document questions elsewhere exactly once", () => {
+describe("shortAnswerQuestions, routes personal-info and document questions elsewhere exactly once", () => {
   it("keeps a question with no autofillKey at all", () => {
     const question = q({ id: "q1", autofillKey: undefined });
     expect(shortAnswerQuestions(form({ questions: [question] }))).toEqual([question]);
@@ -109,7 +109,7 @@ describe("shortAnswerQuestions — routes personal-info and document questions e
     expect(shortAnswerQuestions(form({ questions: [resumeQ, coverQ] }))).toEqual([]);
   });
 
-  it("a question is routed to exactly one place — never both short-answers and personal-info", () => {
+  it("a question is routed to exactly one place, never both short-answers and personal-info", () => {
     const personalQ = q({ id: "q1", autofillKey: "location" });
     const genericQ = q({ id: "q2", autofillKey: undefined });
     const kept = shortAnswerQuestions(form({ questions: [personalQ, genericQ] }));
@@ -121,7 +121,7 @@ describe("shortAnswerQuestions — routes personal-info and document questions e
   });
 });
 
-describe("buildShortAnswers — no questions", () => {
+describe("buildShortAnswers, no questions", () => {
   it("is 'not-requested' when the form was read in full and asks nothing here", () => {
     const doc = buildShortAnswers({
       form: form({ completeness: "complete", questions: [] }),
@@ -135,7 +135,7 @@ describe("buildShortAnswers — no questions", () => {
     expect(doc.missing).toEqual([]);
   });
 
-  it("is 'needs-you' — not 'not-requested' — when the form could not be fully read, even with zero questions", () => {
+  it("is 'needs-you', not 'not-requested', when the form could not be fully read, even with zero questions", () => {
     const doc = buildShortAnswers({
       form: form({ completeness: "partial", questions: [] }),
       library: [],
@@ -159,7 +159,7 @@ describe("buildShortAnswers — no questions", () => {
   });
 });
 
-describe("buildShortAnswers — never 'drafted', only 'reused' or 'needs-you'", () => {
+describe("buildShortAnswers, never 'drafted', only 'reused' or 'needs-you'", () => {
   it("is 'reused' when every question is matched, and content names the library question it came from", () => {
     const doc = buildShortAnswers({
       form: form({
@@ -192,11 +192,11 @@ describe("buildShortAnswers — never 'drafted', only 'reused' or 'needs-you'", 
     expect(doc.status).not.toBe("drafted");
     expect(doc.content).toContain("YOU MUST WRITE THIS");
     expect(doc.missing).toEqual([
-      'An answer to "Describe your biggest failure." — no saved answer matched, so you must write it.',
+      'An answer to "Describe your biggest failure.", no saved answer matched, so you must write it.',
     ]);
   });
 
-  it("claims are exactly one per MATCHED answer, all 'user-provided' with the user's own text — never 'evidenced'", () => {
+  it("claims are exactly one per MATCHED answer, all 'user-provided' with the user's own text, never 'evidenced'", () => {
     const doc = buildShortAnswers({
       form: form({
         questions: [
@@ -211,7 +211,7 @@ describe("buildShortAnswers — never 'drafted', only 'reused' or 'needs-you'", 
     expect(doc.claims).toEqual([{ text: "Culture.", support: "user-provided" }]);
   });
 
-  it("an unmatched question produces NO claim — nothing is asserted about an answer that doesn't exist yet", () => {
+  it("an unmatched question produces NO claim, nothing is asserted about an answer that doesn't exist yet", () => {
     const doc = buildShortAnswers({
       form: form({ questions: [q({ id: "q1", prompt: "Describe your biggest failure." })] }),
       library: [],
@@ -222,7 +222,7 @@ describe("buildShortAnswers — never 'drafted', only 'reused' or 'needs-you'", 
   });
 });
 
-describe("buildShortAnswers — required/optional framing never invents what we didn't read", () => {
+describe("buildShortAnswers, required/optional framing never invents what we didn't read", () => {
   it("labels a question the form marked required as 'Required'", () => {
     const doc = buildShortAnswers({
       form: form({ questions: [q({ id: "q1", prompt: "Why us?", required: true })] }),
@@ -257,7 +257,7 @@ describe("buildShortAnswers — required/optional framing never invents what we 
 });
 
 /**
- * RULED, PINNED (not a bug) — coder-package's call, not mine to overturn.
+ * RULED, PINNED (not a bug), coder-package's call, not mine to overturn.
  *
  * `matchAnswers` calls `isSameTopic(question.prompt, entry.question)`
  * directly: the CURRENT form's question is the query, a SAVED library
@@ -269,19 +269,19 @@ describe("buildShortAnswers — required/optional framing never invents what we 
  * coder-package chose not to tighten `isSameTopic` for this: the resulting
  * failure is a user handed their OWN saved answer, labelled "reused", with
  * the exact library question it came from printed next to it (see
- * `buildShortAnswers`'s "saved as: ..." line below) — visible over-answering,
+ * `buildShortAnswers`'s "saved as: ..." line below), visible over-answering,
  * not a misleading claim. The alternative (a coverageOfTarget floor) would
  * turn the single most common application question, "Why do you want to
  * work here?", into a silent "needs-you" whenever the only saved answer for
- * it happens to be a broader one — defeating the point of the answer
+ * it happens to be a broader one, defeating the point of the answer
  * library. Flagged to 'main' as a product call, not a defect.
  *
  * Pinned here (not left as it.todo) so a future edit to `isSameTopic` that
  * changes this must consciously break this test rather than pass by
  * accident.
  */
-describe("buildShortAnswers — deliberate over-match (ruled acceptable, not a bug)", () => {
-  it("a short current question DOES reuse an answer saved under a longer, topically-broader question — and says exactly which one", () => {
+describe("buildShortAnswers, deliberate over-match (ruled acceptable, not a bug)", () => {
+  it("a short current question DOES reuse an answer saved under a longer, topically-broader question, and says exactly which one", () => {
     const doc = buildShortAnswers({
       form: form({
         questions: [q({ id: "q1", prompt: "Why do you want to work here?" })],
@@ -297,7 +297,7 @@ describe("buildShortAnswers — deliberate over-match (ruled acceptable, not a b
       company: "Acme Corp",
     });
 
-    // Reused, not silently dropped to "needs-you" — visible over-answering.
+    // Reused, not silently dropped to "needs-you", visible over-answering.
     expect(doc.status).toBe("reused");
     expect(doc.missing).toEqual([]);
     // The user can SEE the mismatch: the exact saved question is quoted.

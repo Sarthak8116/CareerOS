@@ -7,7 +7,7 @@ import { demoPeople } from "@/lib/demo/people";
 const LEVELS = ["strong", "moderate", "limited", "none"] as const;
 
 /**
- * computeFit must return the six categorical fit dimensions (§5.3, §5.7) — one
+ * computeFit must return the six categorical fit dimensions (§5.3, §5.7), one
  * per FitCategory, each a Level + confidence + a plain-language explanation the
  * user can inspect. No single mystery score, no fake percentages.
  */

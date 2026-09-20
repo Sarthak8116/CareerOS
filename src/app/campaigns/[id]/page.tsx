@@ -200,7 +200,7 @@ export default function CampaignDetailPage() {
             <Card>
               <CardHeader
                 title="How this campaign was built"
-                subtitle="Each agent shows its work — actions, evidence, and conclusions."
+                subtitle="Each agent shows its work, actions, evidence, and conclusions."
               />
               <AgentActivityFeed activity={campaign.activity} />
             </Card>
@@ -227,7 +227,7 @@ export default function CampaignDetailPage() {
           <Card>
             <CardHeader
               title="Fit analysis"
-              subtitle="Categorical judgments grounded in your evidence — never invented scores."
+              subtitle="Categorical judgments grounded in your evidence, never invented scores."
             />
             <div className="divide-y divide-slate-100">
               {campaign.fit.map((f) => (
@@ -242,7 +242,7 @@ export default function CampaignDetailPage() {
             <p className="text-sm text-slate-500">
               Reporting lines and relationships shown here are{" "}
               <span className="font-medium text-slate-600">inferred, not confirmed</span>{" "}
-              — verify before you reach out.
+             , verify before you reach out.
             </p>
             {campaign.people.length === 0 ? (
               <EmptyState

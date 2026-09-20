@@ -4,7 +4,7 @@ import { z } from "zod";
  * Zod schemas for RAW job-board API output.
  *
  * These are the boundary contract (build directive §15). Shapes are taken from
- * REAL captured responses in `__fixtures__/`, not from published docs — the
+ * REAL captured responses in `__fixtures__/`, not from published docs, the
  * Harvest layer learned at production cost that docs understate reality and
  * that the gap silently drops every record.
  *
@@ -12,7 +12,7 @@ import { z } from "zod";
  *
  *  1. EVERY optional field is `.nullish()` (null | undefined), never bare
  *     `.optional()`. Boards return `null` for empty fields AND omit others
- *     entirely — Ashby's `validThrough` is absent while Greenhouse's
+ *     entirely, Ashby's `validThrough` is absent while Greenhouse's
  *     `application_deadline` is null, and both mean "not stated".
  *
  *  2. Almost nothing is required. A posting missing a title still parses here
@@ -35,7 +35,7 @@ const LooseId = z.union([z.string(), z.number()]).nullish();
  * One field inside a Greenhouse question.
  *
  * `type` drives our question kind. `input_hidden` appears in
- * `location_questions` (Longitude / Latitude) and is dropped by the mapper —
+ * `location_questions` (Longitude / Latitude) and is dropped by the mapper,
  * those are page plumbing, not questions a human answers.
  */
 export const GreenhouseField = z.object({
@@ -62,7 +62,7 @@ export type GreenhouseQuestion = z.infer<typeof GreenhouseQuestion>;
 
 /**
  * A demographic (EEO) question. NOTE the shape differs from `GreenhouseQuestion`
- * above: these are FLAT — `label`/`type`/`answer_options` sit directly on the
+ * above: these are FLAT, `label`/`type`/`answer_options` sit directly on the
  * question with no `fields[]` wrapper. Reusing the other schema here silently
  * dropped every one of them.
  *
@@ -112,7 +112,7 @@ export const GreenhouseJob = z.object({
     })
     .nullish(),
   education: z.string().nullish(),
-  /** Null on most postings — "not stated", never "no deadline". */
+  /** Null on most postings, "not stated", never "no deadline". */
   application_deadline: z.string().nullish(),
   requisition_id: z.string().nullish(),
   first_published: z.string().nullish(),
@@ -253,13 +253,13 @@ export const WorkdayJob = z.object({
     .object({
       id: z.string().nullish(),
       title: z.string().nullish(),
-      /** RAW html — must NOT be entity-decoded. */
+      /** RAW html, must NOT be entity-decoded. */
       jobDescription: z.string().nullish(),
       location: z.string().nullish(),
       /** RELATIVE TEXT ("Posted Today"). Never a date. */
       postedOn: z.string().nullish(),
       startDate: z.string().nullish(),
-      /** "Full time" | "Part time" — note the space. */
+      /** "Full time" | "Part time", note the space. */
       timeType: z.string().nullish(),
       jobReqId: z.string().nullish(),
       externalUrl: z.string().nullish(),
@@ -289,7 +289,7 @@ export const JsonLdJobPosting = z.object({
   title: z.string().nullish(),
   description: z.string().nullish(),
   datePosted: z.string().nullish(),
-  /** Frequently ABSENT rather than null — both mean "not stated". */
+  /** Frequently ABSENT rather than null, both mean "not stated". */
   validThrough: z.string().nullish(),
   /** "FULL_TIME" | "PART_TIME" | "CONTRACTOR" | "INTERN"; may be an array. */
   employmentType: SchemaOrgText,

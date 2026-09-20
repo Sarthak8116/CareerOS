@@ -21,7 +21,7 @@ export default function AnswersPage() {
         </h1>
         <p className="mt-1 text-sm text-slate-500">
           Reusable answers to common application questions speed up every
-          application — and you always review before anything is submitted.
+          application, and you always review before anything is submitted.
         </p>
       </div>
 

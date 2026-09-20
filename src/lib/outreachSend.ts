@@ -3,7 +3,7 @@
  *
  * CareerOS never sends mail. This opens Gmail's compose window with the draft
  * filled in; the user reads it and presses Send themselves. The recipient is
- * included only when the user explicitly looked one up — an address we merely
+ * included only when the user explicitly looked one up, an address we merely
  * guessed is never put in a To: field.
  */
 export function gmailComposeUrl(input: {

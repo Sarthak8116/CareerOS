@@ -35,7 +35,7 @@ describe("applyKnownConnections", () => {
     expect(out.connection).toMatch(/profile URL/);
   });
 
-  it("a NAME-ONLY match never raises trust or priority — two people can share a name", () => {
+  it("a NAME-ONLY match never raises trust or priority, two people can share a name", () => {
     const before = person({ linkedinUrl: "https://www.linkedin.com/in/someone-else" });
     const [out] = applyKnownConnections(
       [before],
@@ -47,7 +47,7 @@ describe("applyKnownConnections", () => {
     expect(out.connection).toMatch(/Confirm/);
   });
 
-  it("never labels anything verified — we verified nothing", () => {
+  it("never labels anything verified, we verified nothing", () => {
     const out = applyKnownConnections(
       [person({ linkedinUrl: "https://www.linkedin.com/in/ada-lovelace" }), person({ id: "p2" })],
       [{ name: "Ada Lovelace", profileUrl: "https://www.linkedin.com/in/ada-lovelace" }],

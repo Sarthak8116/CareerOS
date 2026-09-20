@@ -11,14 +11,14 @@ import ApplicationStudioPage from "./page";
 /**
  * THE PACKAGE MUST BE GROUNDED IN THE USER'S OWN PROFILE.
  *
- * This page used to build everything — the cover letter sent for grounding,
- * the resume recommendations, and the claim verification pass — from
+ * This page used to build everything, the cover letter sent for grounding,
+ * the resume recommendations, and the claim verification pass, from
  * `demoCandidate`. For a real user that meant the surface whose entire job is
  * "we never assert anything about you we cannot evidence" was asserting things
  * about SOMEONE ELSE and presenting it as their check.
  *
  * The regression is silent by nature: everything renders, nothing errors, and
- * the letter reads fine — it is just about the wrong person. So the guard has
+ * the letter reads fine, it is just about the wrong person. So the guard has
  * to be a test that names a stored profile and looks for it in the output.
  * Without it this comes back the next time a candidate-consuming call is added.
  */
@@ -73,7 +73,7 @@ async function buildPackage() {
 
 /**
  * The seeded demo candidate/job pair genuinely produces at least one
- * unsupported claim (real behaviour, not a test artifact — confirmed by
+ * unsupported claim (real behaviour, not a test artifact, confirmed by
  * checking the rendered button's `disabled` state directly), which leaves
  * the download button disabled until the user resolves it. Tests about the
  * DOWNLOAD path itself aren't about that gate, so this clears it by owning
@@ -87,10 +87,10 @@ function resolveAllUnsupportedClaims() {
     if (ownButtons.length === 0) return;
     fireEvent.click(ownButtons[0]);
   }
-  throw new Error("unsupported claims never cleared — is attestation broken?");
+  throw new Error("unsupported claims never cleared, is attestation broken?");
 }
 
-describe("Application studio page — whose evidence is this?", () => {
+describe("Application studio page, whose evidence is this?", () => {
   it("builds the package from the STORED profile, not the demo candidate", async () => {
     saveProfile({ ...demoCandidate, id: "cand_stored", name: STORED_NAME });
 
@@ -139,10 +139,10 @@ describe("Application studio page — whose evidence is this?", () => {
 });
 
 /* ------------------------------------------------------------------ */
-/* Build state machine — the transient "Assembling…" state             */
+/* Build state machine, the transient "Assembling…" state             */
 /* ------------------------------------------------------------------ */
 
-describe("Application studio page — build is on request, and shows it's working", () => {
+describe("Application studio page, build is on request, and shows it's working", () => {
   it("disables the button and reads 'Assembling…' while the build is in flight, then returns to the built state", async () => {
     let resolveFetch!: (res: Response) => void;
     vi.stubGlobal(
@@ -161,7 +161,7 @@ describe("Application studio page — build is on request, and shows it's workin
     });
     fireEvent.click(button);
 
-    // Real state machine, real code path — the fetch inside `build()` is
+    // Real state machine, real code path, the fetch inside `build()` is
     // deliberately left unresolved so the page sits in "building" the same
     // way it would waiting on a slow model call.
     const assembling = await screen.findByRole("button", { name: /assembling/i });
@@ -190,7 +190,7 @@ const VALID_MODEL_DRAFT: CoverLetterDraft = {
   closing: "Sincerely,\nCandidate",
 };
 
-describe("Application studio page — coverLetterOrigin disclosure", () => {
+describe("Application studio page, coverLetterOrigin disclosure", () => {
   it("says the model drafted it when the live call succeeds with a valid draft", async () => {
     vi.stubGlobal(
       "fetch",
@@ -202,7 +202,7 @@ describe("Application studio page — coverLetterOrigin disclosure", () => {
   });
 
   it("says it was assembled from evidence on the supported no-key path (503)", async () => {
-    // beforeEach's default stub already returns 503 — exercised explicitly
+    // beforeEach's default stub already returns 503, exercised explicitly
     // here so this test states its own precondition rather than borrowing it.
     vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 503 })));
     await buildPackage();
@@ -260,7 +260,7 @@ describe("Application studio page — coverLetterOrigin disclosure", () => {
 
     await buildPackage();
     // "Describing how a non-existent document was written is a claim about
-    // nothing" — neither sentence, and no mention of a cover letter at all.
+    // nothing", neither sentence, and no mention of a cover letter at all.
     expect(screen.queryByText(MODEL_SENTENCE)).toBeNull();
     expect(screen.queryByText(DETERMINISTIC_SENTENCE)).toBeNull();
   });
@@ -270,7 +270,7 @@ describe("Application studio page — coverLetterOrigin disclosure", () => {
 /* Campaign lookup failure                                             */
 /* ------------------------------------------------------------------ */
 
-describe("Application studio page — campaign not found", () => {
+describe("Application studio page, campaign not found", () => {
   it("shows an honest not-found state rather than a blank or crashed page", async () => {
     hoisted.campaignId = "camp_does_not_exist";
     render(<ApplicationStudioPage />);
@@ -282,7 +282,7 @@ describe("Application studio page — campaign not found", () => {
 /* Download / export                                                   */
 /* ------------------------------------------------------------------ */
 
-describe("Application studio page — download", () => {
+describe("Application studio page, download", () => {
   const originalCreateObjectURL = URL.createObjectURL;
   const originalRevokeObjectURL = URL.revokeObjectURL;
 
@@ -306,7 +306,7 @@ describe("Application studio page — download", () => {
 
     // Real zip assembly (jszip is dynamically imported inside buildPackageZip)
     // is slower than the default 1s waitFor window under test-environment
-    // overhead — generous but bounded timeouts rather than a flaky default.
+    // overhead, generous but bounded timeouts rather than a flaky default.
     await waitFor(() => expect(createSpy).toHaveBeenCalledTimes(1), { timeout: 8000 });
     expect(clickSpy).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(revokeSpy).toHaveBeenCalledWith("blob:mock-package-url"), {
@@ -318,7 +318,7 @@ describe("Application studio page — download", () => {
 
   it("shows an honest error and downloads nothing when the archive cannot be built", async () => {
     // buildPackageZip throws when JSZip itself fails; simulate that at the
-    // boundary this page actually calls through — a poisoned createObjectURL
+    // boundary this page actually calls through, a poisoned createObjectURL
     // that throws stands in for any failure inside the export path, since the
     // page's try/catch around exportZip doesn't distinguish the source.
     URL.createObjectURL = vi.fn(() => {
@@ -343,7 +343,7 @@ describe("Application studio page — download", () => {
     // to leak). This isolates the narrower, real gap: exportZip's `url` is
     // scoped inside the try block, so if anything BETWEEN createObjectURL
     // succeeding and revokeObjectURL running throws, the catch block has no
-    // reference to `url` and can never revoke it — a blob holding the user's
+    // reference to `url` and can never revoke it, a blob holding the user's
     // own cover letter and personal information stays alive in memory for
     // the rest of the page's life. Forcing the failure at `a.click()`
     // isolates exactly that window.
@@ -368,7 +368,7 @@ describe("Application studio page — download", () => {
     // revoked even though the flow failed after creating it.
     expect(
       revokeSpy,
-      "exportZip's catch block cannot reach `url` to revoke it — the object URL leaks for the life of the page",
+      "exportZip's catch block cannot reach `url` to revoke it, the object URL leaks for the life of the page",
     ).toHaveBeenCalledWith("blob:mock-leaked-url");
 
     clickSpy.mockRestore();

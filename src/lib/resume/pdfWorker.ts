@@ -28,7 +28,7 @@ export const WORKER_READY_TIMEOUT_MS = 15_000;
  * `new URL(…, import.meta.url)` makes the bundler own this file: it compiles
  * `pdf.worker.mjs` into a worker bundle of its own and rewrites the URL to
  * point at it. That bundle loads its chunks with `importScripts`, which exists
- * only in a classic worker — asking for a module worker gets you a worker that
+ * only in a classic worker, asking for a module worker gets you a worker that
  * boots and then dies on its first chunk load. pdf.js never hears back, and the
  * upload hangs on a spinner forever. Verified against the emitted bundle, not
  * assumed: `.next/static/chunks` contains an `importScripts`-based worker entry.
@@ -47,8 +47,8 @@ export function defaultCreateWorker(): unknown {
  * pdf.js's worker announces itself the moment it loads (`initializeFromPort`
  * sends "ready" from the worker's own static initialiser), so the first message
  * back is evidence the worker fetched its chunks and is running our code. Every
- * way that can fail — a 404 on the worker chunk, a CSP that forbids workers, a
- * classic/module mismatch — otherwise ends in silence, and silence here looks
+ * way that can fail, a 404 on the worker chunk, a CSP that forbids workers, a
+ * classic/module mismatch, otherwise ends in silence, and silence here looks
  * exactly like a slow PDF.
  *
  * The error listener stays attached for the whole operation, so a worker that
@@ -77,7 +77,7 @@ export function watchWorker(port: unknown, timeoutMs: number) {
     const detail = (event as ErrorEvent).message;
     // Typed as a rasterise failure, not a bare Error, because this rejection is
     // raced against the parse. A plain error would be caught by the load
-    // classifier and reported to the user as a damaged PDF — blaming their file
+    // classifier and reported to the user as a damaged PDF, blaming their file
     // for our reader crashing is exactly the wrong answer.
     onFailure?.(
       new ResumeRasterizeError(

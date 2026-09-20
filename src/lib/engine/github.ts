@@ -6,7 +6,7 @@ import { avechenGitHub } from "@/lib/demo/github";
  *
  * Deterministic and honest: for the demo candidate we return the hand-authored,
  * evidence-grounded analysis. For any other candidate we derive a *minimal*
- * analysis from their own fields only — we never invent repositories or
+ * analysis from their own fields only, we never invent repositories or
  * fabricate skill proof. With no cached repo data we can only report which
  * public skills we can and cannot corroborate.
  */

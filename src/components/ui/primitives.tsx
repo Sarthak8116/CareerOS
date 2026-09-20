@@ -3,7 +3,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 /* ---------------------------------------------------------------- */
-/* Pill / Badge — the categorical label used everywhere              */
+/* Pill / Badge, the categorical label used everywhere              */
 /* ---------------------------------------------------------------- */
 
 export function Pill({

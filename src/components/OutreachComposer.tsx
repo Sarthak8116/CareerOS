@@ -66,7 +66,7 @@ export function OutreachComposer({
    * On-demand email lookup (§5.13 + LinkedIn enrichment).
    *
    * Runs for ONE contact, only when the user clicks. Results are held in local
-   * state and labeled unconfirmed — nothing here sends, and nothing auto-runs.
+   * state and labeled unconfirmed, nothing here sends, and nothing auto-runs.
    */
   const [lookupAvailable, setLookupAvailable] = useState(false);
   const [emails, setEmails] = useState<Record<string, UnconfirmedEmail | null>>({});
@@ -91,7 +91,7 @@ export function OutreachComposer({
   }, []);
 
   /**
-   * Recent public posts for the SELECTED contact only — fetched lazily, one
+   * Recent public posts for the SELECTED contact only, fetched lazily, one
    * contact at a time, capped server-side and cached by profile URL. We never
    * bulk-fetch posts for the whole contact list: that would cost real money
    * for people the user never opens.
@@ -155,7 +155,7 @@ export function OutreachComposer({
         setPostsByPerson((m) => ({ ...m, [selectedPersonId]: excerpts }));
       })
       .catch(() => {
-        // A missing post feed is not an error — the draft stands without it.
+        // A missing post feed is not an error, the draft stands without it.
         if (active) setPostsByPerson((m) => ({ ...m, [selectedPersonId]: [] }));
       });
     return () => {
@@ -198,7 +198,7 @@ export function OutreachComposer({
         ...(livePostExcerpts.length > 0 &&
         !selected.claimsToVerify.some((c) => c.includes("Post excerpts"))
           ? [
-              "Post excerpts are quoted from their public LinkedIn activity — re-read the original before referencing it, in case the excerpt lost context.",
+              "Post excerpts are quoted from their public LinkedIn activity, re-read the original before referencing it, in case the excerpt lost context.",
             ]
           : []),
       ]
@@ -388,11 +388,11 @@ export function OutreachComposer({
             />
           </div>
 
-          {/* Approval controls — two-step, never auto-send */}
+          {/* Approval controls, two-step, never auto-send */}
           {status === "sent" ? (
             <div className="mt-4 flex items-center gap-2 rounded-xl bg-emerald-50 p-3 text-sm font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
               <CheckCircle2 className="h-4 w-4" />
-              Sent (demo) — no real email was sent.
+              Sent (demo), no real email was sent.
             </div>
           ) : (
             <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -440,7 +440,7 @@ export function OutreachComposer({
             </div>
           )}
 
-          {/* Email lookup result — always labeled unconfirmed, never "verified" */}
+          {/* Email lookup result, always labeled unconfirmed, never "verified" */}
           {selectedPerson && emails[selectedPerson.id] !== undefined && (
             <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3">
               {emails[selectedPerson.id] ? (
@@ -457,7 +457,7 @@ export function OutreachComposer({
                   <p className="mt-2 text-xs leading-snug text-slate-500">
                     The mailbox answered an SMTP check. That is not confirmation
                     that it belongs to {selectedPerson.name} or that they read it
-                    — this has been added to the verify-before-sending list below.
+                   , this has been added to the verify-before-sending list below.
                     Nothing was sent.
                   </p>
                 </>

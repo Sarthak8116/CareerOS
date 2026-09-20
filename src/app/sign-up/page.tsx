@@ -6,7 +6,7 @@ import { Sparkles, ArrowRight } from "lucide-react";
 import { Button, Pill } from "@/components/ui/primitives";
 
 /**
- * Sign-up — DEMO MODE mock.
+ * Sign-up, DEMO MODE mock.
  * Name + email inputs are decorative (never read, never posted). No password
  * is ever collected. "Create demo account" simply routes into onboarding.
  * Nothing here touches the network.
@@ -41,7 +41,7 @@ export default function SignUp() {
           <form
             className="space-y-4"
             onSubmit={(e) => {
-              // Demo mock — never submits credentials anywhere.
+              // Demo mock, never submits credentials anywhere.
               e.preventDefault();
               router.push("/onboarding");
             }}
@@ -82,7 +82,7 @@ export default function SignUp() {
                 <Pill className="bg-slate-50 text-slate-500 ring-slate-200">
                   Demo
                 </Pill>
-                Nothing is stored — no password, no real account.
+                Nothing is stored, no password, no real account.
               </p>
             </div>
 

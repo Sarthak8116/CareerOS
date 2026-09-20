@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/primitives";
  *
  * Both are optional. With no ELEVENLABS_API_KEY the server reports voice as
  * off, these controls do not render, and the interview stays text-only.
- * A recording is sent for transcription and discarded — it is never stored.
+ * A recording is sent for transcription and discarded, it is never stored.
  */
 
 export interface InterviewCapabilities {
@@ -140,7 +140,7 @@ export function RecordAnswerButton({
       if (!res.ok) throw new Error(await errorFrom(res, "Could not transcribe that recording."));
       const { text } = (await res.json()) as { text?: string };
       if (text?.trim()) onTranscript(text.trim());
-      else onError("No speech was detected in that recording — try again, closer to the microphone.");
+      else onError("No speech was detected in that recording, try again, closer to the microphone.");
     } catch (err) {
       onError(err instanceof Error ? err.message : "Could not transcribe that recording.");
     } finally {

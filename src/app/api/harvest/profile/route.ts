@@ -9,17 +9,17 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Integration point 1 — the onboarding LinkedIn step.
+ * Integration point 1, the onboarding LinkedIn step.
  *
  * Scrapes the user's OWN public profile (never email mode) and maps their
  * experience, education, and skills into Evidence records with source
  * "linkedin" and the public-proof flag set.
  *
  * When Harvest is off this returns 503 and the page keeps its existing
- * demo-mode behavior — nothing about that path changes.
+ * demo-mode behavior, nothing about that path changes.
  */
 
-/** GET /api/harvest/profile — is live LinkedIn import configured? */
+/** GET /api/harvest/profile, is live LinkedIn import configured? */
 export function GET() {
   return NextResponse.json({ enabled: harvestEnabled() });
 }

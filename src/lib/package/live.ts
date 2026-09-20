@@ -15,7 +15,7 @@ import { CoverLetterDraft } from "@/lib/package/coverLetter";
  *
  * THE MODEL IS NOT TRUSTED TO GROUND ITS OWN PROSE. It is asked to cite an
  * evidence id per sentence, but the returned ids are checked against the real
- * graph afterwards by `groundSentences` — an id that does not resolve marks
+ * graph afterwards by `groundSentences`: an id that does not resolve marks
  * the sentence unsupported, exactly as if it had cited nothing. The prompt
  * shapes the output; the grading is what enforces it.
  *

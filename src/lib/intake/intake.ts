@@ -15,15 +15,15 @@ import {
 /**
  * Intake orchestration: the only module that decides WHAT to fetch for a given
  * job link and in what order. Everything it returns is already validated,
- * sanitized and mapped into app shapes — callers never see a raw board record.
+ * sanitized and mapped into app shapes, callers never see a raw board record.
  *
  * It NEVER throws upward. Every failure comes back as `ok: false` with a coarse
  * reason and a fallback the UI can offer, because a job link that cannot be
  * read is an ordinary outcome of this feature, not an exception.
  *
  * Partial success is `ok: true` with `form.completeness: "none"`. That is the
- * NORMAL path for Lever, Ashby and Workday — we got the job but not the
- * application questions — and it must never be reported as an error.
+ * NORMAL path for Lever, Ashby and Workday, we got the job but not the
+ * application questions, and it must never be reported as an error.
  */
 
 /** Map an HTTP status onto the coarse reason the UI explains. */
@@ -90,7 +90,7 @@ export async function intakeFromUrl(
     const requests = adapter.plan(url);
 
     if (requests.length === 0) {
-      // The host matched an ATS but the path did not yield the ids we need —
+      // The host matched an ATS but the path did not yield the ids we need,
       // a board listing page rather than a posting, usually.
       return {
         ok: false,
@@ -147,8 +147,8 @@ export async function intakeFromUrl(
 
     if (!output.job) {
       // The site readers found no posting. With NVIDIA keys configured, let
-      // Nemotron read the page text before giving up. Any failure in there —
-      // no keys, a model error, a page that is not a posting — falls through
+      // Nemotron read the page text before giving up. Any failure in there,
+      // no keys, a model error, a page that is not a posting, falls through
       // to the same honest "paste it instead" the user got before.
       const page = responses.find((r) => r.kind === "posting" && r.text)?.text;
       if (page && liveModeAvailable()) {

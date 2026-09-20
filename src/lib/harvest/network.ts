@@ -37,7 +37,7 @@ import { cacheKey, withCache } from "@/lib/harvest/cache";
 /**
  * Harvest orchestration: the only module that decides WHICH actors to call and
  * with what input. Everything it returns is already validated, sanitized, and
- * mapped into app shapes — callers never see a raw Apify record.
+ * mapped into app shapes, callers never see a raw Apify record.
  *
  * Cost discipline (build directive: default to the cheap path):
  *  - No-email mode everywhere except the one explicit per-contact lookup.
@@ -79,7 +79,7 @@ function contactWarmthProfile(profile: HarvestProfile): WarmthProfile {
     ...(profile.skills ?? [])
       .map((s) => s.name)
       .filter((s): s is string => !!s),
-    // `topSkills` is an array in the live actor and a string in the docs —
+    // `topSkills` is an array in the live actor and a string in the docs,
     // `topSkillsList` normalises both.
     ...topSkillsList(profile.topSkills),
   ];
@@ -98,7 +98,7 @@ function contactWarmthProfile(profile: HarvestProfile): WarmthProfile {
 
 /**
  * Look up a company by LinkedIn URL when we have one, otherwise by name.
- * Returns `undefined` when nothing validates — the caller then keeps its
+ * Returns `undefined` when nothing validates, the caller then keeps its
  * existing low-confidence fallback rather than showing a half-empty record.
  */
 export async function fetchCompanyFacts(input: {
@@ -158,7 +158,7 @@ export async function fetchCompanyPosts(
  * that is roughly $0.20 per campaign.
  *
  * Returns contacts sorted warmest-first, then by relevance. On any failure the
- * caller falls back to its existing behavior — this never throws upward.
+ * caller falls back to its existing behavior, this never throws upward.
  */
 export async function fetchTeamContacts(input: {
   candidate: Candidate;
@@ -219,7 +219,7 @@ const WARMTH_RANK: Record<NonNullable<Person["warmth"]>["level"], number> = {
 /**
  * Order contacts by warmth, then relevance, then name.
  *
- * The warmest contact is promoted to `outreachPriority: "first"` — but only
+ * The warmest contact is promoted to `outreachPriority: "first"`: but only
  * when there is genuinely something in common to open with. With no overlap
  * anywhere, nobody is labeled "contact first", because the ranking would be
  * arbitrary and the label would be a lie.
@@ -287,7 +287,7 @@ export async function fetchContactPosts(
  * Email lookup for ONE contact. This is the only call that ever uses email
  * mode, and it runs only from an explicit user action on a single contact.
  *
- * The returned label is fixed at "found + SMTP-checked, unconfirmed" — the
+ * The returned label is fixed at "found + SMTP-checked, unconfirmed", the
  * provider checked that the mailbox answers, which is NOT confirmation that it
  * belongs to this person or that they read it. Callers put it in the outreach
  * message's "claims you must verify yourself" list.
@@ -307,7 +307,7 @@ export async function findContactEmail(
 
   const { valid } = parseItems(HarvestProfile, items);
   const address = valid[0]?.email?.trim();
-  // Email is never guaranteed, even in email mode — absence is a normal result.
+  // Email is never guaranteed, even in email mode, absence is a normal result.
   if (!address) return undefined;
 
   return {

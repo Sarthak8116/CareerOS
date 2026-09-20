@@ -67,7 +67,7 @@ export const effortText: Record<string, string> = {
  * `unstated` holds raw `Job` field names because it is data, not presentation.
  * This is the one place that turns them into something a person can read, so
  * the phrasing stays consistent everywhere it is rendered. Every entry reads
- * as a NEUTRAL field name, never as a claim — the surrounding UI supplies the
+ * as a NEUTRAL field name, never as a claim, the surrounding UI supplies the
  * "not stated in the posting" framing.
  *
  * `unstatedLabel()` falls back to the raw key rather than hiding an entry: a

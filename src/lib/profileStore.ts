@@ -11,14 +11,14 @@ import { demoCandidate } from "@/lib/demo/candidate";
 import { resetStyleMemory } from "@/lib/styleMemory";
 
 /**
- * Candidate profile persistence — the "profile memory" layer.
+ * Candidate profile persistence, the "profile memory" layer.
  *
  * Until now `demoCandidate` was a static import, so anything a user imported
  * (a LinkedIn profile, a parsed résumé) was displayed once and lost on reload.
  * Every "CareerOS remembers you / learns from your edits" behaviour depends on
  * this module.
  *
- * Mirrors `lib/store.ts` exactly — same conventions, so the eventual
+ * Mirrors `lib/store.ts` exactly, same conventions, so the eventual
  * Supabase-backed implementation can slot in behind these signatures:
  *  - client-only, guarded by `canPersist()` for SSR safety
  *  - every read re-validated with Zod; anything that no longer matches is dropped
@@ -92,7 +92,7 @@ export function saveProfile(candidate: Candidate): Candidate {
  * Which sources may overwrite which.
  *
  * Higher wins. `user-confirmation` sits at the top because a person correcting
- * their own record must never be silently overwritten by a later import — the
+ * their own record must never be silently overwritten by a later import, the
  * whole point of profile memory is that your edits stick.
  */
 const SOURCE_AUTHORITY: Record<EvidenceSource, number> = {
@@ -175,7 +175,7 @@ export function addEvidence(incoming: Evidence[]): {
   return { profile, added, updated };
 }
 
-/** Field-wise comparison — Evidence is flat, so this is exact. */
+/** Field-wise comparison, Evidence is flat, so this is exact. */
 function shallowEqual(a: Evidence, b: Evidence): boolean {
   return (
     a.claim === b.claim &&
@@ -194,7 +194,7 @@ function shallowEqual(a: Evidence, b: Evidence): boolean {
  *
  * Only fills fields that are genuinely EMPTY on the stored profile, so an
  * import can never silently rewrite something the user has already set. The
- * evidence graph is untouched here — use {@link addEvidence} for that.
+ * evidence graph is untouched here, use {@link addEvidence} for that.
  */
 export function fillProfileFields(
   fields: Partial<Pick<Candidate, "name" | "headline" | "location">> & {

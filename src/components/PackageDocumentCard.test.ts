@@ -5,17 +5,17 @@ import { claimsStillMade, removeSentence } from "@/components/PackageDocumentCar
 /**
  * `claimsStillMade` and `removeSentence` are the two functions that make
  * "a claim is derived from the content" actually true. The adversarial case
- * coder-ui-2 flagged — one claim's text is a literal substring of another
- * claim's text — used to be a real, reproducible bug here: removing the
+ * coder-ui-2 flagged, one claim's text is a literal substring of another
+ * claim's text, used to be a real, reproducible bug here: removing the
  * shorter claim tore the opening words out of the longer, unrelated sentence,
  * leaving a headless fragment AND silently dropping the longer claim's
  * evidence tracking (since its text no longer matched anything in the
  * content). Confirmed with a failing repro against the earlier
  * `split().join()` implementation. `removeSentence` has since gone through
  * two more iterations, landing on whole-UNIT removal (see its own comment for
- * why a boundary check alone was still not enough) — these tests now assert
+ * why a boundary check alone was still not enough), these tests now assert
  * the CORRECT behavior against whichever implementation is current, and pass
- * — kept as a regression guard, not a historical note, since a future
+ *, kept as a regression guard, not a historical note, since a future
  * "simplification" of removeSentence is exactly the kind of change that would
  * reintroduce the corruption.
  */
@@ -24,8 +24,8 @@ function claim(overrides: Partial<PackageClaim> & Pick<PackageClaim, "text">): P
   return { support: "unsupported", ...overrides };
 }
 
-describe("removeSentence + claimsStillMade — the substring-collision edge", () => {
-  it("removing the LONGER of two claims, where the shorter is a prefix, drops both — over-reporting, not under-reporting", () => {
+describe("removeSentence + claimsStillMade, the substring-collision edge", () => {
+  it("removing the LONGER of two claims, where the shorter is a prefix, drops both, over-reporting, not under-reporting", () => {
     const short = claim({ text: "I built the payments pipeline", support: "user-provided" });
     const long = claim({
       text: "I built the payments pipeline at my last internship, handling 10,000 transactions daily.",
@@ -38,7 +38,7 @@ describe("removeSentence + claimsStillMade — the substring-collision edge", ()
     const afterRemoval = removeSentence(content, long.text);
     const survivors = claimsStillMade(afterRemoval, [short, long]);
 
-    // Both vanish — short's text only ever existed AS PART OF long's text, so
+    // Both vanish, short's text only ever existed AS PART OF long's text, so
     // once long is gone there is genuinely nothing left to claim. This is the
     // "safe" direction: nothing false is left standing.
     expect(survivors).toEqual([]);
@@ -85,18 +85,18 @@ describe("removeSentence + claimsStillMade — the substring-collision edge", ()
     ).toBe(true);
   });
 
-  it("two claims with IDENTICAL text are addressed by index, not merged — removing one instance leaves exactly one", () => {
+  it("two claims with IDENTICAL text are addressed by index, not merged, removing one instance leaves exactly one", () => {
     const a = claim({ text: "I am excited about this role.", support: "unsupported" });
     const b = claim({ text: "I am excited about this role.", support: "unsupported" });
     // Both occurrences are genuine, standalone sentence units (a real sentence
-    // boundary — terminator + space — precedes each). A lead-in clause with no
+    // boundary, terminator + space, precedes each). A lead-in clause with no
     // terminator of its own ("Later in the letter: ...") would make the second
     // occurrence part of a LARGER unit rather than a whole one on its own,
-    // which is a different case (see the "does NOT corrupt" test above) — this
+    // which is a different case (see the "does NOT corrupt" test above), this
     // one isolates true duplication specifically.
     const content = "I am excited about this role. I am excited about this role.";
 
-    // removeSentence has no concept of "which occurrence" — it removes every
+    // removeSentence has no concept of "which occurrence", it removes every
     // WHOLE-UNIT match. Confirming that explicitly, since resolveClaim's
     // index-based addressing implies (but does not guarantee) per-occurrence
     // removal.
@@ -108,7 +108,7 @@ describe("removeSentence + claimsStillMade — the substring-collision edge", ()
   });
 });
 
-describe("claimsStillMade — baseline behavior", () => {
+describe("claimsStillMade, baseline behavior", () => {
   it("keeps a claim whose exact text is still present", () => {
     const c = claim({ text: "A real sentence.", support: "evidenced", evidenceId: "ev_1" });
     expect(claimsStillMade("A real sentence. And more.", [c])).toEqual([c]);
@@ -125,7 +125,7 @@ describe("claimsStillMade — baseline behavior", () => {
   });
 });
 
-describe("removeSentence — baseline behavior", () => {
+describe("removeSentence, baseline behavior", () => {
   it("removes the sentence and collapses the resulting whitespace", () => {
     const out = removeSentence("First. Removed sentence. Third.", "Removed sentence.");
     expect(out).not.toContain("Removed sentence.");

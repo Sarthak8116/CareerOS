@@ -5,7 +5,7 @@ import { countUnsupported } from "@/lib/package/claims";
 /**
  * Archive assembly.
  *
- * JSZip writes whatever entry name it is handed — given "../../etc/evil" it
+ * JSZip writes whatever entry name it is handed, given "../../etc/evil" it
  * produces exactly that, a Zip Slip archive. Every name here therefore comes
  * from `lib/package/filenames.ts`, and `assertSafeEntryPath` re-checks each
  * finished path immediately before it is added. That second check is not
@@ -19,7 +19,7 @@ import { countUnsupported } from "@/lib/package/claims";
  * cover letter, their personal information, and their answers to application
  * questions. Building it client-side means those documents never leave the
  * machine to be exported. A server route would put a person's private
- * documents on the network purely so we could compress them — a worse privacy
+ * documents on the network purely so we could compress them, a worse privacy
  * posture for no benefit. Do not "simplify" this into an API route.
  */
 
@@ -32,8 +32,8 @@ export const README_NAME = "README.md";
 
 const STATUS_NOTE: Record<PackageDocument["status"], string> = {
   drafted: "drafted by CareerOS for this posting",
-  reused: "reused from what you already saved — not rewritten for this job",
-  "needs-you": "incomplete — it names what you still have to write",
+  reused: "reused from what you already saved, not rewritten for this job",
+  "needs-you": "incomplete, it names what you still have to write",
   "not-requested": "this application does not ask for it",
 };
 
@@ -54,8 +54,8 @@ function manifest(pkg: ApplicationPackage): string {
     `Built by CareerOS at ${pkg.builtAt}.`,
     "",
     pkg.completeness === "complete"
-      ? "**Complete** — everything this application asks for is in this folder."
-      : "**Partial** — some of what this application asks for is not here. See “Still on you” below.",
+      ? "**Complete** everything this application asks for is in this folder."
+      : "**Partial** some of what this application asks for is not here. See “Still on you” below.",
     "",
     "## In this folder",
     "",
@@ -63,9 +63,9 @@ function manifest(pkg: ApplicationPackage): string {
       const flagged = countUnsupported(doc.claims);
       const warning =
         flagged > 0
-          ? ` — ${flagged} statement${flagged === 1 ? "" : "s"} nothing in your evidence backs; check ${flagged === 1 ? "it" : "them"} before you send this`
+          ? `: ${flagged} statement${flagged === 1 ? "" : "s"} nothing in your evidence backs; check ${flagged === 1 ? "it" : "them"} before you send this`
           : "";
-      return `- \`${doc.fileName}\` — ${STATUS_NOTE[doc.status]}${warning}`;
+      return `- \`${doc.fileName}\`: ${STATUS_NOTE[doc.status]}${warning}`;
     }),
   ];
 
@@ -74,7 +74,7 @@ function manifest(pkg: ApplicationPackage): string {
       "",
       "## Not included",
       "",
-      ...omitted.map((doc) => `- ${doc.kind} — ${STATUS_NOTE[doc.status]}`),
+      ...omitted.map((doc) => `- ${doc.kind}, ${STATUS_NOTE[doc.status]}`),
     );
   }
 
@@ -127,7 +127,7 @@ export function packageEntries(pkg: ApplicationPackage): PackageEntry[] {
 export async function buildPackageZip(
   pkg: ApplicationPackage,
 ): Promise<Uint8Array> {
-  // DYNAMIC ON PURPOSE — do not hoist this to the top of the file. A static
+  // DYNAMIC ON PURPOSE, do not hoist this to the top of the file. A static
   // import pulls ~45 kB of JSZip into the first load of the application page
   // for every visitor, including the many who review a package and never
   // export it. Imported here, it is fetched when the user actually clicks
@@ -140,7 +140,7 @@ export async function buildPackageZip(
   return zip.generateAsync({ type: "uint8array" });
 }
 
-/** Suggested download name. Sanitized by construction — folderName already is. */
+/** Suggested download name. Sanitized by construction, folderName already is. */
 export function packageZipName(pkg: ApplicationPackage): string {
   return `${pkg.folderName}.zip`;
 }

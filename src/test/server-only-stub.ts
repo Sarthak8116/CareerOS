@@ -2,7 +2,7 @@
  * Test-only stub for the `server-only` package.
  *
  * The real package throws the moment it is imported outside a React Server
- * Component — that is exactly what makes it a useful guard in the app, and
+ * Component, that is exactly what makes it a useful guard in the app, and
  * exactly what makes server modules impossible to unit test. Vitest aliases
  * `server-only` to this empty module so the logic inside those modules can be
  * exercised.

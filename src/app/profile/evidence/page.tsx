@@ -102,7 +102,7 @@ export default function EvidencePage() {
       {/* Explainer */}
       <p className="mt-8 max-w-3xl text-sm leading-relaxed text-slate-500">
         Every claim points to evidence and is labeled by strength, recency, and
-        trust — nothing is invented.
+        trust, nothing is invented.
       </p>
 
       {/* Evidence grouped by category */}

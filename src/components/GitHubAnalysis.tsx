@@ -7,7 +7,7 @@ import { LevelPill } from "@/components/pills";
  * Presentational view for §5.15 GitHub analysis.
  *
  * Honest framing: these are signals from *public metadata* (languages, README
- * presence/quality, role relevance) — not a claim of deep code-quality review.
+ * presence/quality, role relevance), not a claim of deep code-quality review.
  * Recommendations (which repos to feature, which READMEs to improve, and which
  * claimed skills lack public evidence) are the visible output.
  */
@@ -123,7 +123,7 @@ export function GitHubAnalysisView({ analysis }: { analysis: GitHubProfileAnalys
               <Github className="h-5 w-5 text-slate-500" />@{analysis.username}
             </span>
           }
-          subtitle="Signals from public GitHub metadata — not a deep code-quality audit."
+          subtitle="Signals from public GitHub metadata, not a deep code-quality audit."
         />
         <p className="text-sm leading-relaxed text-slate-600">{analysis.summary}</p>
       </Card>

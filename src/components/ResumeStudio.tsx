@@ -21,16 +21,16 @@ import { cn } from "@/lib/utils";
  * Resume & Application Studio (§5.8).
  *
  * Three evidence-grounded surfaces:
- *  1. Requirement coverage — covered / partially-covered / missing, with the
+ *  1. Requirement coverage, covered / partially-covered / missing, with the
  *     candidate evidence behind each conclusion.
- *  2. Tailored recommendations — accept/reject each rewrite, before → after,
+ *  2. Tailored recommendations, accept/reject each rewrite, before → after,
  *     traced to the requirement it addresses and the evidence behind it.
- *  3. Claim verification — the honesty pass. Flags risky claims so the
+ *  3. Claim verification, the honesty pass. Flags risky claims so the
  *     candidate fixes them first; CareerOS never fabricates experience.
  *
  * Accept/reject is CONTROLLED: the status shown is the one on the
  * recommendation, and every decision is handed to `onDecide` so the owner can
- * persist it. This component holds no decision state of its own — it used to,
+ * persist it. This component holds no decision state of its own, it used to,
  * which meant "you approve or deny each one" lasted until the next render.
  * Nothing here invents metrics or upgrades a claim beyond its evidence.
  */
@@ -329,7 +329,7 @@ export function ResumeStudio({
 
         {recommendations.length === 0 ? (
           <p className="text-sm text-slate-500">
-            No rewrites suggested — your evidence already frames this role well.
+            No rewrites suggested, your evidence already frames this role well.
           </p>
         ) : (
           <div className="space-y-4">
@@ -352,7 +352,7 @@ export function ResumeStudio({
           <SectionTitle className="text-slate-500">Claim verification</SectionTitle>
         </div>
         <p className="mb-4 text-sm text-slate-500">
-          CareerOS never fabricates experience — it flags claims your evidence
+          CareerOS never fabricates experience, it flags claims your evidence
           doesn’t fully support so you can fix them before an employer does.
         </p>
 

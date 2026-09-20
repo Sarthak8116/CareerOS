@@ -4,7 +4,7 @@ import type { Candidate, Warmth, WarmthSignal } from "@/lib/types";
  * Overlap-scoring engine (§5.12 warmest path, §5.7 network strength).
  *
  * Compares the candidate's background against a contact's and reports what they
- * have IN COMMON — nothing more. Fully deterministic: no Math.random, no Date,
+ * have IN COMMON, nothing more. Fully deterministic: no Math.random, no Date,
  * no network. It receives already-fetched data as plain input, so it stays a
  * pure engine like every other module in `lib/engine`.
  *
@@ -27,7 +27,7 @@ export interface WarmthProfile {
 }
 
 /* ------------------------------------------------------------------ */
-/* Normalization — so "MIT" and "M.I.T." compare equal, deterministically */
+/* Normalization, so "MIT" and "M.I.T." compare equal, deterministically */
 /* ------------------------------------------------------------------ */
 
 /** Legal/company suffixes that carry no identity ("Nvidia Inc" === "NVIDIA"). */
@@ -52,7 +52,7 @@ const normCompany = (v: string) => normalize(v, COMPANY_NOISE);
 const normSchool = (v: string) => normalize(v, SCHOOL_NOISE);
 const normPlain = (v: string) => normalize(v);
 
-/** City comparison uses the first segment only — "Austin, TX" vs "Austin, Texas". */
+/** City comparison uses the first segment only, "Austin, TX" vs "Austin, Texas". */
 function normCity(value: string): string {
   return normPlain(value.split(",")[0] ?? value);
 }
@@ -83,7 +83,7 @@ function overlap(a: string[], b: string[], norm: (v: string) => string): string[
  *
  * Schools come from the profile plus any education evidence; employers from
  * experience evidence; skills from skill evidence. Only what the candidate has
- * actually told us — nothing inferred.
+ * actually told us, nothing inferred.
  */
 export function candidateWarmthProfile(candidate: Candidate): WarmthProfile {
   const schools = [candidate.university].filter(
@@ -94,8 +94,8 @@ export function candidateWarmthProfile(candidate: Candidate): WarmthProfile {
 
   for (const ev of candidate.evidence) {
     if (ev.category === "education") {
-      // "B.S. Computer Science — University of Illinois" -> the school half.
-      const school = ev.claim.split("—").pop()?.trim();
+      // "B.S. Computer Science, University of Illinois" -> the school half.
+      const school = ev.claim.split("·").pop()?.trim();
       if (school) schools.push(school);
     } else if (ev.category === "experience") {
       // "Systems Intern at Acme" -> "Acme".
@@ -120,7 +120,7 @@ export function candidateWarmthProfile(candidate: Candidate): WarmthProfile {
 /* ------------------------------------------------------------------ */
 
 /**
- * A shared school or former employer is a genuinely usable opener — you can
+ * A shared school or former employer is a genuinely usable opener, you can
  * name a specific shared context. A shared city or skill is much weaker: lots
  * of people live in Austin and lots of engineers know Python.
  */
@@ -133,17 +133,17 @@ const SIGNAL_TRUST: Record<WarmthSignal["kind"], WarmthSignal["trust"]> = {
 
 const NOTE_BASE =
   "Derived from overlapping background only. A shared school, employer, city or skill " +
-  "is an inference about common ground — not a confirmed connection, and not evidence " +
+  "is an inference about common ground, not a confirmed connection, and not evidence " +
   "that you have met. Verify before you reference it.";
 
 /**
  * Score how warm an approach to one contact looks.
  *
  * Levels:
- *   strong   — a strong signal plus at least one more piece of common ground
- *   moderate — exactly one strong signal (school or former employer)
- *   limited  — only weak signals (city, skills)
- *   none     — nothing in common that we can honestly point to
+ *   strong  , a strong signal plus at least one more piece of common ground
+ *   moderate, exactly one strong signal (school or former employer)
+ *   limited , only weak signals (city, skills)
+ *   none    , nothing in common that we can honestly point to
  */
 export function computeWarmth(
   candidate: WarmthProfile,
