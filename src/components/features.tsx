@@ -26,6 +26,7 @@ import {
 } from "@/components/pills";
 import { gapClassificationText, effortText, levelStyle } from "@/lib/labels";
 import { cn } from "@/lib/utils";
+import { proposeProject } from "@/lib/engine/projectBooster";
 
 /* ---------------------------------------------------------------- */
 /* Evidence card (§5.1 evidence graph)                               */
@@ -100,6 +101,8 @@ export function FitDimensionRow({ dimension }: { dimension: FitDimension }) {
 /* ---------------------------------------------------------------- */
 
 export function GapActionCard({ gap }: { gap: Gap }) {
+  const project = proposeProject(gap);
+
   return (
     <Card className="border-l-4 border-l-brand-500">
       <div className="flex flex-wrap items-center gap-1.5">
@@ -129,6 +132,24 @@ export function GapActionCard({ gap }: { gap: Gap }) {
 
       {gap.evidenceNote && (
         <p className="mt-3 text-xs italic text-slate-400">{gap.evidenceNote}</p>
+      )}
+
+      {project && (
+        <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/50 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+            Suggested project
+          </p>
+          <p className="mt-1 text-sm font-semibold text-slate-800">{project.title}</p>
+          <p className="mt-1 text-sm text-slate-600">{project.goal}</p>
+          <p className="mt-3 text-xs font-semibold text-slate-500">Deliverable</p>
+          <p className="mt-1 text-sm text-slate-700">{project.deliverable}</p>
+          <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm text-slate-700">
+            {project.milestones.map((milestone) => (
+              <li key={milestone}>{milestone}</li>
+            ))}
+          </ol>
+          <p className="mt-3 text-xs italic text-slate-500">{project.honestyNote}</p>
+        </div>
       )}
     </Card>
   );
