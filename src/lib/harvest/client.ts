@@ -180,7 +180,7 @@ export function harvestSafeMessage(err: unknown): string {
   const safe = scrub(raw, token);
   return /api key|401|authentication/i.test(safe)
     ? "Authentication failed, check APIFY_TOKEN."
-    : /rate|429/i.test(safe)
+    : /\b429\b|rate.?limit/i.test(safe)
       ? "Rate limited by the data provider, try again shortly."
       : "The LinkedIn lookup failed. Try again shortly.";
 }

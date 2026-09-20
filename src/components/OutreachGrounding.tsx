@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import type { OutreachMessage } from "@/lib/types";
 import { Button, Card, Pill, SectionTitle } from "@/components/ui/primitives";
-import { cn } from "@/lib/utils";
 import type { OutreachStatus } from "@/lib/outreachStore";
 
 type MessageStatus = OutreachStatus;

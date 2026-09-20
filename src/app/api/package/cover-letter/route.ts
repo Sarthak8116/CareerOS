@@ -57,7 +57,7 @@ export async function POST(req: Request) {
     const message = err instanceof Error ? err.message : "";
     const safe = /api key|401|403|authentication/i.test(message)
       ? "Authentication failed, check your NVIDIA API key."
-      : /rate|429/i.test(message)
+      : /\b429\b|rate.?limit/i.test(message)
         ? "Rate limited by the model API, try again shortly."
         : "The model did not return a usable draft. CareerOS can assemble one from your evidence instead.";
     return NextResponse.json({ error: safe }, { status: 502 });

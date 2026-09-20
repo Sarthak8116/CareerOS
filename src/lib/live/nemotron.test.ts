@@ -475,3 +475,22 @@ describe("readDocumentPages, re-guards page format before any bytes leave for th
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });
+
+describe("repairEnums", () => {
+  it("maps a label from the other ladder, and a truncated one, onto the schema's option", async () => {
+    const { repairEnums } = await import("@/lib/live/nemotron");
+    const { z } = await import("zod");
+    const Level = z.enum(["strong", "moderate", "limited", "none"]);
+    const schema = z.object({ fit: z.array(z.object({ level: Level })), confidence: z.enum(["high", "medium", "low"]) });
+    const json = { fit: [{ level: "high" }, { level: "moder" }, { level: "banana" }], confidence: "high" };
+    const first = schema.safeParse(json);
+    expect(first.success).toBe(false);
+    if (first.success) return;
+    expect(repairEnums(json, first.error.issues)).toBe(true);
+    expect(json.fit[0].level).toBe("strong");
+    expect(json.fit[1].level).toBe("moderate");
+    // Nonsense is NOT guessed at, and a valid value on the other ladder is untouched.
+    expect(json.fit[2].level).toBe("banana");
+    expect(json.confidence).toBe("high");
+  });
+});

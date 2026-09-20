@@ -22,7 +22,8 @@ export const BUILD_AGENTS = [
  */
 export function BuildingState() {
   return (
-    <div className="mt-5 rounded-xl border border-brand-100 bg-brand-50/60 p-4">
+    <div className="card-accent mt-5 overflow-hidden p-4">
+      <div aria-hidden className="brand-gradient -mx-4 -mt-4 mb-4 h-1 animate-pulse" />
       <p className="flex items-center gap-2 text-sm font-medium text-brand-900">
         <Loader2 className="h-4 w-4 animate-spin text-brand-600" />
         Agents are building your campaign…

@@ -1,15 +1,10 @@
 import { z } from "zod";
 import {
   Confidence,
-  Evidence,
   HarvestProvenance,
-  Job,
   Level,
   TrustLabel,
 } from "@/lib/types/core";
-import {
-  ApplicationForm,
-} from "@/lib/types/campaign";
 
 /* ================================================================== */
 /* PHASE 3 CONTRACTS, shared schemas for the parallel agent fleet.    */

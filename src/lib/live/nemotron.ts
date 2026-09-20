@@ -18,7 +18,12 @@ import type { z } from "zod";
  */
 
 const ENDPOINT = "https://integrate.api.nvidia.com/v1/chat/completions";
-const REQUEST_TIMEOUT_MS = 120_000;
+const REQUEST_TIMEOUT_MS = 90_000;
+
+/** Capacity errors worth waiting out, and how long to wait before each retry. */
+const RETRYABLE_STATUS = new Set([429, 502, 503, 504]);
+const RETRY_DELAYS_MS = process.env.NODE_ENV === "test" ? [0, 0] : [1500, 5000];
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Verified present in the live model list. */
 export const NEMOTRON_MODELS = {
@@ -159,6 +164,8 @@ async function chat(opts: {
   role: NemotronRole;
   messages: ChatMessage[];
   maxTokens: number;
+  /** Override the request timeout (a fast model should fail fast). */
+  timeoutMs?: number;
   json: boolean;
 }): Promise<string> {
   const payload: Record<string, unknown> = {
@@ -174,28 +181,38 @@ async function chat(opts: {
     payload.response_format = { type: "json_object" };
   }
 
-  let res: Response;
-  try {
-    res = await fetch(ENDPOINT, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey(opts.role)}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
-  } catch (err) {
-    const reason = err instanceof Error ? err.message : "network error";
-    throw new Error(`Nemotron ${opts.role} request failed: ${scrub(reason)}`);
+  // NVIDIA's shared endpoints answer 429/503 ("worker request limit reached")
+  // under load, and the condition usually clears within seconds. A first live
+  // run failed on exactly that, so capacity errors are retried with backoff;
+  // anything else (bad request, auth) fails immediately.
+  let res: Response | undefined;
+  let failure = "";
+  for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
+    if (attempt > 0) await sleep(RETRY_DELAYS_MS[attempt - 1]);
+    try {
+      res = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey(opts.role)}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(opts.timeoutMs ?? REQUEST_TIMEOUT_MS),
+      });
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : "network error";
+      throw new Error(`Nemotron ${opts.role} request failed: ${scrub(reason)}`);
+    }
+    if (res.ok || !RETRYABLE_STATUS.has(res.status)) break;
+    failure = await res.text().catch(() => "");
   }
 
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
+  if (!res || !res.ok) {
+    const body = res && !RETRYABLE_STATUS.has(res.status) ? await res.text().catch(() => "") : failure;
     // Status is kept, the routes map 401/429 to user-safe copy.
     throw new Error(
-      `Nemotron ${opts.role} returned ${res.status}. ${scrub(body.slice(0, 500))}`.trim(),
+      `Nemotron ${opts.role} returned ${res?.status ?? "no response"}. ${scrub(body.slice(0, 500))}`.trim(),
     );
   }
 
@@ -247,8 +264,76 @@ export async function parseStructured<T extends z.ZodTypeAny>(opts: {
   maxTokens?: number;
   /** Which Nemotron answers. Defaults to the largest model. */
   model?: NemotronRole;
+  /**
+   * Tried once if `model` fails at the REQUEST level (timeout, capacity).
+   * Never used to paper over a schema-invalid answer: that is a content
+   * failure, and a different model is not the fix for it.
+   */
+  fallbackModel?: NemotronRole;
+  timeoutMs?: number;
 }): Promise<z.infer<T>> {
-  const role = opts.model ?? "super";
+  try {
+    return await runStructured(opts, opts.model ?? "super", opts.timeoutMs);
+  } catch (err) {
+    const requestLevel =
+      err instanceof Error && /request failed|returned (?:\d{3}|no response)/.test(err.message);
+    if (!opts.fallbackModel || !requestLevel) throw err;
+    return runStructured(opts, opts.fallbackModel);
+  }
+}
+
+/** Words that mean the same rung on either label ladder. */
+const ENUM_SYNONYMS: string[][] = [
+  ["strong", "high", "excellent", "very high"],
+  ["moderate", "medium", "mid", "average", "fair"],
+  ["limited", "low", "weak", "minimal"],
+  ["none", "no", "absent", "n/a", "na"],
+];
+
+/**
+ * Rewrite invalid enum values to the schema option they plainly mean. Only a
+ * synonym on the same rung or an unambiguous prefix is accepted; anything else
+ * is left alone for the corrective retry. Mutates `json`; returns whether it
+ * changed anything.
+ */
+export function repairEnums(json: unknown, issues: z.ZodIssue[]): boolean {
+  let changed = false;
+  for (const issue of issues) {
+    if (issue.code !== "invalid_enum_value") continue;
+    const received = String(issue.received).trim().toLowerCase();
+    const options = issue.options.map(String);
+    const rung = ENUM_SYNONYMS.find((group) => group.includes(received));
+    const bySynonym = rung ? options.find((option) => rung.includes(option)) : undefined;
+    const byPrefix =
+      received.length >= 3 ? options.filter((option) => option.startsWith(received)) : [];
+    const fixed = bySynonym ?? (byPrefix.length === 1 ? byPrefix[0] : undefined);
+    if (!fixed) continue;
+
+    let node = json as Record<string | number, unknown> | undefined;
+    for (const key of issue.path.slice(0, -1)) {
+      node = node?.[key] as Record<string | number, unknown> | undefined;
+    }
+    const last = issue.path[issue.path.length - 1];
+    if (node && last !== undefined) {
+      node[last] = fixed;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
+async function runStructured<T extends z.ZodTypeAny>(
+  opts: {
+    system: string;
+    task: string;
+    untrusted?: { label: string; text: string }[];
+    schema: T;
+    schemaName: string;
+    maxTokens?: number;
+  },
+  role: NemotronRole,
+  timeoutMs?: number,
+): Promise<z.infer<T>> {
   const jsonSchema = JSON.stringify(
     zodToJsonSchema(opts.schema, opts.schemaName),
   );
@@ -281,6 +366,7 @@ export async function parseStructured<T extends z.ZodTypeAny>(opts: {
       messages,
       maxTokens: opts.maxTokens ?? 16000,
       json: true,
+      timeoutMs,
     });
 
     const text = extractJsonText(raw);
@@ -291,8 +377,16 @@ export async function parseStructured<T extends z.ZodTypeAny>(opts: {
       parsedJson = undefined;
     }
 
-    const validated = opts.schema.safeParse(parsedJson);
+    let validated = opts.schema.safeParse(parsedJson);
     if (validated.success) return validated.data;
+
+    // Models blur our two label sets ("high" where the schema says "strong")
+    // and occasionally truncate one ("moder"). That is a vocabulary slip, not
+    // a wrong answer, so it is repaired in place rather than costing a retry.
+    if (repairEnums(parsedJson, validated.error.issues)) {
+      validated = opts.schema.safeParse(parsedJson);
+      if (validated.success) return validated.data;
+    }
 
     if (attempt === 0) {
       // Corrective retry: show the model its output and the validation error.
@@ -306,7 +400,12 @@ export async function parseStructured<T extends z.ZodTypeAny>(opts: {
       });
       continue;
     }
-    throw new Error(`Model did not return schema-valid ${opts.schemaName}.`);
+    // Paths and messages only, never the model's content.
+    const issues = validated.error.issues
+      .slice(0, 8)
+      .map((issue) => `${issue.path.join(".") || "(root)"}: ${issue.message}`)
+      .join("; ");
+    throw new Error(`Model did not return schema-valid ${opts.schemaName}. ${issues}`);
   }
   throw new Error(`Model did not return schema-valid ${opts.schemaName}.`);
 }
@@ -363,6 +462,7 @@ export async function readDocumentPages(opts: {
     );
   }
 
+  const pageErrors = new Map<NemotronRole, string>();
   const read = async (
     role: NemotronRole,
   ): Promise<{ text: string; unreadable: number[] }> => {
@@ -385,7 +485,10 @@ export async function readDocumentPages(opts: {
           json: false,
         });
         chunks.push(`--- ${opts.label} page ${i + 1} ---\n${page.trim()}`);
-      } catch {
+      } catch (err) {
+        // Kept (already key-scrubbed by `chat`) so that "no page could be
+        // read" can say WHY, instead of blaming the document by default.
+        pageErrors.set(role, err instanceof Error ? err.message : String(err));
         unreadable.push(i + 1);
         chunks.push(
           `--- ${opts.label} page ${i + 1} ---\n[this page could not be read]`,
@@ -408,7 +511,8 @@ export async function readDocumentPages(opts: {
   if (fallback.unreadable.length >= opts.pages.length) {
     throw new Error(
       `Could not read any page of the ${opts.label}. ` +
-        "The pages may be blank or in an unsupported format.",
+        "The pages may be blank or in an unsupported format." +
+        [...pageErrors].map(([role, msg]) => ` [${role}: ${msg.slice(0, 300)}]`).join(""),
     );
   }
   return {

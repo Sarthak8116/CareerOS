@@ -177,8 +177,8 @@ export function computeActivity(
     },
     {
       agent: "Campaign Planner",
-      message: gaps[0]
-        ? `Recommended first step: ${gaps[0].action.summary}.`
+      message: (trueGap ?? gaps[0])
+        ? `Recommended first step: ${(trueGap ?? gaps[0]).action.summary}.`
         : "Recommended tailoring the résumé and applying.",
       kind: "action",
     },

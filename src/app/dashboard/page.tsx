@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, RotateCcw, Sparkles } from "lucide-react";
+import { RotateCcw, Sparkles } from "lucide-react";
 import type { Campaign } from "@/lib/types";
 import { getCampaigns, resetToDemo } from "@/lib/store";
 import { Shell } from "@/components/Shell";
 import { QuickStart } from "@/components/QuickStart";
 import {
   Button,
-  ButtonLink,
   Card,
   EmptyState,
   SectionTitle,
@@ -30,7 +29,10 @@ function deriveActions(campaigns: Campaign[]): RecommendedAction[] {
   const actions: RecommendedAction[] = [];
   for (const c of campaigns) {
     const label = `${c.job.title} · ${c.job.company}`;
-    if (c.nextAction) {
+    // The next action is usually also the first task; listing it twice made
+    // the same sentence appear at the top and the bottom of this panel.
+    const openTitles = new Set(c.tasks.filter((t) => t.status !== "done").map((t) => t.title));
+    if (c.nextAction && !openTitles.has(c.nextAction)) {
       actions.push({
         campaignId: c.id,
         campaignLabel: label,
@@ -108,10 +110,6 @@ export default function DashboardPage() {
             <RotateCcw className="h-3.5 w-3.5" />
             {resetting ? "Resetting…" : "Reset demo"}
           </Button>
-          <ButtonLink href="/jobs" size="sm">
-            Build a campaign
-            <ArrowRight className="h-4 w-4" />
-          </ButtonLink>
         </div>
       </div>
 

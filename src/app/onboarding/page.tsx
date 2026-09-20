@@ -6,7 +6,6 @@ import {
   Sparkles,
   FileText,
   Github,
-  Mail,
   Linkedin,
   SlidersHorizontal,
   ArrowRight,

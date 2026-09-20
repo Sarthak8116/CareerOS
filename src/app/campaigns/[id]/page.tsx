@@ -2,15 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import Link from "next/link";
 import {
   Sparkles,
-  Building2,
-  Network,
-  FileText,
-  Send,
-  MessagesSquare,
-} from "lucide-react";
+  } from "lucide-react";
 import type { Campaign, CampaignStage } from "@/lib/types";
 import { getCampaign, setTaskStatus } from "@/lib/store";
 import { Shell } from "@/components/Shell";
@@ -43,7 +37,7 @@ const stageText: Record<CampaignStage, string> = {
   closed: "Closed",
 };
 
-const TABS = ["Overview", "Fit", "Network", "Gaps", "Tasks"] as const;
+const TABS = ["Activity", "Fit", "Network", "Gaps", "Tasks"] as const;
 type Tab = (typeof TABS)[number];
 
 export default function CampaignDetailPage() {
@@ -52,7 +46,7 @@ export default function CampaignDetailPage() {
 
   const [campaign, setCampaign] = useState<Campaign | undefined>(undefined);
   const [loaded, setLoaded] = useState(false);
-  const [tab, setTab] = useState<Tab>("Overview");
+  const [tab, setTab] = useState<Tab>("Activity");
 
   useEffect(() => {
     let active = true;
@@ -108,12 +102,6 @@ export default function CampaignDetailPage() {
   return (
     <Shell>
       {/* Header */}
-      <div className="mb-3">
-        <ButtonLink href="/dashboard" variant="ghost" size="sm">
-          ← Home
-        </ButtonLink>
-      </div>
-
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
@@ -140,29 +128,6 @@ export default function CampaignDetailPage() {
         <p className="mt-1 text-base font-medium text-slate-800">
           {campaign.nextAction}
         </p>
-      </div>
-
-      {/* Deep-dive modules (sub-routes) */}
-      <div className="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {[
-          { href: `/campaigns/${id}/intelligence`, label: "Company Intel", icon: Building2 },
-          { href: `/campaigns/${id}/graph`, label: "Opportunity Graph", icon: Network },
-          { href: `/campaigns/${id}/application`, label: "Resume Studio", icon: FileText },
-          { href: `/campaigns/${id}/outreach`, label: "Outreach", icon: Send },
-          { href: `/campaigns/${id}/interview`, label: "Interview Prep", icon: MessagesSquare },
-        ].map((m) => {
-          const Icon = m.icon;
-          return (
-            <Link
-              key={m.href}
-              href={m.href}
-              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 shadow-card transition-colors hover:border-brand-300 hover:bg-brand-50/60"
-            >
-              <Icon className="h-4 w-4 shrink-0 text-brand-600" />
-              {m.label}
-            </Link>
-          );
-        })}
       </div>
 
       {/* Tab bar */}
@@ -195,7 +160,7 @@ export default function CampaignDetailPage() {
 
       {/* Tab content */}
       <div className="mt-6">
-        {tab === "Overview" && (
+        {tab === "Activity" && (
           <div className="space-y-6">
             <Card>
               <CardHeader

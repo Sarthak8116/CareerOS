@@ -81,7 +81,7 @@ export default function JobsPage() {
       {/* Live mode entry point */}
       <a
         href="/jobs/live"
-        className="mt-6 flex items-center justify-between gap-3 rounded-2xl border border-brand-200 bg-brand-50/50 p-4 transition-colors hover:bg-brand-50"
+        className="card-accent mt-6 flex items-center justify-between gap-3 p-4 transition hover:-translate-y-0.5"
       >
         <div>
           <p className="text-sm font-semibold text-brand-900">
@@ -92,7 +92,7 @@ export default function JobsPage() {
             your real profile. Requires an NVIDIA API key.
           </p>
         </div>
-        <Pill className="shrink-0 bg-brand-600 text-white ring-brand-700/20">Live</Pill>
+        <Pill className="brand-gradient shrink-0 text-white ring-white/20">Live</Pill>
       </a>
 
       {/* Section A, sample role */}

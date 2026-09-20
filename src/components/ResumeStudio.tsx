@@ -13,7 +13,7 @@ import {
   type CoverageState,
   type RequirementCoverage,
 } from "@/lib/engine/keywords";
-import { Card, CardHeader, Button, Pill, SectionTitle } from "@/components/ui/primitives";
+import { Card, Button, Pill, SectionTitle } from "@/components/ui/primitives";
 import { ConfidencePill, LevelPill } from "@/components/pills";
 import { cn } from "@/lib/utils";
 

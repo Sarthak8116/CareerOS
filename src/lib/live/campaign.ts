@@ -124,18 +124,29 @@ export async function buildLiveCampaign(input: {
   });
 
   // 2) Parse the job posting into structured requirements.
-  const parsedJob = await parseStructured({
-    schema: LiveJob,
+  // The model is NOT asked to echo the description back. Re-emitting several
+  // kilobytes of posting text made this call run past the request timeout on
+  // a real Amazon posting, and the user's own pasted text is the more faithful
+  // description anyway. The model returns the structure; we attach the text.
+  const jobStructure = await parseStructured({
+    schema: LiveJob.omit({ description: true }),
     schemaName: "job",
     model: "lightning",
+    // Lightning is the fast model: if it has not answered in 45s it is stuck
+    // behind NVIDIA's queue, and SUPER parses the posting instead.
+    timeoutMs: 45_000,
+    fallbackModel: "super",
+    maxTokens: 6000,
     system:
       "You parse a job posting into structured fields and a requirements list. " +
       "Classify each requirement as minimum, preferred, or responsibility, and give each a short id like 'req_c'. " +
+      "Keep each requirement to one sentence, copied or lightly trimmed from the posting. " +
       "Separate explicit facts from inference; do not invent salary, deadline, or sponsorship if absent. " +
       HONESTY,
     task: "Parse this job posting into structured job intelligence.",
     untrusted: [{ label: "job_posting", text: job }],
   });
+  const parsedJob = { ...jobStructure, description: job.slice(0, 4000) };
 
   const candidateId = slugId("cand", candidate.name || "candidate");
   const jobId = slugId("job", `${parsedJob.company}:${parsedJob.title}`);

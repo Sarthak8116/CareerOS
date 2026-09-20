@@ -60,6 +60,24 @@ function hasPngSignature(dataUrl: string): boolean {
 }
 
 /** POST /api/campaign, build a real campaign from a résumé + job posting. */
+/**
+ * A live run is five model calls, each with its own timeout and retries. When
+ * NVIDIA's shared endpoints are congested those can stack into a request that
+ * never answers (one test run hung for 19 minutes). The user gets a clear
+ * answer inside a fixed budget instead.
+ */
+const OVERALL_BUDGET_MS = 270_000;
+
+class BudgetExceeded extends Error {}
+
+function withDeadline<T>(work: Promise<T>): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const deadline = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new BudgetExceeded()), OVERALL_BUDGET_MS);
+  });
+  return Promise.race([work, deadline]).finally(() => clearTimeout(timer));
+}
+
 export async function POST(req: Request) {
   if (!liveModeAvailable()) {
     return NextResponse.json(
@@ -134,7 +152,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const result = await buildLiveCampaign({
+    const result = await withDeadline(buildLiveCampaign({
       resume: {
         pages: resume.pages.map((page) => page.dataUrl),
         totalPages: resume.totalPages,
@@ -145,19 +163,32 @@ export async function POST(req: Request) {
       jobText: jobText.slice(0, MAX_CHARS),
       // Deterministic-friendly stamp passed from the server clock.
       createdAt: new Date().toISOString(),
-    });
+    }));
     return NextResponse.json(result);
   } catch (err) {
+    if (err instanceof BudgetExceeded) {
+      return NextResponse.json(
+        {
+          error:
+            "NVIDIA's models are taking too long right now, which usually means their shared servers are busy. Nothing was saved. Try again in a few minutes.",
+        },
+        { status: 504 },
+      );
+    }
     const message =
       err instanceof Error ? err.message : "Live analysis failed unexpectedly.";
     // Don't leak internals (or a key); return a concise, user-safe message.
     const safe = /api key|401|403|authentication/i.test(message)
       ? "Authentication failed, check your NVIDIA API key."
-      : /rate|429/i.test(message)
+      : /\b429\b|rate.?limit/i.test(message)
         ? "Rate limited by the model API, try again shortly."
         : /could not read/i.test(message)
           ? "CareerOS could not read that résumé. Try re-exporting the PDF and uploading it again."
           : "Live analysis failed. The model may have returned an unexpected result; try again.";
-    return NextResponse.json({ error: safe }, { status: 502 });
+    // In development only, include the (already key-scrubbed) cause so a
+    // failing live run can be diagnosed. Production responses stay generic.
+    const detail =
+      process.env.NODE_ENV !== "production" ? { detail: message.slice(0, 1200) } : {};
+    return NextResponse.json({ error: safe, ...detail }, { status: 502 });
   }
 }

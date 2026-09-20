@@ -308,8 +308,9 @@ export function CampaignCard({ campaign }: { campaign: Campaign }) {
   return (
     <Link
       href={`/campaigns/${campaign.id}`}
-      className="group block rounded-2xl border border-slate-200 bg-white p-5 shadow-card transition-shadow hover:shadow-lift"
+      className="group relative block overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-card transition hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-lift"
     >
+      <span aria-hidden className="brand-gradient absolute inset-x-0 top-0 h-1 opacity-0 transition-opacity group-hover:opacity-100" />
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-base font-semibold text-slate-900">{campaign.job.title}</p>
@@ -325,8 +326,8 @@ export function CampaignCard({ campaign }: { campaign: Campaign }) {
         <MiniStat label="Network" level={network?.level ?? "none"} />
       </div>
 
-      <div className="mt-4 rounded-xl bg-slate-50 p-3">
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+      <div className="mt-4 rounded-xl bg-gradient-to-r from-brand-50/80 to-violet-50/80 p-3">
+        <p className="text-xs font-medium uppercase tracking-wide text-brand-700/80">
           Strongest next action
         </p>
         <p className="mt-0.5 text-sm font-medium text-slate-700">{campaign.nextAction}</p>

@@ -67,6 +67,8 @@ export async function readPostingWithModel(input: {
     schema: ModelPosting,
     schemaName: "posting",
     model: "lightning",
+    timeoutMs: 45_000,
+    fallbackModel: "super",
     maxTokens: 4000,
     system:
       "You locate a single job posting inside the text of a web page. " +
