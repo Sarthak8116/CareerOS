@@ -5,6 +5,12 @@ import { IntakeError, PASTE_JOB_MESSAGE, intakeSafeMessage } from "@/lib/intake/
 import { adapterFor } from "@/lib/intake/adapters";
 import { asJson, resolveFinalUrl, safeFetch } from "@/lib/intake/fetch";
 import { isShortlink, toUrl } from "@/lib/intake/urls";
+import { liveModeAvailable } from "@/lib/live/nemotron";
+import {
+  MODEL_ADAPTER_KEY,
+  MODEL_ADAPTER_LABEL,
+  readPostingWithModel,
+} from "@/lib/intake/modelFallback";
 
 /**
  * Intake orchestration: the only module that decides WHAT to fetch for a given
@@ -140,6 +146,37 @@ export async function intakeFromUrl(
     });
 
     if (!output.job) {
+      // The site readers found no posting. With NVIDIA keys configured, let
+      // Nemotron read the page text before giving up. Any failure in there —
+      // no keys, a model error, a page that is not a posting — falls through
+      // to the same honest "paste it instead" the user got before.
+      const page = responses.find((r) => r.kind === "posting" && r.text)?.text;
+      if (page && liveModeAvailable()) {
+        try {
+          const viaModel = await readPostingWithModel({
+            html: page,
+            url: url.toString(),
+            fetchedAt,
+          });
+          if (viaModel?.job) {
+            return {
+              ok: true,
+              job: viaModel.job,
+              form: viaModel.form,
+              descriptionFull: viaModel.descriptionFull,
+              fieldOrigins: viaModel.fieldOrigins,
+              adapter: MODEL_ADAPTER_KEY,
+              adapterLabel: MODEL_ADAPTER_LABEL,
+              fetchedAt,
+              assumptions: viaModel.assumptions,
+              warnings: viaModel.warnings,
+            };
+          }
+          if (viaModel?.partial) output.partial ??= viaModel.partial;
+        } catch {
+          // Deliberately silent: the fallback below already tells the truth.
+        }
+      }
       return {
         ok: false,
         reason: "unreadable",
