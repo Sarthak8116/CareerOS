@@ -115,7 +115,11 @@ export default function OutreachPage() {
             body="The network agent hasn't surfaced any people for this role, so there's nothing to draft."
           />
         ) : (
-          <OutreachComposer messages={messages} people={campaign.people} />
+          <OutreachComposer
+            messages={messages}
+            people={campaign.people}
+            isDemo={campaign.isDemo}
+          />
         )}
       </div>
     </Shell>

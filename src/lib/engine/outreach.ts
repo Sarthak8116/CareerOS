@@ -78,12 +78,42 @@ function resolveEvidence(
     })[0];
 }
 
+/** One sentence of self-introduction, from the candidate's own profile only. */
+function introFor(candidate: Candidate): string {
+  const headline = candidate.headline.trim();
+  if (headline) return `I'm ${firstNameOf(candidate.name)} — ${headline.replace(/\.$/, "")}.`;
+  const degree = candidate.degree.trim();
+  const university = candidate.university.trim();
+  if (degree && university) {
+    return `I'm ${firstNameOf(candidate.name)}; I studied ${degree} at ${university}.`;
+  }
+  return `I'm ${firstNameOf(candidate.name)}.`;
+}
+
+/**
+ * When none of the job-keyed skills resolve, fall back to the strongest thing
+ * the candidate actually recorded — never to a description of a background.
+ */
+function strongestEvidence(
+  candidate: Candidate,
+): Candidate["evidence"][number] | undefined {
+  return [...candidate.evidence]
+    .filter((item) => item.trust !== "weak-inference" && item.trust !== "unknown")
+    .sort((left, right) => {
+      if (left.publicProof !== right.publicProof) return left.publicProof ? -1 : 1;
+      return LEVEL_RANK[right.strength] - LEVEL_RANK[left.strength];
+    })[0];
+}
+
 function resolveContext(candidate: Candidate, job: Job, person: Person): {
   ctx: OutreachContext;
   evidence: ResolvedOutreachEvidence;
 } {
   const evidence: ResolvedOutreachEvidence = {
-    project: resolveEvidence(candidate, "systems_debug", "project"),
+    // The draft and its `evidenceUsed` list read the same slot, so they agree.
+    project:
+      resolveEvidence(candidate, "systems_debug", "project") ??
+      strongestEvidence(candidate),
     c: resolveEvidence(candidate, "c_cpp", "skill"),
     os: resolveEvidence(candidate, "os_arch", "education"),
   };
@@ -96,9 +126,15 @@ function resolveContext(candidate: Candidate, job: Job, person: Person): {
     jobTitle: job.title,
     company: job.company,
     team: job.team,
-    projectClaim: evidence.project?.claim ?? "a project from my background",
-    cClaim: evidence.c?.claim ?? "my recorded systems background",
-    osClaim: evidence.os?.claim ?? "my recorded coursework",
+    intro: introFor(candidate),
+    projectClaim: evidence.project?.claim,
+    supportingClaims: [
+      ...new Set(
+        [evidence.c, evidence.os]
+          .filter((item): item is Candidate["evidence"][number] => Boolean(item))
+          .map((item) => item.claim),
+      ),
+    ],
     workAuth: candidate.workAuthorization,
   };
   return { ctx, evidence };

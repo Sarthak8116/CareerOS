@@ -256,12 +256,17 @@ These are **planned scope, not frozen contracts.** Freeze each one before writin
 
 ## 7. Known open items
 
+> Updated after P4–P7: style memory, project booster, Connections.csv matching (browser-side),
+> persona-neutral outreach, Gmail hand-off (opens the user's own compose window — never sends), and
+> requirement-driven interview prep are all committed. `types.ts` is now a barrel over
+> `types/core → campaign → features`. No source file exceeds 500 lines. Still open: the items below,
+> plus **no live `buildLiveCampaign()` run has happened** and the pdf.js worker has never been watched
+> running in a real browser.
+
 None of these block P3.
 
 | Item | Detail |
 |---|---|
-| `src/lib/types.ts` is **952 lines** | CLAUDE.md caps files at 500. Split by domain. `OutreachComposer.tsx` is 612. |
-| `GET /api/campaign` leaks model IDs | Returns full Nemotron model IDs unauthenticated. Minor info disclosure. |
 | ~13 files still use `demoCandidate` | Where they should call `getProfile()`. **Audit these against P0's bug class** — each one is a potential "confident output about the wrong person". |
 | Stale doc comment | `src/lib/package/guards.test.ts:13`. |
 | Unmeasured | Live cover-letter unsupported-claim rate. NANO reasoning suppression during plain-text transcription. |

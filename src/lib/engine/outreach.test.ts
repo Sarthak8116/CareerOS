@@ -118,3 +118,39 @@ describe("generateAllOutreach", () => {
     }
   });
 });
+
+describe("outreach copy is about THIS user, not the demo persona", () => {
+  it("never writes the demo biography into another candidate's draft", async () => {
+    const { generateOutreach } = await import("@/lib/engine/outreach");
+    const { demoCandidate } = await import("@/lib/demo/candidate");
+    const { demoJob } = await import("@/lib/demo/job");
+    const { demoPeople } = await import("@/lib/demo/people");
+    const designer = {
+      ...demoCandidate,
+      name: "Rosalind Ashgrove",
+      headline: "Product designer focused on accessibility",
+      university: "Rhode Island School of Design",
+      degree: "BFA Graphic Design",
+      evidence: [
+        {
+          id: "ev_d1",
+          claim: "Redesigned a checkout flow used by a regional grocery chain",
+          category: "project" as const,
+          sourceType: "resume" as const,
+          sourceReference: "resume",
+          strength: "strong" as const,
+          recency: "current" as const,
+          publicProof: false,
+          trust: "user-provided" as const,
+        },
+      ],
+    };
+    for (const person of demoPeople) {
+      const message = generateOutreach({ candidate: designer, job: demoJob, person });
+      const text = `${message.subject}\n${message.full}\n${message.concise}`;
+      expect(text).not.toMatch(/CS senior|UIUC|low-level|systems track|systems internship|2026/i);
+      expect(text).not.toMatch(/my recorded/i);
+      expect(message.evidenceUsed.every((claim) => claim === designer.evidence[0].claim)).toBe(true);
+    }
+  });
+});

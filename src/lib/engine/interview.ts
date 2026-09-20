@@ -6,6 +6,7 @@ import type {
 } from "@/lib/types";
 import { demoInterviewQuestions } from "@/lib/demo/interview";
 import { LEVEL_RANK, matchSkill } from "@/lib/engine/skills";
+import { computeRequirementCoverage } from "@/lib/engine/keywords";
 
 /**
  * Interview Preparation engine (build directive §5.19).
@@ -44,17 +45,110 @@ export function getInterviewQuestions(
 ): InterviewQuestion[] {
   const knownEvidenceIds = new Set(candidate.evidence.map((e) => e.id));
 
-  const questions = demoInterviewQuestions.map((q) => ({
-    ...q,
-    prompt: personalize(q.prompt, job),
-    // Keep only evidence references the candidate actually has; missing
-    // evidence stays missing rather than being borrowed from the demo.
-    evidenceToUse: retainKnownEvidence(q.evidenceToUse, knownEvidenceIds),
-  }));
+  // The curated bank is written ABOUT the demo candidate: its answer hints say
+  // "CS undergrad", "name the cache simulator". Swapping the company name does
+  // not make that anyone else's biography, so nobody else is served it.
+  const questions = usesDemoBank(candidate)
+    ? demoInterviewQuestions.map((q) => ({
+        ...q,
+        prompt: personalize(q.prompt, job),
+        evidenceToUse: retainKnownEvidence(q.evidenceToUse, knownEvidenceIds),
+      }))
+    : [...openingQuestions(candidate, job), ...requirementQuestions(candidate, job)];
 
   const candidateQuestions = candidateGroundedQuestions(candidate, job);
   const grounded = groundedCompanyQuestions(job, companyContext);
   return [...questions, ...candidateQuestions, ...grounded];
+}
+
+/** The bank's evidence ids are the demo candidate's; owning them is the test. */
+function usesDemoBank(candidate: Candidate): boolean {
+  const ids = new Set(candidate.evidence.map((e) => e.id));
+  const referenced = demoInterviewQuestions.flatMap((q) =>
+    q.evidenceToUse.map((ref) => ref.split("—")[0].trim()),
+  );
+  return referenced.length > 0 && referenced.every((id) => ids.has(id));
+}
+
+const cite = (evidence: Candidate["evidence"][number]) =>
+  `${evidence.id} — ${evidence.claim}`;
+
+/** Recruiter-screen and behavioral openers with hints that assume no biography. */
+function openingQuestions(candidate: Candidate, job: Job): InterviewQuestion[] {
+  const strongest = [...candidate.evidence]
+    .sort((a, b) => LEVEL_RANK[b.strength] - LEVEL_RANK[a.strength])
+    .slice(0, 2)
+    .map(cite);
+  return [
+    {
+      id: "q_open_walkthrough",
+      category: "recruiter-screen",
+      prompt: `Walk me through your background in two minutes, and tell me why the ${job.title} role at ${job.company}.`,
+      difficulty: "easy",
+      answerHints: [
+        "Open with one line on who you are and what you do best.",
+        "Name the one or two pieces of work most relevant to this role.",
+        "Connect your motivation to something specific in the posting.",
+        "Keep it under two minutes and end on why this role.",
+      ],
+      evidenceToUse: strongest,
+    },
+    {
+      id: "q_open_hardest_problem",
+      category: "behavioral",
+      prompt: "Tell me about the hardest problem you have worked through. How did you approach it?",
+      difficulty: "medium",
+      answerHints: [
+        "Use STAR: situation, task, action, result.",
+        "Pick one concrete problem from work you have actually recorded.",
+        "Describe how you narrowed it down and confirmed the cause.",
+        "Close with the outcome, how you verified it, and what you learned.",
+      ],
+      evidenceToUse: strongest,
+    },
+  ];
+}
+
+const MAX_REQUIREMENT_QUESTIONS = 4;
+
+/**
+ * Questions drawn from what THIS posting asks for, each paired with the
+ * candidate's own evidence for it. Requirements they cover come first — those
+ * are the ones an interviewer will probe — and an uncovered requirement is
+ * asked honestly rather than skipped.
+ */
+function requirementQuestions(candidate: Candidate, job: Job): InterviewQuestion[] {
+  const rank = { covered: 0, "partially-covered": 1, missing: 2 } as const;
+  return computeRequirementCoverage(candidate, job)
+    .filter((row) => row.kind !== "responsibility")
+    .sort((a, b) => rank[a.state] - rank[b.state])
+    .slice(0, MAX_REQUIREMENT_QUESTIONS)
+    .map((row) => {
+      const evidence = candidate.evidence.filter((e) =>
+        row.supportingEvidenceIds.includes(e.id),
+      );
+      const covered = evidence.length > 0;
+      return {
+        id: `q_req_${row.requirementId}`,
+        category: "role-specific" as const,
+        prompt: covered
+          ? `This role asks for: "${row.requirement}" Tell me about a time you did exactly that.`
+          : `This role asks for: "${row.requirement}" Where are you on that today?`,
+        difficulty: row.kind === "minimum" ? ("hard" as const) : ("medium" as const),
+        answerHints: covered
+          ? [
+              "Anchor the answer in the specific work listed below, not in general claims.",
+              "Say what you did yourself, and what the result was.",
+              "Be ready for a follow-up on how you verified it.",
+            ]
+          : [
+              "Say plainly that you have not recorded evidence for this yet.",
+              "Name the closest thing you have done, without stretching it.",
+              "Give a concrete plan for closing the gap.",
+            ],
+        evidenceToUse: evidence.map(cite),
+      };
+    });
 }
 
 const MAX_CANDIDATE_QUESTIONS = 3;
