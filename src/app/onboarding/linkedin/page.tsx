@@ -17,7 +17,15 @@ import { Button, ButtonLink, Card, Pill } from "@/components/ui/primitives";
 import { demoCandidate } from "@/lib/demo/candidate";
 import type { Evidence } from "@/lib/types";
 import { isLinkedInProfileUrl } from "@/lib/harvest/urls";
-import { addEvidence, fillProfileFields } from "@/lib/profileStore";
+import {
+  addEvidence,
+  fillProfileFields,
+  saveLinkedInConnections,
+} from "@/lib/profileStore";
+import {
+  ConnectionsCsvError,
+  parseConnectionsCsv,
+} from "@/lib/linkedin/connections";
 
 /**
  * Onboarding · Import LinkedIn.
@@ -83,6 +91,10 @@ export default function ImportLinkedin() {
   const [liveEvidence, setLiveEvidence] = useState<Evidence[]>([]);
   /** What actually persisted — reported honestly, not as "imported everything". */
   const [saved, setSaved] = useState<{ added: number; updated: number } | null>(null);
+  const [connectionImport, setConnectionImport] = useState<{
+    count: number;
+    error?: string;
+  } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -133,6 +145,24 @@ export default function ImportLinkedin() {
       setError("Could not reach the import service.");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function importConnections(file: File | undefined) {
+    if (!file) return;
+    setConnectionImport(null);
+    try {
+      const connections = parseConnectionsCsv(await file.text());
+      saveLinkedInConnections(connections);
+      setConnectionImport({ count: connections.length });
+    } catch (err) {
+      setConnectionImport({
+        count: 0,
+        error:
+          err instanceof ConnectionsCsvError
+            ? err.message
+            : "Could not read that connections export.",
+      });
     }
   }
 
@@ -250,11 +280,38 @@ export default function ImportLinkedin() {
           })}
         </div>
 
-        {method && method !== "sample" && method !== "live" && (
+        {method === "upload" && (
+          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+            <label htmlFor="connections-csv" className="block text-sm font-medium text-slate-800">
+              Upload LinkedIn Connections.csv
+            </label>
+            <p className="mt-1 text-sm text-slate-500">
+              CareerOS uses only this file to identify confirmed first-degree
+              connections. It never reads private messages or logs into LinkedIn.
+            </p>
+            <input
+              id="connections-csv"
+              type="file"
+              accept=".csv,text/csv"
+              onChange={(event) => void importConnections(event.target.files?.[0])}
+              className="mt-3 block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-brand-700 hover:file:bg-brand-100"
+            />
+            {connectionImport?.count ? (
+              <p className="mt-2 text-sm text-emerald-700">
+                Saved {connectionImport.count} connections to your profile.
+              </p>
+            ) : null}
+            {connectionImport?.error && (
+              <p className="mt-2 text-sm text-red-600">{connectionImport.error}</p>
+            )}
+          </div>
+        )}
+
+        {method === "paste" && (
           <p className="mt-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/60 p-4 text-sm text-slate-500">
-            This method is not wired up in the demo. Choose{" "}
-            <span className="font-medium text-slate-700">Use sample profile</span>{" "}
-            to continue.
+            Paste import is not connected to a provider yet. Use the LinkedIn
+            Connections.csv upload for relationship matching, or choose{" "}
+            <span className="font-medium text-slate-700">Use sample profile</span>.
           </p>
         )}
 

@@ -5,6 +5,7 @@ export interface ProjectProposal {
   goal: string;
   deliverable: string;
   milestones: string[];
+  prompt: string;
   honestyNote: string;
 }
 
@@ -27,6 +28,13 @@ export function proposeProject(gap: Gap): ProjectProposal | undefined {
         "Add the CUDA kernels and compare correctness against the reference.",
         "Publish the code, test results, and one reproducible benchmark.",
       ],
+      prompt:
+        "Build a small, honest CUDA portfolio project: implement a CPU reference " +
+        "version, a CUDA vector-add kernel, and a tiled matrix-multiply kernel. " +
+        "Add correctness checks against the CPU implementation, explain the " +
+        "thread/block and memory-access choices in a README, and include one " +
+        "reproducible benchmark. Do not claim performance improvements you did " +
+        "not measure.",
       honestyNote:
         "This is a proposed project, not evidence that CUDA work is already complete.",
     };
@@ -37,12 +45,17 @@ export function proposeProject(gap: Gap): ProjectProposal | undefined {
     goal: "Build one narrow artifact that directly exercises this requirement.",
     deliverable:
       "A public repository with a runnable example, a README explaining the design, and one reproducible result.",
-    milestones: [
-      "Choose the smallest testable scope that answers the requirement.",
-      "Implement the example with a repeatable validation step.",
-      "Publish the artifact and document what it proves and what it does not.",
-    ],
-    honestyNote:
+      milestones: [
+        "Choose the smallest testable scope that answers the requirement.",
+        "Implement the example with a repeatable validation step.",
+        "Publish the artifact and document what it proves and what it does not.",
+      ],
+      prompt:
+        `Build a small portfolio project that directly exercises this requirement: "${gap.requirement}". ` +
+        "Keep the scope to a few days, include a runnable example, add a " +
+        "repeatable validation step, and write a README that separates measured " +
+        "results from future work. Do not invent experience or metrics.",
+      honestyNote:
       "This is a proposed project, not evidence that the requirement is already satisfied.",
   };
 }

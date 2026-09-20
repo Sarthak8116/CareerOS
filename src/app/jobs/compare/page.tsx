@@ -3,17 +3,18 @@
 import { Shell } from "@/components/Shell";
 import { JobCompare } from "@/components/JobCompare";
 import { compareJobs } from "@/lib/engine/compare";
-import { demoCandidate } from "@/lib/demo/candidate";
+import { getProfile } from "@/lib/profileStore";
 import { demoJobsPool } from "@/lib/demo/jobsPool";
 
 /**
- * Job Comparison view (§5.4). Compares the demo candidate against a pool of
+ * Job Comparison view (§5.4). Compares the active candidate against a pool of
  * cached sample roles across categorical dimensions — deterministic, no live
  * calls, no invented numbers. The comparison is computed at render time from
  * the same fit engine used everywhere else.
  */
 export default function JobComparePage() {
-  const comparisons = compareJobs(demoCandidate, demoJobsPool);
+  const candidate = getProfile();
+  const comparisons = compareJobs(candidate, demoJobsPool);
 
   return (
     <Shell>
@@ -23,10 +24,10 @@ export default function JobComparePage() {
             Job comparison
           </p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
-            How these roles stack up for {demoCandidate.name}
+            How these roles stack up for {candidate.name}
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-500">
-            {demoCandidate.headline}. Each role below is scored against the same
+            {candidate.headline}. Each role below is scored against the same
             evidence graph across categorical dimensions — hard requirements,
             location, sponsorship, learning upside and more. Conclusions are
             labels, never invented scores; where a fact is unknown it is marked

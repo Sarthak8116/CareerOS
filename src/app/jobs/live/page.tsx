@@ -11,8 +11,10 @@ import {
   FileText,
   X,
 } from "lucide-react";
-import type { Campaign } from "@/lib/types";
+import { Candidate as CandidateSchema, type Campaign } from "@/lib/types";
 import { saveCampaign } from "@/lib/store";
+import { getProfile, saveProfile } from "@/lib/profileStore";
+import { applyKnownConnections } from "@/lib/linkedin/match";
 import { Shell } from "@/components/Shell";
 import { Button, Card, CardHeader, Pill } from "@/components/ui/primitives";
 import {
@@ -25,9 +27,9 @@ import {
 export default function LiveJobPage() {
   const router = useRouter();
   const [live, setLive] = useState<boolean | null>(null);
-  const [model, setModel] = useState<string>("");
   const [resume, setResume] = useState<RasterizedResume | null>(null);
   const [resumeName, setResumeName] = useState("");
+  const [resumeError, setResumeError] = useState<string | null>(null);
   const [reading, setReading] = useState(false);
   const [jobText, setJobText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -46,26 +48,37 @@ export default function LiveJobPage() {
     const file = e.target.files?.[0];
     e.target.value = ""; // allow re-selecting the same file
     if (!file) return;
-    if (file.type !== "application/pdf") {
-      setError("Please upload a PDF file.");
+    // Some browsers and downloaded files report an empty or generic MIME type
+    // even when the file is a PDF. pdf.js performs the authoritative signature
+    // check below, so use the extension as the client-side picker guard too.
+    const isPdf =
+      file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      setError(null);
+      setResumeName(file.name);
+      setResume(null);
+      setResumeError("Please upload a PDF file.");
       return;
     }
     if (file.size > 8 * 1024 * 1024) {
-      setError("That PDF is too large (max 8 MB).");
+      setError(null);
+      setResumeName(file.name);
+      setResume(null);
+      setResumeError("That PDF is too large (max 8 MB).");
       return;
     }
 
     setError(null);
+    setResumeError(null);
     setResume(null);
     setResumeName(file.name);
     setReading(true);
     try {
       setResume(await rasterizeResumePdf(file));
     } catch (err) {
-      setResumeName("");
       // ResumeRasterizeError messages are written for the user and say what to
       // do next. Anything else is a bug, and is not dressed up as a result.
-      setError(
+      setResumeError(
         err instanceof ResumeRasterizeError
           ? err.message
           : "Could not read that PDF. Try re-exporting it and uploading again.",
@@ -78,6 +91,7 @@ export default function LiveJobPage() {
   function clearResume() {
     setResume(null);
     setResumeName("");
+    setResumeError(null);
   }
 
   useEffect(() => {
@@ -87,7 +101,6 @@ export default function LiveJobPage() {
       .then((d) => {
         if (!active) return;
         setLive(!!d.live);
-        setModel(d.model ?? "");
       })
       .catch(() => active && setLive(false));
     return () => {
@@ -120,7 +133,25 @@ export default function LiveJobPage() {
         setBusy(false);
         return;
       }
-      const campaign = data.campaign as Campaign;
+      const received = data.campaign as Campaign;
+      const candidate = CandidateSchema.safeParse(data.candidate);
+      if (!candidate.success) {
+        throw new Error("Live analysis returned an invalid candidate profile.");
+      }
+      const existingProfile = getProfile();
+      saveProfile({
+        ...candidate.data,
+        linkedinConnections: existingProfile.linkedinConnections,
+      });
+      // The Connections.csv export never leaves this browser, so the match
+      // against it happens here rather than on the server.
+      const campaign: Campaign = {
+        ...received,
+        people: applyKnownConnections(
+          received.people,
+          existingProfile.linkedinConnections,
+        ),
+      };
       saveCampaign(campaign);
       router.push(`/campaigns/${campaign.id}`);
     } catch {
@@ -168,10 +199,10 @@ export default function LiveJobPage() {
           </div>
         </div>
       )}
-      {live && model && (
+      {live && (
         <p className="mt-4 inline-flex items-center gap-1.5 text-xs text-slate-400">
           <span className="h-2 w-2 rounded-full bg-emerald-500" />
-          Live mode ready · model {model}
+          Live mode ready
         </p>
       )}
 
@@ -232,11 +263,17 @@ export default function LiveJobPage() {
                 </div>
                 <input
                   type="file"
-                  accept="application/pdf"
+                  accept=".pdf,application/pdf"
                   onChange={onResumeFile}
                   className="sr-only"
                 />
               </label>
+            )}
+            {resumeError && (
+              <div role="alert" className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+                <p className="font-medium">Could not load {resumeName || "that file"}</p>
+                <p className="mt-1 text-xs text-rose-700">{resumeError}</p>
+              </div>
             )}
           </Card>
           <Card>

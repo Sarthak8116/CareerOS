@@ -70,6 +70,16 @@ export const Evidence = z.object({
 });
 export type Evidence = z.infer<typeof Evidence>;
 
+/** A first-degree LinkedIn relationship supplied by the user's own export. */
+export const LinkedInConnection = z.object({
+  name: z.string(),
+  profileUrl: z.string().optional(),
+  company: z.string().optional(),
+  position: z.string().optional(),
+  connectedOn: z.string().optional(),
+});
+export type LinkedInConnection = z.infer<typeof LinkedInConnection>;
+
 export const Candidate = z.object({
   id: z.string(),
   name: z.string(),
@@ -88,6 +98,8 @@ export const Candidate = z.object({
     portfolio: z.string().optional(),
   }),
   evidence: z.array(Evidence),
+  /** Populated only from the user's own LinkedIn Connections.csv export. */
+  linkedinConnections: z.array(LinkedInConnection).optional(),
 });
 export type Candidate = z.infer<typeof Candidate>;
 

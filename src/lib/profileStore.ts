@@ -1,6 +1,11 @@
 "use client";
 
-import type { Candidate, Evidence, EvidenceSource } from "@/lib/types";
+import type {
+  Candidate,
+  Evidence,
+  EvidenceSource,
+  LinkedInConnection,
+} from "@/lib/types";
 import { Candidate as CandidateSchema, Evidence as EvidenceSchema } from "@/lib/types";
 import { demoCandidate } from "@/lib/demo/candidate";
 import { resetStyleMemory } from "@/lib/styleMemory";
@@ -217,6 +222,29 @@ export function fillProfileFields(
   };
 
   return saveProfile(next);
+}
+
+/** Persist the editable preference fields from the demo onboarding flow. */
+export function updateProfilePreferences(fields: {
+  targetRoles: string[];
+  targetIndustries: string[];
+  location: string;
+  workAuthorization: string;
+}): Candidate {
+  const current = getProfile();
+  return saveProfile({
+    ...current,
+    targetRoles: fields.targetRoles,
+    targetIndustries: fields.targetIndustries,
+    location: fields.location,
+    workAuthorization: fields.workAuthorization,
+  });
+}
+
+/** Replace the user's own exported first-degree connection list. */
+export function saveLinkedInConnections(connections: LinkedInConnection[]): Candidate {
+  const current = getProfile();
+  return saveProfile({ ...current, linkedinConnections: connections });
 }
 
 /** Wipe the stored profile and fall back to the demo candidate. */

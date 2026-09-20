@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   Network,
@@ -12,15 +14,14 @@ import {
 import { Shell } from "@/components/Shell";
 import { Card, Pill, SectionTitle } from "@/components/ui/primitives";
 import { LevelPill } from "@/components/pills";
-import { demoCandidate } from "@/lib/demo/candidate";
+import { getProfile } from "@/lib/profileStore";
 import type { Evidence, Level } from "@/lib/types";
 
 /**
  * §13 — /profile — Career Workspace overview.
  *
- * Server Component. Reads the demo candidate directly; no store, no client
- * state. Profile "completeness" is shown CATEGORICALLY (a LevelPill) rather
- * than as an invented percentage (build directive §16).
+ * Profile "completeness" is shown CATEGORICALLY (a LevelPill) rather than as
+ * an invented percentage (build directive §16).
  */
 
 const workspaceAreas = [
@@ -79,7 +80,7 @@ function completenessLevel(evidence: Evidence[]): { level: Level; note: string }
 }
 
 export default function ProfilePage() {
-  const c = demoCandidate;
+  const c = getProfile();
 
   // Count evidence by category, preserving a stable display order.
   const counts = c.evidence.reduce<Partial<Record<Evidence["category"], number>>>(

@@ -1,17 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Sparkles, Check } from "lucide-react";
 import { Button, Pill } from "@/components/ui/primitives";
 import { demoCandidate } from "@/lib/demo/candidate";
+import { getProfile, updateProfilePreferences } from "@/lib/profileStore";
 
 /**
  * Onboarding · Preferences — DEMO MODE.
- * Form is pre-filled from demoCandidate and fully editable, but state is local
- * only — nothing is persisted and nothing is submitted anywhere. "Finish setup"
- * simply routes into the dashboard.
+ * Form is pre-filled from the active profile and persists the edited preference
+ * fields locally. "Finish setup" returns to the dashboard without submitting
+ * anything externally.
  */
 const inputClass =
   "mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-1";
@@ -30,6 +31,14 @@ export default function PreferencesOnboarding() {
   const [workAuthorization, setWorkAuthorization] = useState(
     demoCandidate.workAuthorization,
   );
+
+  useEffect(() => {
+    const profile = getProfile();
+    setTargetRoles(profile.targetRoles.join(", "));
+    setTargetIndustries(profile.targetIndustries.join(", "));
+    setLocation(profile.location);
+    setWorkAuthorization(profile.workAuthorization);
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 px-6 py-12">
@@ -59,8 +68,16 @@ export default function PreferencesOnboarding() {
         <form
           className="card space-y-5 p-6 sm:p-8"
           onSubmit={(e) => {
-            // Demo mock — local state only, nothing persisted.
             e.preventDefault();
+            updateProfilePreferences({
+              targetRoles: targetRoles.split(",").map((value) => value.trim()).filter(Boolean),
+              targetIndustries: targetIndustries
+                .split(",")
+                .map((value) => value.trim())
+                .filter(Boolean),
+              location: location.trim(),
+              workAuthorization: workAuthorization.trim(),
+            });
             router.push("/dashboard");
           }}
         >

@@ -103,7 +103,7 @@ describe("buildLiveCampaign — résumé-truncation provenance", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const { buildLiveCampaign } = await import("@/lib/live/campaign");
-    const campaign = await buildLiveCampaign({
+    const { campaign } = await buildLiveCampaign({
       resume: {
         pages: ["data:image/png;base64," + "A".repeat(40)],
         totalPages: 12,
@@ -160,7 +160,7 @@ describe("buildLiveCampaign — résumé-truncation provenance", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const { buildLiveCampaign } = await import("@/lib/live/campaign");
-    const campaign = await buildLiveCampaign({
+    const { campaign } = await buildLiveCampaign({
       resume: {
         pages: ["data:image/png;base64," + "A".repeat(40)],
         totalPages: 1,

@@ -10,7 +10,7 @@ import path from "node:path";
  *
  *  1. Exactly one module here reaches the network, and it opens with the
  *     `server-only` guard on line 1. If that guard is ever dropped, the
- *     Anthropic key becomes reachable from a client bundle and nothing else
+ *     provider key becomes reachable from a client bundle and nothing else
  *     in the suite notices.
  *  2. Everything else is PURE. A `new Date()` or a `Math.random()` slipped
  *     into the builder would not fail a test — it would just make packages

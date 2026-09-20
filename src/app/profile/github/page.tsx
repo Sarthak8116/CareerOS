@@ -1,16 +1,18 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { GitHubAnalysisView } from "@/components/GitHubAnalysis";
 import { analyzeGitHub } from "@/lib/engine/github";
-import { demoCandidate } from "@/lib/demo/candidate";
+import { getProfile } from "@/lib/profileStore";
 
 /**
- * §5.15 GitHub analysis page (Server Component, DEMO mode).
- * Runs the deterministic engine over the demo candidate — no live API calls.
+ * §5.15 GitHub analysis page.
+ * Runs the deterministic engine over the stored profile — no live API calls.
  */
 export default function GitHubAnalysisPage() {
-  const analysis = analyzeGitHub(demoCandidate);
+  const analysis = analyzeGitHub(getProfile());
 
   return (
     <Shell>

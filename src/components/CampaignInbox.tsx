@@ -13,9 +13,8 @@ import { cn } from "@/lib/utils";
  * follow-up date. Statuses are the §5.20 categorical set.
  *
  * DEMO HONESTY: this app has no live email/LinkedIn connection, so no replies
- * can have been received. Every status here is a DEMO-DERIVED STARTING state
- * (first-priority contact = a prepared draft; everyone else = not yet
- * contacted). Nothing claims a message was sent or answered.
+ * can have been received. Draft and simulated-send statuses are persisted
+ * locally; reply statuses remain unavailable until a real provider exists.
  */
 
 export type InboxStatus =
@@ -185,7 +184,7 @@ export function CampaignInbox({ rows }: { rows: ConversationRow[] }) {
       )}
 
       <p className="text-xs text-slate-400">
-        Demo mode: statuses are the starting state for each conversation. No messages
+        Demo mode: drafts and simulated sends are stored locally. No real messages
         have been sent and no replies have been received.
       </p>
     </div>

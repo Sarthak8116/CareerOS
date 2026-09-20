@@ -1,7 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { Github, Linkedin, Globe, GraduationCap } from "lucide-react";
 import type { Evidence, EvidenceCategory } from "@/lib/types";
-import { demoCandidate } from "@/lib/demo/candidate";
+import { getProfile } from "@/lib/profileStore";
 import { Shell } from "@/components/Shell";
 import { Card, Pill, SectionTitle } from "@/components/ui/primitives";
 import { EvidenceCard } from "@/components/features";
@@ -27,7 +29,7 @@ function groupByCategory(evidence: Evidence[]) {
 }
 
 export default function EvidencePage() {
-  const c = demoCandidate;
+  const c = getProfile();
   const grouped = groupByCategory(c.evidence);
 
   const links: { href: string; label: string; icon: typeof Github }[] = [];

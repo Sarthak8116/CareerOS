@@ -1,6 +1,6 @@
 import "server-only";
 import type { AgentActivity, Campaign, Candidate } from "@/lib/types";
-import { Campaign as CampaignSchema } from "@/lib/types";
+import { Campaign as CampaignSchema, Candidate as CandidateSchema } from "@/lib/types";
 import {
   parseStructured,
   readDocumentPages,
@@ -39,6 +39,11 @@ const HONESTY = [
   "- When you infer rather than know, mark it with the appropriate trust label and lower confidence.",
 ].join("\n");
 
+export interface LiveCampaignResult {
+  campaign: Campaign;
+  candidate: Candidate;
+}
+
 export async function buildLiveCampaign(input: {
   resume: {
     /** The résumé rasterised page-by-page IN THE BROWSER: image data URLs. */
@@ -50,7 +55,7 @@ export async function buildLiveCampaign(input: {
   };
   jobText: string;
   createdAt: string;
-}): Promise<Campaign> {
+}): Promise<LiveCampaignResult> {
   const job = sanitizeUntrusted(input.jobText).clean;
 
   // 1a) Read the résumé pages. nemotron-parse is a document model: it takes
@@ -178,13 +183,16 @@ export async function buildLiveCampaign(input: {
   // 4) OPTIONAL: replace the role-based placeholder network with real, sourced
   //    LinkedIn contacts. Off unless HARVEST_ENABLED=true and APIFY_TOKEN are
   //    set; any failure inside leaves the campaign exactly as assembled above.
+  const candidateWithId = { ...candidate, id: candidateId } as Candidate;
   const enriched = harvestEnabled()
     ? await enrichWithLinkedIn(campaign, {
-        ...candidate,
-        id: candidateId,
-      } as Candidate)
+        ...candidateWithId,
+      })
     : campaign;
 
   // Validate our own assembly before returning it to the client.
-  return CampaignSchema.parse(enriched);
+  return {
+    campaign: CampaignSchema.parse(enriched),
+    candidate: CandidateSchema.parse(candidateWithId),
+  };
 }

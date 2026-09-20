@@ -14,6 +14,7 @@ import { demoJob } from "@/lib/demo/job";
 import { getCampaignProvider } from "@/lib/providers/ai";
 import { sanitizeUntrusted } from "@/lib/security/untrusted";
 import { slugId } from "@/lib/utils";
+import { resetOutreachStates } from "@/lib/outreachStore";
 
 /**
  * Demo-mode persistence (build directive: campaign persists and reloads, §17
@@ -209,6 +210,7 @@ export function jobFromPastedText(title: string, company: string, text: string):
 /** Wipe user data and re-seed the demo (for the reset control / §20 demo toggle). */
 export async function resetToDemo(): Promise<Campaign[]> {
   if (canPersist()) window.localStorage.removeItem(KEY);
+  resetOutreachStates();
   return ensureSeededCampaigns();
 }
 

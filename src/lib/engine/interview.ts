@@ -1,5 +1,11 @@
-import type { Campaign, Candidate, InterviewQuestion, Job } from "@/lib/types";
+import type {
+  Campaign,
+  Candidate,
+  InterviewQuestion,
+  Job,
+} from "@/lib/types";
 import { demoInterviewQuestions } from "@/lib/demo/interview";
+import { LEVEL_RANK, matchSkill } from "@/lib/engine/skills";
 
 /**
  * Interview Preparation engine (build directive §5.19).
@@ -8,8 +14,8 @@ import { demoInterviewQuestions } from "@/lib/demo/interview";
  *
  *  - getInterviewQuestions() returns a category-spanning question set tailored
  *    to the candidate's real evidence and the target job. It reuses the curated
- *    demo bank (systems + GPU) and lightly rewrites company/team references so
- *    the same logic works if the job changes.
+ *    demo bank (systems + GPU), lightly rewrites company/team references, and
+ *    adds candidate-grounded prompts so imported profiles get useful prep too.
  *
  *  - evaluateAnswer() scores a free-text answer with a keyword-coverage
  *    heuristic over the question's answerHints, then assembles a model answer
@@ -21,8 +27,9 @@ import { demoInterviewQuestions } from "@/lib/demo/interview";
 /* ------------------------------------------------------------------ */
 
 /**
- * Return 6–9 interview questions across the §5.19 categories, personalized to
- * the candidate + job. Deterministic: same inputs always yield the same set.
+ * Return a deterministic interview set across the §5.19 categories. The
+ * curated base bank is supplemented with a few prompts from the candidate's
+ * actual projects and the role's first visible skill gap.
  */
 export function getInterviewQuestions(
   candidate: Candidate,
@@ -31,7 +38,7 @@ export function getInterviewQuestions(
    * Optional live company context (the company's own recent LinkedIn posts).
    * When present, the `company-specific` questions are grounded in what the
    * company has actually been talking about, instead of generic prompts.
-   * Absent in demo mode — the function then behaves exactly as before.
+   * Absent in demo mode — no company-specific prompts are added.
    */
   companyContext?: Campaign["harvest"],
 ): InterviewQuestion[] {
@@ -40,13 +47,76 @@ export function getInterviewQuestions(
   const questions = demoInterviewQuestions.map((q) => ({
     ...q,
     prompt: personalize(q.prompt, job),
-    // Keep only evidence references the candidate actually has; fall back to
-    // the original list if filtering would leave the question unsupported.
+    // Keep only evidence references the candidate actually has; missing
+    // evidence stays missing rather than being borrowed from the demo.
     evidenceToUse: retainKnownEvidence(q.evidenceToUse, knownEvidenceIds),
   }));
 
+  const candidateQuestions = candidateGroundedQuestions(candidate, job);
   const grounded = groundedCompanyQuestions(job, companyContext);
-  return grounded.length > 0 ? [...questions, ...grounded] : questions;
+  return [...questions, ...candidateQuestions, ...grounded];
+}
+
+const MAX_CANDIDATE_QUESTIONS = 3;
+
+/**
+ * Add only prompts that can be answered from this candidate's own profile.
+ * This prevents imported profiles from inheriting a demo-only project story
+ * while still making prep useful before a model-backed live campaign exists.
+ */
+function candidateGroundedQuestions(
+  candidate: Candidate,
+  job: Job,
+): InterviewQuestion[] {
+  const questions: InterviewQuestion[] = [];
+  const projects = candidate.evidence.filter((evidence) => evidence.category === "project");
+
+  for (const [index, project] of projects.slice(0, 2).entries()) {
+    questions.push({
+      id: `q_candidate_project_${index + 1}`,
+      category: "project-deep-dive",
+      prompt:
+        `Walk me through this project from your background: "${project.claim}" ` +
+        "What was the hardest trade-off, and what would you improve next?",
+      difficulty: "medium",
+      answerHints: [
+        "State the problem and your specific contribution.",
+        "Explain one technical trade-off or debugging decision.",
+        "Name how you verified the result instead of implying success without proof.",
+        "Close with one concrete next improvement.",
+      ],
+      evidenceToUse: [`${project.id} — ${project.claim}`],
+    });
+  }
+
+  const gapRequirement = job.requirements.find((requirement) => {
+    if (!requirement.skillKey || requirement.kind === "responsibility") return false;
+    return LEVEL_RANK[matchSkill(requirement.skillKey, candidate).level] < 2;
+  });
+
+  if (gapRequirement && questions.length < MAX_CANDIDATE_QUESTIONS) {
+    const match = matchSkill(gapRequirement.skillKey!, candidate);
+    const supportingEvidence = match.supportingEvidenceIds
+      .map((id) => candidate.evidence.find((evidence) => evidence.id === id))
+      .filter((evidence): evidence is Candidate["evidence"][number] => Boolean(evidence));
+
+    questions.push({
+      id: `q_gap_${gapRequirement.id}`,
+      category: "weakness-challenge",
+      prompt:
+        `This role asks for: "${gapRequirement.text}" ` +
+        "What is your honest current level, and how would you close the gap?",
+      difficulty: gapRequirement.kind === "minimum" ? "hard" : "medium",
+      answerHints: [
+        "Acknowledge what you have not yet demonstrated without overclaiming.",
+        "Connect any genuinely transferable evidence to the requirement.",
+        "Give a concrete, time-bounded plan to build or verify the missing skill.",
+      ],
+      evidenceToUse: supportingEvidence.map((evidence) => `${evidence.id} — ${evidence.claim}`),
+    });
+  }
+
+  return questions.slice(0, MAX_CANDIDATE_QUESTIONS);
 }
 
 /** How many post-grounded questions we add. Enough to be useful, not padding. */

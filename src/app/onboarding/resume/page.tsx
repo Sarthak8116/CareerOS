@@ -8,16 +8,22 @@ import {
   FileText,
   Check,
   ArrowRight,
+  Loader2,
+  X,
 } from "lucide-react";
 import { Button, Pill } from "@/components/ui/primitives";
 import { demoCandidate } from "@/lib/demo/candidate";
 import type { Evidence } from "@/lib/types";
+import {
+  rasterizeResumePdf,
+  ResumeRasterizeError,
+  type RasterizedResume,
+} from "@/lib/resume/rasterize";
 
 /**
- * Onboarding · Resume — DEMO MODE.
- * No real file is read or uploaded. "Use sample resume" flips local state to
- * reveal the pre-parsed evidence from demoCandidate, grouped by category, to
- * demonstrate what parsing produces. Fully deterministic, no network.
+ * Onboarding · Resume — browser-local setup.
+ * A selected PDF is rendered locally so the user can see that it was accepted;
+ * "Use sample resume" still reveals the deterministic demo evidence.
  */
 
 const categoryLabels: Record<Evidence["category"], string> = {
@@ -38,6 +44,45 @@ const strengthStyles: Record<Evidence["strength"], string> = {
 
 export default function ResumeOnboarding() {
   const [parsed, setParsed] = useState(false);
+  const [resume, setResume] = useState<RasterizedResume | null>(null);
+  const [resumeName, setResumeName] = useState("");
+  const [resumeError, setResumeError] = useState<string | null>(null);
+  const [reading, setReading] = useState(false);
+
+  async function onResumeFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setResumeName(file.name);
+    setResume(null);
+    setResumeError(null);
+    setParsed(false);
+
+    const isPdf =
+      file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      setResumeError("Please choose a PDF file.");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      setResumeError("That PDF is too large (max 8 MB).");
+      return;
+    }
+
+    setReading(true);
+    try {
+      setResume(await rasterizeResumePdf(file));
+    } catch (err) {
+      setResumeError(
+        err instanceof ResumeRasterizeError
+          ? err.message
+          : "Could not read that PDF. Try re-exporting it and uploading again.",
+      );
+    } finally {
+      setReading(false);
+    }
+  }
 
   // Group demo evidence by category for a tidy parsed view.
   const grouped = demoCandidate.evidence.reduce<
@@ -69,9 +114,50 @@ export default function ResumeOnboarding() {
           </p>
         </div>
 
-        {!parsed ? (
+        {reading ? (
+          <div className="card flex min-h-64 flex-col items-center justify-center gap-3 p-6 text-center">
+            <Loader2 className="h-6 w-6 animate-spin text-brand-600" />
+            <p className="text-sm font-medium text-slate-700">Reading {resumeName}…</p>
+            <p className="text-xs text-slate-400">Rendering its pages locally in your browser</p>
+          </div>
+        ) : resume ? (
+          <div className="space-y-5">
+            <div className="card flex items-center gap-3 border-emerald-200 bg-emerald-50/50 p-4">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                <Check className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-slate-900">Résumé attached</p>
+                <p className="truncate text-sm text-slate-500">{resumeName}</p>
+                <p className="text-xs text-slate-400">
+                  {resume.pages.length} of {resume.totalPages} {resume.totalPages === 1 ? "page" : "pages"} read locally.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setResume(null);
+                  setResumeName("");
+                  setResumeError(null);
+                }}
+                aria-label="Remove résumé"
+                className="shrink-0 text-slate-400 transition-colors hover:text-slate-700"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="text-sm leading-relaxed text-slate-600">
+              The PDF stays in this browser. Use the live job flow when you are ready to analyse it against a real posting.
+            </p>
+            <Link
+              href="/jobs/live"
+              className="inline-flex items-center gap-2 text-sm font-medium text-brand-700 hover:text-brand-800"
+            >
+              Continue to live analysis <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        ) : !parsed ? (
           <div className="card p-6 sm:p-8">
-            {/* Dropzone-styled area (decorative — no real upload) */}
             <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white/60 px-6 py-12 text-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
                 <UploadCloud className="h-6 w-6" />
@@ -80,19 +166,32 @@ export default function ResumeOnboarding() {
                 Drag & drop your resume here
               </p>
               <p className="mt-1 text-sm text-slate-400">
-                PDF or DOCX — or use our sample to see how parsing works.
+                PDF only, up to 8 MB — or use our sample to see how parsing works.
               </p>
-              <div className="mt-5">
+              <div className="mt-5 flex flex-wrap justify-center gap-3">
+                <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-medium text-white transition-colors hover:bg-brand-700">
+                  <UploadCloud className="h-4 w-4" />
+                  Attach PDF
+                  <input
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    onChange={onResumeFile}
+                    className="sr-only"
+                  />
+                </label>
                 <Button onClick={() => setParsed(true)}>
                   <FileText className="h-4 w-4" />
                   Use sample resume
                 </Button>
               </div>
+              {resumeError && (
+                <p role="alert" className="mt-4 text-sm text-rose-600">{resumeError}</p>
+              )}
               <p className="mt-4 flex items-center gap-1.5 text-xs text-slate-400">
                 <Pill className="bg-slate-50 text-slate-500 ring-slate-200">
-                  Demo
+                  Browser only
                 </Pill>
-                No file leaves your browser — parsing is simulated.
+                No PDF is sent during this step.
               </p>
             </div>
           </div>

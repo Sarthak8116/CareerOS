@@ -1,9 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import {
   Github,
   ArrowRight,
   CheckCircle2,
   Circle,
+  Check,
+  Copy,
   Users,
   ArrowUpRight,
 } from "lucide-react";
@@ -16,7 +21,7 @@ import type {
   AgentActivity,
   Level,
 } from "@/lib/types";
-import { Card, Pill } from "@/components/ui/primitives";
+import { Button, Card, Pill } from "@/components/ui/primitives";
 import {
   LevelPill,
   ConfidencePill,
@@ -102,6 +107,18 @@ export function FitDimensionRow({ dimension }: { dimension: FitDimension }) {
 
 export function GapActionCard({ gap }: { gap: Gap }) {
   const project = proposeProject(gap);
+  const [copied, setCopied] = useState(false);
+
+  async function copyPrompt() {
+    if (!project) return;
+    try {
+      await navigator.clipboard.writeText(project.prompt);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopied(false);
+    }
+  }
 
   return (
     <Card className="border-l-4 border-l-brand-500">
@@ -148,6 +165,25 @@ export function GapActionCard({ gap }: { gap: Gap }) {
               <li key={milestone}>{milestone}</li>
             ))}
           </ol>
+          <div className="mt-4 rounded-lg border border-emerald-200 bg-white p-3">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Copy-ready AI build prompt
+              </p>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={copyPrompt}
+                aria-label="Copy project build prompt"
+              >
+                {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? "Copied" : "Copy"}
+              </Button>
+            </div>
+            <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-600">
+              {project.prompt}
+            </p>
+          </div>
           <p className="mt-3 text-xs italic text-slate-500">{project.honestyNote}</p>
         </div>
       )}

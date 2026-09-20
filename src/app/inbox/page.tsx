@@ -10,6 +10,7 @@ import {
 import { getCampaigns } from "@/lib/store";
 import { generateAllOutreach } from "@/lib/engine/outreach";
 import { getProfile } from "@/lib/profileStore";
+import { getOutreachStates, type OutreachStatus } from "@/lib/outreachStore";
 import type { Campaign, Candidate, Person } from "@/lib/types";
 
 /**
@@ -20,7 +21,12 @@ import type { Campaign, Candidate, Person } from "@/lib/types";
  */
 
 /** Demo-derived starting status: the first-priority contact has a prepared draft. */
-function initialStatus(person: Person | undefined): InboxStatus {
+function initialStatus(
+  person: Person | undefined,
+  messageStatus: OutreachStatus | undefined,
+): InboxStatus {
+  if (messageStatus === "sent") return "Sent";
+  if (messageStatus === "draft") return "Draft ready";
   return person?.outreachPriority === "first" ? "Draft ready" : "Not contacted";
 }
 
@@ -44,6 +50,7 @@ function nextActionFor(status: InboxStatus): string {
 
 function buildRows(campaigns: Campaign[], candidate: Candidate): ConversationRow[] {
   const rows: ConversationRow[] = [];
+  const storedStates = getOutreachStates();
   for (const campaign of campaigns) {
     const byId = new Map(campaign.people.map((p) => [p.id, p] as const));
     const messages = generateAllOutreach(
@@ -53,7 +60,7 @@ function buildRows(campaigns: Campaign[], candidate: Candidate): ConversationRow
     );
     for (const msg of messages) {
       const person = byId.get(msg.personId);
-      const status = initialStatus(person);
+      const status = initialStatus(person, storedStates[msg.id]?.status);
       rows.push({
         campaignId: campaign.id,
         campaignTitle: `${campaign.job.title} · ${campaign.job.company}`,

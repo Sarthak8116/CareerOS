@@ -3,8 +3,6 @@ import { z } from "zod";
 import { buildLiveCampaign } from "@/lib/live/campaign";
 import {
   liveModeAvailable,
-  LIVE_MODEL_LABEL,
-  NEMOTRON_MODELS,
 } from "@/lib/live/nemotron";
 
 export const runtime = "nodejs";
@@ -17,11 +15,7 @@ const MAX_TOTAL_BYTES = 6 * 1024 * 1024;
 
 /** GET /api/campaign — is live mode configured? (the intake page checks this) */
 export function GET() {
-  return NextResponse.json({
-    live: liveModeAvailable(),
-    model: LIVE_MODEL_LABEL,
-    models: NEMOTRON_MODELS,
-  });
+  return NextResponse.json({ live: liveModeAvailable() });
 }
 
 /**
@@ -140,7 +134,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const campaign = await buildLiveCampaign({
+    const result = await buildLiveCampaign({
       resume: {
         pages: resume.pages.map((page) => page.dataUrl),
         totalPages: resume.totalPages,
@@ -152,7 +146,7 @@ export async function POST(req: Request) {
       // Deterministic-friendly stamp passed from the server clock.
       createdAt: new Date().toISOString(),
     });
-    return NextResponse.json({ campaign });
+    return NextResponse.json(result);
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Live analysis failed unexpectedly.";

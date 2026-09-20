@@ -20,6 +20,12 @@ import {
 import type { OutreachMessage, Person, UnconfirmedEmail } from "@/lib/types";
 import { Card, Pill, Button, SectionTitle } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
+import {
+  getOutreachStates,
+  saveOutreachState,
+  type OutreachStatus,
+  type StoredOutreachState,
+} from "@/lib/outreachStore";
 
 /**
  * Outreach Studio composer (build directive §5.13, §5.14).
@@ -35,7 +41,7 @@ import { cn } from "@/lib/utils";
  * simulated — no real email leaves the app.
  */
 
-type MessageStatus = "unsent" | "draft" | "sent";
+type MessageStatus = OutreachStatus;
 type Variant = "full" | "concise";
 
 export function OutreachComposer({
@@ -53,6 +59,7 @@ export function OutreachComposer({
   const [selectedId, setSelectedId] = useState<string>(messages[0]?.id ?? "");
   const [variant, setVariant] = useState<Variant>("full");
   const [statuses, setStatuses] = useState<Record<string, MessageStatus>>({});
+  const [drafts, setDrafts] = useState<Record<string, StoredOutreachState>>({});
   // Whether the two-step send confirmation panel is open for the selected message.
   const [confirming, setConfirming] = useState(false);
 
@@ -66,6 +73,12 @@ export function OutreachComposer({
   const [emails, setEmails] = useState<Record<string, UnconfirmedEmail | null>>({});
   const [lookingUp, setLookingUp] = useState<string | null>(null);
   const [lookupError, setLookupError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const stored = getOutreachStates();
+    setStatuses(Object.fromEntries(Object.entries(stored).map(([id, state]) => [id, state.status])));
+    setDrafts(stored);
+  }, [messages]);
 
   useEffect(() => {
     let active = true;
@@ -109,7 +122,10 @@ export function OutreachComposer({
     }
   }
 
-  const selected = messages.find((m) => m.id === selectedId) ?? messages[0];
+  const selectedMessage = messages.find((m) => m.id === selectedId) ?? messages[0];
+  const selected = selectedMessage
+    ? { ...selectedMessage, ...(drafts[selectedMessage.id] ?? {}) }
+    : undefined;
   const selectedPerson = selected ? personById.get(selected.personId) : undefined;
   const status = selected ? statuses[selected.id] ?? "unsent" : "unsent";
 
@@ -197,13 +213,40 @@ export function OutreachComposer({
 
   function saveDraft() {
     if (!selected) return;
-    setStatuses((s) => (s[selected.id] === "sent" ? s : { ...s, [selected.id]: "draft" }));
+    const state = saveOutreachState(selected.id, {
+      status: "draft",
+      subject: selected.subject,
+      full: selected.full,
+      concise: selected.concise,
+    });
+    setDrafts((d) => ({ ...d, [selected.id]: state }));
+    setStatuses((s) => ({ ...s, [selected.id]: "draft" }));
   }
 
   function confirmSend() {
     if (!selected) return;
+    const state = saveOutreachState(selected.id, {
+      status: "sent",
+      subject: selected.subject,
+      full: selected.full,
+      concise: selected.concise,
+    });
+    setDrafts((d) => ({ ...d, [selected.id]: state }));
     setStatuses((s) => ({ ...s, [selected.id]: "sent" }));
     setConfirming(false);
+  }
+
+  function updateSelectedDraft(field: "subject" | "full" | "concise", value: string) {
+    if (!selected) return;
+    setDrafts((current) => ({
+      ...current,
+      [selected.id]: {
+        status: current[selected.id]?.status ?? statuses[selected.id] ?? "unsent",
+        subject: field === "subject" ? value : selected.subject,
+        full: field === "full" ? value : selected.full,
+        concise: field === "concise" ? value : selected.concise,
+      },
+    }));
   }
 
   if (!selected) return null;
@@ -306,16 +349,25 @@ export function OutreachComposer({
             <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
               Subject
             </p>
-            <p className="mt-0.5 text-sm font-medium text-slate-800">
-              {selected.subject}
-            </p>
+            <label htmlFor="outreach-subject" className="sr-only">Subject</label>
+            <input
+              id="outreach-subject"
+              value={selected.subject}
+              onChange={(event) => updateSelectedDraft("subject", event.target.value)}
+              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm font-medium text-slate-800 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+            />
           </div>
 
           {/* Body */}
           <div className="mt-3 rounded-xl border border-slate-200 bg-white p-4">
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
-              {variant === "full" ? selected.full : selected.concise}
-            </p>
+            <label htmlFor="outreach-body" className="sr-only">Message body</label>
+            <textarea
+              id="outreach-body"
+              value={variant === "full" ? selected.full : selected.concise}
+              onChange={(event) => updateSelectedDraft(variant, event.target.value)}
+              rows={10}
+              className="w-full resize-y rounded-lg border border-slate-200 p-3 text-sm leading-relaxed text-slate-700 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+            />
           </div>
 
           {/* Approval controls — two-step, never auto-send */}
