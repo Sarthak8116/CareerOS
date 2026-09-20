@@ -100,6 +100,35 @@ describe("Application studio page — whose evidence is this?", () => {
     expect(document.body.textContent).not.toContain(demoCandidate.name);
   });
 
+  it("shows requirement coverage from the stored profile's evidence", async () => {
+    const claim =
+      "Built a CPU cache simulator modeling associativity and replacement policies";
+    saveProfile({
+      ...demoCandidate,
+      id: "cand_coverage",
+      name: STORED_NAME,
+      evidence: [
+        {
+          id: "candidate_cache_project",
+          claim,
+          category: "project",
+          sourceType: "github",
+          sourceReference: "github.com/rashgrove/cache-project",
+          strength: "strong",
+          recency: "current",
+          publicProof: true,
+          trust: "source-backed",
+        },
+      ],
+    });
+
+    render(<ApplicationStudioPage />);
+
+    expect(await screen.findByText("Requirement coverage")).toBeTruthy();
+    expect((await screen.findAllByText(claim)).length).toBeGreaterThan(0);
+    expect(document.body.textContent).not.toContain(demoCandidate.evidence[0].claim);
+  });
+
   it("falls back to the demo candidate only when nothing has been imported", async () => {
     /* getProfile() owns that fallback, in one place. The page must not carry
        a second copy of the decision. */

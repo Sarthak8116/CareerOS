@@ -4,9 +4,9 @@ import { demoCandidate } from "@/lib/demo/candidate";
 
 /**
  * matchSkill is deterministic and evidence-grounded: it must resolve each
- * canonical skillKey to the demo candidate's real evidence rows, never invent
- * experience. Expected values below are traced directly from the SKILL_EVIDENCE
- * map and the demo evidence records.
+ * canonical skillKey to the candidate's real evidence rows, never invent
+ * experience. Evidence ids are opaque: matching must survive imports that
+ * assign completely different ids to the same recorded claims.
  */
 
 describe("matchSkill (demoCandidate)", () => {
@@ -52,5 +52,27 @@ describe("matchSkill (demoCandidate)", () => {
     for (const m of Object.values(all)) {
       for (const id of m.supportingEvidenceIds) expect(ids.has(id)).toBe(true);
     }
+  });
+
+  it("matches imported evidence by its claim, not by demo-specific ids", () => {
+    const imported = {
+      ...demoCandidate,
+      id: "cand_imported",
+      evidence: demoCandidate.evidence.map((evidence, index) => ({
+        ...evidence,
+        id: `imported_${index}`,
+      })),
+    };
+
+    expect(matchSkill("python", imported).supportingEvidenceIds).toEqual([
+      "imported_0",
+    ]);
+    expect(matchSkill("systems_debug", imported).supportingEvidenceIds).toEqual([
+      "imported_1",
+      "imported_3",
+    ]);
+    expect(matchSkill("cuda", imported).supportingEvidenceIds).toEqual([
+      "imported_8",
+    ]);
   });
 });

@@ -14,15 +14,46 @@ export interface SkillMatch {
   note: string;
 }
 
-/** Which evidence ids support each canonical skill, and how strongly. */
-const SKILL_EVIDENCE: Record<string, string[]> = {
-  c_cpp: ["ev_c", "ev_cpp"],
-  os_arch: ["ev_os_course", "ev_cachesim"],
-  systems_debug: ["ev_cachesim", "ev_c"],
-  degree: [], // satisfied by profile, not evidence rows
-  cuda: ["ev_gpu"],
-  python: ["ev_py"],
-  parallel: ["ev_gpu"],
+/**
+ * Conservative textual signals for the canonical skills used by the demo and
+ * deterministic engines.
+ *
+ * Evidence ids are deliberately absent. Imported profiles assign their own
+ * ids, so an id-based map makes the same claim count for the demo candidate
+ * and disappear for everybody else. These patterns only recognize terms the
+ * candidate actually recorded; an unknown skill remains an honest miss.
+ */
+const SKILL_SIGNALS: Readonly<Record<string, readonly RegExp[]>> = {
+  c_cpp: [
+    /(?:^|[^a-z0-9])c\+\+(?=$|[^a-z0-9])/i,
+    /(?:^|[^a-z0-9])cpp(?=$|[^a-z0-9])/i,
+    /(?:^|[^a-z0-9])c(?=$|[^a-z0-9])/i,
+    /\bsystems? programming\b/i,
+  ],
+  os_arch: [
+    /\boperating systems?\b/i,
+    /\bcomputer architecture\b/i,
+    /\bcache simulator\b/i,
+    /\bmemory allocator\b/i,
+  ],
+  systems_debug: [
+    /\bdebug(?:ged|ging)?\b/i,
+    /\btroubleshoot(?:ed|ing)?\b/i,
+    /\bcache simulator\b/i,
+    /\bmemory allocator\b/i,
+    /\blow[- ]level\b/i,
+    /\bembedded\b/i,
+    /\bsystems? programming\b/i,
+  ],
+  cuda: [/\bcuda\b/i, /\bgpu\b/i],
+  python: [/\bpython\b/i],
+  parallel: [
+    /\bparallel\b/i,
+    /\bconcurren(?:cy|t)\b/i,
+    /\bmultithread(?:ed|ing)?\b/i,
+    /\bcuda\b/i,
+    /\bgpu\b/i,
+  ],
 };
 
 const LEVEL_RANK: Record<Level, number> = {
@@ -65,8 +96,10 @@ export function matchSkill(
     };
   }
 
-  const ids = SKILL_EVIDENCE[skillKey] ?? [];
-  const evidence = candidate.evidence.filter((e) => ids.includes(e.id));
+  const signals = SKILL_SIGNALS[skillKey] ?? [];
+  const evidence = candidate.evidence.filter((item) =>
+    signals.some((signal) => signal.test(item.claim)),
+  );
   const level = bestLevel(evidence);
   const confidence = confidenceFor(evidence);
 

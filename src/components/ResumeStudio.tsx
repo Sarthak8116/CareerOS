@@ -2,7 +2,17 @@
 
 import { useMemo } from "react";
 import { Check, X, ArrowRight, ShieldCheck, FileText } from "lucide-react";
-import type { ResumeRecommendation, ClaimFlag, Level } from "@/lib/types";
+import type {
+  ResumeRecommendation,
+  ClaimFlag,
+  Evidence,
+  Level,
+} from "@/lib/types";
+import {
+  summarizeCoverage,
+  type CoverageState,
+  type RequirementCoverage,
+} from "@/lib/engine/keywords";
 import { Card, CardHeader, Button, Pill, SectionTitle } from "@/components/ui/primitives";
 import { ConfidencePill, LevelPill } from "@/components/pills";
 import { cn } from "@/lib/utils";
@@ -10,10 +20,12 @@ import { cn } from "@/lib/utils";
 /**
  * Resume & Application Studio (§5.8).
  *
- * Two evidence-grounded surfaces:
- *  1. Tailored recommendations — accept/reject each rewrite, before → after,
+ * Three evidence-grounded surfaces:
+ *  1. Requirement coverage — covered / partially-covered / missing, with the
+ *     candidate evidence behind each conclusion.
+ *  2. Tailored recommendations — accept/reject each rewrite, before → after,
  *     traced to the requirement it addresses and the evidence behind it.
- *  2. Claim verification — the honesty pass. Flags risky claims so the
+ *  3. Claim verification — the honesty pass. Flags risky claims so the
  *     candidate fixes them first; CareerOS never fabricates experience.
  *
  * Accept/reject is CONTROLLED: the status shown is the one on the
@@ -58,6 +70,60 @@ const severityTone: Record<Level, { row: string; badge: string }> = {
     badge: "bg-slate-100 text-slate-600 ring-slate-500/20",
   },
 };
+
+const coverageTone: Record<
+  CoverageState,
+  { label: string; row: string; badge: string }
+> = {
+  covered: {
+    label: "Covered",
+    row: "border-l-emerald-400 bg-emerald-50/30",
+    badge: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
+  },
+  "partially-covered": {
+    label: "Partly covered",
+    row: "border-l-amber-400 bg-amber-50/30",
+    badge: "bg-amber-50 text-amber-700 ring-amber-600/20",
+  },
+  missing: {
+    label: "No evidence recorded",
+    row: "border-l-slate-300 bg-slate-50/60",
+    badge: "bg-slate-100 text-slate-600 ring-slate-500/20",
+  },
+};
+
+function CoverageRow({
+  row,
+  evidenceById,
+}: {
+  row: RequirementCoverage;
+  evidenceById: ReadonlyMap<string, Evidence>;
+}) {
+  const tone = coverageTone[row.state];
+  const supporting = row.supportingEvidenceIds
+    .map((id) => evidenceById.get(id))
+    .filter((item): item is Evidence => Boolean(item));
+
+  return (
+    <div className={cn("rounded-xl border border-slate-200 border-l-4 p-4", tone.row)}>
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <p className="text-sm font-medium text-slate-800">{row.requirement}</p>
+        <Pill className={tone.badge}>{tone.label}</Pill>
+      </div>
+      <p className="mt-1 text-sm text-slate-600">{row.note}</p>
+      {supporting.length > 0 && (
+        <div className="mt-3">
+          <p className="text-xs font-semibold text-slate-500">Evidence behind this</p>
+          <ul className="mt-1 space-y-1 text-sm text-slate-700">
+            {supporting.map((item) => (
+              <li key={item.id}>{item.claim}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /* Recommendation card                                                 */
@@ -195,10 +261,14 @@ function ClaimFlagRow({ flag }: { flag: ClaimFlag }) {
 /* ------------------------------------------------------------------ */
 
 export function ResumeStudio({
+  coverage,
+  evidence,
   recommendations,
   flags,
   onDecide,
 }: {
+  coverage: RequirementCoverage[];
+  evidence: Evidence[];
   recommendations: ResumeRecommendation[];
   flags: ClaimFlag[];
   /** Called with the user's decision. The owner persists it and re-renders. */
@@ -208,10 +278,39 @@ export function ResumeStudio({
     () => recommendations.filter((r) => r.status === "accepted").length,
     [recommendations],
   );
+  const coverageSummary = useMemo(() => summarizeCoverage(coverage), [coverage]);
+  const evidenceById = useMemo(
+    () => new Map(evidence.map((item) => [item.id, item] as const)),
+    [evidence],
+  );
 
   return (
     <div className="space-y-10">
-      {/* Section 1: recommendations */}
+      {/* Section 1: requirement coverage */}
+      <section>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <SectionTitle className="text-slate-500">Requirement coverage</SectionTitle>
+          {coverageSummary.total > 0 && (
+            <span className="text-xs font-medium text-slate-500">
+              {coverageSummary.covered} covered · {coverageSummary.partiallyCovered} partial · {coverageSummary.missing} missing
+            </span>
+          )}
+        </div>
+        <p className="mb-4 text-sm text-slate-600">{coverageSummary.statement}</p>
+        {coverage.length > 0 && (
+          <div className="space-y-3">
+            {coverage.map((row) => (
+              <CoverageRow
+                key={row.requirementId}
+                row={row}
+                evidenceById={evidenceById}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Section 2: recommendations */}
       <section>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -246,7 +345,7 @@ export function ResumeStudio({
         )}
       </section>
 
-      {/* Section 2: claim verification */}
+      {/* Section 3: claim verification */}
       <section>
         <div className="mb-3 flex items-center gap-2">
           <ShieldCheck className="h-4 w-4 text-emerald-600" aria-hidden="true" />

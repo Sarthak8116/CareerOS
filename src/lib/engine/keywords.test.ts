@@ -83,6 +83,33 @@ describe("computeRequirementCoverage", () => {
     expect(debug.supportingEvidenceIds).toEqual(["ev_import_1"]);
     expect(debug.state).toBe("covered");
   });
+
+  it("finds a real user's semantic evidence even when the posting uses different words", () => {
+    const imported = {
+      ...demoCandidate,
+      id: "cand_semantic",
+      evidence: [
+        {
+          id: "candidate_cache_project",
+          claim: "Built a CPU cache simulator modeling associativity and replacement policies",
+          category: "project" as const,
+          sourceType: "github" as const,
+          sourceReference: "github.com/example/cache-project",
+          strength: "strong" as const,
+          recency: "current" as const,
+          publicProof: true,
+          trust: "source-backed" as const,
+        },
+      ],
+    };
+
+    const debug = computeRequirementCoverage(imported, demoJob).find(
+      (row) => row.requirementId === "req_debug",
+    )!;
+    expect(debug.state).toBe("partially-covered");
+    expect(debug.weakness).toBe("wording");
+    expect(debug.supportingEvidenceIds).toEqual(["candidate_cache_project"]);
+  });
 });
 
 describe("summarizeCoverage", () => {
@@ -101,6 +128,12 @@ describe("summarizeCoverage", () => {
     const allCovered = coverage.map((c) => ({ ...c, state: "covered" as const }));
     expect(summarizeCoverage(allCovered).statement).toBe(
       "Your evidence matches every keyword and requirement this job lists.",
+    );
+  });
+
+  it("does not describe an empty requirement list as a match", () => {
+    expect(summarizeCoverage([]).statement).toBe(
+      "This posting has no structured requirements to compare.",
     );
   });
 });

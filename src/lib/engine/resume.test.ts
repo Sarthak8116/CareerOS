@@ -90,11 +90,11 @@ describe("getResumeRecommendations", () => {
       name: "Rosalind Ashgrove",
       evidence: [
         {
-          id: "ev_other_c",
-          claim: "Strong programming work in C on an embedded flight controller",
-          category: "experience" as const,
+          id: "candidate_cache_project",
+          claim: "Built a CPU cache simulator modeling associativity and replacement policies",
+          category: "project" as const,
           sourceType: "github" as const,
-          sourceReference: "github.com/rashgrove/fc",
+          sourceReference: "github.com/rashgrove/cache-project",
           strength: "strong" as const,
           recency: "current" as const,
           publicProof: true,
@@ -105,6 +105,10 @@ describe("getResumeRecommendations", () => {
 
     const otherRecs = getResumeRecommendations(other, demoJob);
     const otherIds = new Set(other.evidence.map((e) => e.id));
+
+    // Without this guard, every assertion below passes vacuously when the
+    // real-user path silently produces no recommendations.
+    expect(otherRecs.length).toBeGreaterThan(0);
 
     for (const rec of otherRecs) {
       for (const demoId of demoCandidate.evidence.map((e) => e.id)) {

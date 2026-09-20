@@ -13,6 +13,7 @@ import { getCampaign, setResumeRecommendationStatus } from "@/lib/store";
 import { getAnswers } from "@/lib/answers";
 import { getProfile } from "@/lib/profileStore";
 import { getResumeRecommendations, verifyClaims } from "@/lib/engine/resume";
+import { computeRequirementCoverage } from "@/lib/engine/keywords";
 import {
   CoverLetterDraft,
   type CoverLetterOrigin,
@@ -97,6 +98,14 @@ export default function ApplicationStudioPage() {
       status: decisions[rec.id] ?? rec.status,
     }));
   }, [campaign, candidate]);
+
+  const coverage = useMemo(
+    () =>
+      campaign && candidate
+        ? computeRequirementCoverage(candidate, campaign.job)
+        : [],
+    [campaign, candidate],
+  );
 
   const decideRecommendation = useCallback(
     (recommendationId: string, status: ResumeRecommendation["status"]) => {
@@ -253,6 +262,8 @@ export default function ApplicationStudioPage() {
 
       <div className="mt-8">
         <ResumeStudio
+          coverage={coverage}
+          evidence={candidate?.evidence ?? []}
           recommendations={recommendations}
           flags={flags}
           onDecide={decideRecommendation}

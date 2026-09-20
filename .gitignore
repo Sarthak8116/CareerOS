@@ -32,6 +32,7 @@ yarn-error.log*
 # ruflo / claude-flow local state (not part of the app)
 /.claude-flow/
 /.swarm/
+/.hive-mind/
 ruvector.db
 agentdb.rvf
 agentdb.rvf.lock

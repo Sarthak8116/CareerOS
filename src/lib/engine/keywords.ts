@@ -201,11 +201,14 @@ export function summarizeCoverage(rows: RequirementCoverage[]): CoverageSummary 
   const missing = rows.filter((r) => r.state === "missing").length;
   const matchesEveryRequirement = rows.length > 0 && covered === rows.length;
 
-  const statement = matchesEveryRequirement
-    ? "Your evidence matches every keyword and requirement this job lists."
-    : `Your evidence matches ${covered} of ${rows.length} requirements this job lists` +
-      `${partiallyCovered > 0 ? `, partly matches ${partiallyCovered}` : ""}` +
-      `${missing > 0 ? `, and does not answer ${missing}` : ""}.`;
+  const statement =
+    rows.length === 0
+      ? "This posting has no structured requirements to compare."
+      : matchesEveryRequirement
+        ? "Your evidence matches every keyword and requirement this job lists."
+        : `Your evidence matches ${covered} of ${rows.length} requirements this job lists` +
+          `${partiallyCovered > 0 ? `, partly matches ${partiallyCovered}` : ""}` +
+          `${missing > 0 ? `, and does not answer ${missing}` : ""}.`;
 
   return { total: rows.length, covered, partiallyCovered, missing, matchesEveryRequirement, statement };
 }
