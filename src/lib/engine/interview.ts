@@ -96,13 +96,13 @@ function personalize(prompt: string, job: Job): string {
   return out;
 }
 
-/** Drop evidence refs the candidate lacks; never return an empty list. */
+/** Drop evidence refs the candidate lacks; missing evidence stays missing. */
 function retainKnownEvidence(refs: string[], knownIds: Set<string>): string[] {
   const kept = refs.filter((ref) => {
     const id = ref.split("—")[0].trim();
     return knownIds.has(id);
   });
-  return kept.length > 0 ? kept : refs;
+  return kept;
 }
 
 /* ------------------------------------------------------------------ */

@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Sparkles } from "lucide-react";
-import type { Campaign } from "@/lib/types";
-import { getCampaign, DEMO_CANDIDATE } from "@/lib/store";
+import type { Campaign, Candidate } from "@/lib/types";
+import { getCampaign } from "@/lib/store";
+import { getProfile } from "@/lib/profileStore";
 import { getInterviewQuestions } from "@/lib/engine/interview";
 import { Shell } from "@/components/Shell";
 import { ButtonLink, EmptyState } from "@/components/ui/primitives";
@@ -23,6 +24,7 @@ export default function CampaignInterviewPage() {
   const id = params.id;
 
   const [campaign, setCampaign] = useState<Campaign | undefined>(undefined);
+  const [candidate, setCandidate] = useState<Candidate | undefined>(undefined);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -31,6 +33,7 @@ export default function CampaignInterviewPage() {
       const c = await getCampaign(id);
       if (!active) return;
       setCampaign(c);
+      setCandidate(getProfile());
       setLoaded(true);
     })();
     return () => {
@@ -66,7 +69,11 @@ export default function CampaignInterviewPage() {
   }
 
   const { job } = campaign;
-  const questions = getInterviewQuestions(DEMO_CANDIDATE, job, campaign.harvest);
+  const questions = getInterviewQuestions(
+    candidate ?? getProfile(),
+    job,
+    campaign.harvest,
+  );
 
   return (
     <Shell>
