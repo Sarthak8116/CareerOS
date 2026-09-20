@@ -110,3 +110,98 @@ export const nvidiaIntel: CompanyIntel = {
   ],
   sources: nvidiaSources,
 };
+
+/* ------------------------------------------------------------------ */
+/* Quillfeather AI — the FICTIONAL startup in the demo                  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Everything below is invented, including the sources, which live on the
+ * reserved `.example` domain so they can never resolve to a real site. The
+ * point of the contrast with NVIDIA is the SHAPE of startup research: a few
+ * first-party pages and one funding note, no filings, thinner certainty — and
+ * reliability labels that say so instead of dressing it up.
+ */
+const quillfeatherSources: ResearchSource[] = [
+  {
+    id: "src_qf_careers",
+    url: "https://quillfeather.example/careers/founding-engineer-intern",
+    title: "Founding Engineer Intern, ML Infrastructure — job posting",
+    publisher: "Quillfeather AI (demo company, first-party)",
+    excerpt:
+      "States the company is nine people, that interns ship customer-facing features in their first two weeks, that there is no separate QA or DevOps team, and that engineering applications are reviewed by the CTO.",
+    reliability: "strong",
+    retrievedAt: RETRIEVED_AT,
+  },
+  {
+    id: "src_qf_blog",
+    url: "https://quillfeather.example/blog/why-we-built-a-serving-layer",
+    title: "Why we built a serving layer for open-weight models",
+    publisher: "Quillfeather AI engineering blog (demo company, first-party)",
+    excerpt:
+      "Describes a Python control plane over a C++ runtime, argues that small teams overpay for inference because of idle GPUs, and names batching and cold-start time as the two problems the team is working on.",
+    reliability: "moderate",
+    retrievedAt: RETRIEVED_AT,
+  },
+  {
+    id: "src_qf_funding",
+    url: "https://news.example/quillfeather-seed-round",
+    title: "Quillfeather AI raises seed round to cut inference costs",
+    publisher: "Startup news coverage (demo source)",
+    excerpt:
+      "Reports a seed round and a small number of paying design-partner customers. Figures come from the company's own announcement and are not independently verified.",
+    reliability: "limited",
+    retrievedAt: RETRIEVED_AT,
+  },
+];
+
+export const quillfeatherIntel: CompanyIntel = {
+  company: "Quillfeather AI",
+  description:
+    "Quillfeather AI is a fictional, seed-stage startup created for the CareerOS demo. It builds an inference-serving layer that lets small engineering teams run open-weight models on their own GPUs without hiring a platform team: a Python control plane and API over a C++ runtime that handles batching, scheduling, and cold starts. It is nine people, has a handful of paying design partners, and is pre-Series A — which means the product, the roadmap, and the job itself can all change within a quarter.",
+  products: [
+    "Hosted inference API for open-weight language and vision models",
+    "Self-hosted serving runtime (Python control plane over a C++ core)",
+    "Evaluation and benchmarking tooling for comparing served models",
+  ],
+  businessModel:
+    "Usage-based pricing on the hosted API plus annual contracts for the self-hosted runtime. At this stage revenue matters less than proving that design partners stay and expand, so engineering effort goes wherever a named customer is blocked — not toward a long-range platform plan.",
+  relevantOrg:
+    "There is no org chart to speak of: engineering is the two technical founders and a few founding engineers, all committing to the same repositories. An intern sits directly alongside them and reports, in practice, to the CTO.",
+  priorities: [
+    "Keep the existing design partners unblocked — customer issues outrank roadmap work",
+    "Cut cold-start time and improve GPU utilization through better batching",
+    "Build evaluation tooling so customers can compare models before committing",
+    "Stay small: automate operations rather than hire for them",
+  ],
+  whyRoleExists:
+    "A nine-person company has more customer-facing work than engineers. An intern who can own a feature end to end — endpoint, tests, docs, deploy — removes real load from the founders. It is also how early startups hire: a strong internship is the most reliable route to a founding-engineer offer.",
+  whatYoudWorkOn:
+    "Realistically: API endpoints and their tests, evaluation and benchmarking scripts, and the Python glue around the C++ runtime. Expect to deploy your own code, answer a customer question directly, and write the documentation for what you built. Expect very little onboarding and no one assigned to review your work on a schedule.",
+  valuesBeyondJD: [
+    "Shipping — a working feature a customer uses beats an elegant design nobody has seen",
+    "Ownership without being asked: tests, docs and deploys are part of the feature",
+    "Clear writing, because a docs-first team of nine has no meetings to fall back on",
+    "Range over depth: willingness to read C++ one day and fix a deploy script the next",
+  ],
+  talkingPoints: [
+    "Their blog frames the core problem as idle GPUs and cold starts — connecting your cache-simulator work (locality, utilization, measuring before optimizing) to that problem is a genuine bridge, not a stretch.",
+    "They ask for evidence of shipping to real users: CourseMap, with real classmates depending on it each registration period, answers that more directly than any coursework.",
+    "A Python control plane over a C++ runtime is exactly the combination your evidence covers — strong Python, source-backed C, honest about C++ being lighter.",
+    "At nine people the CTO reviews applications personally, so a short, specific note about their serving-layer post will be read by the person who decides.",
+  ],
+  risks: [
+    "Seed-stage risk is real: the company may pivot, run short of money, or rescind an internship — none of which a candidate can assess from outside.",
+    "Little structure or mentorship; interns who need regular feedback can struggle on a team this small.",
+    "Compensation and any return offer are less predictable than at a large company, and sponsorship is unclear per the posting.",
+    "No DevOps or QA team means Docker, CI and deployment work is part of the job — and that is the one area your evidence does not yet cover.",
+    "Everything known here comes from the company's own pages and one unverified funding report; there are no filings or independent sources to check it against.",
+  ],
+  sources: quillfeatherSources,
+};
+
+/** Cached intel per company name. Anything else gets honest generic intel. */
+export const demoIntelByCompany: Record<string, CompanyIntel> = {
+  NVIDIA: nvidiaIntel,
+  "Quillfeather AI": quillfeatherIntel,
+};

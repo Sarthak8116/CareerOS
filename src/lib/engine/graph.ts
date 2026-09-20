@@ -93,6 +93,11 @@ const SKILL_LABELS: Record<string, string> = {
   python: "Python",
   parallel: "Parallel & Performance",
   degree: "CS / CE / EE Degree",
+  backend_api: "Backend & APIs",
+  shipping: "Shipped to Real Users",
+  ml_basics: "ML Fundamentals",
+  devops: "Docker / CI / Cloud",
+  communication: "Written Communication",
 };
 
 /** Short labels for project evidence (falls back to the full claim). */

@@ -10,7 +10,7 @@ import type {
 import { Campaign as CampaignSchema } from "@/lib/types";
 import { demoCandidate } from "@/lib/demo/candidate";
 import { getProfile } from "@/lib/profileStore";
-import { demoJob } from "@/lib/demo/job";
+import { demoJob, demoJobs } from "@/lib/demo/job";
 import { getCampaignProvider } from "@/lib/providers/ai";
 import { sanitizeUntrusted } from "@/lib/security/untrusted";
 import { slugId } from "@/lib/utils";
@@ -216,3 +216,5 @@ export async function resetToDemo(): Promise<Campaign[]> {
 
 export const DEMO_CANDIDATE = demoCandidate;
 export const DEMO_JOB = demoJob;
+/** Every cached sample role (a large company and a startup). */
+export const DEMO_JOBS = demoJobs;

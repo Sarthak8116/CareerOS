@@ -46,6 +46,11 @@ const SKILL_SIGNALS: Readonly<Record<string, readonly RegExp[]>> = {
     /\bsystems? programming\b/i,
   ],
   cuda: [/\bcuda\b/i, /\bgpu\b/i],
+  backend_api: [/\bapis?\b/i, /\bbackend\b/i, /\bfastapi\b/i, /\bflask\b/i, /\brest\b/i, /\bweb service\b/i],
+  shipping: [/\bshipped\b/i, /\blaunched\b/i, /\bdeployed\b/i, /\bused by\b/i, /\bin production\b/i, /\bmerged\b/i],
+  ml_basics: [/\bmachine learning\b/i, /\bneural[- ]network\b/i, /\bmodel training\b/i, /\binference\b/i],
+  devops: [/\bdocker\b/i, /\bkubernetes\b/i, /\bci\/cd\b/i, /\bgithub actions\b/i, /\baws\b/i, /\bgcp\b/i],
+  communication: [/\bteaching assistant\b/i, /\bdocumentation\b/i, /\btechnical writing\b/i, /\bwrote\b.*\bdocs?\b/i],
   python: [/\bpython\b/i],
   parallel: [
     /\bparallel\b/i,

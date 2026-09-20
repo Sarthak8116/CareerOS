@@ -2,7 +2,7 @@ import type { Candidate, Job, Campaign } from "@/lib/types";
 import { computeFit, computeReadiness } from "@/lib/engine/fit";
 import { computeGaps } from "@/lib/engine/gaps";
 import { computeTasks, computeActivity } from "@/lib/engine/plan";
-import { demoPeople } from "@/lib/demo/people";
+import { demoPeopleByJobId } from "@/lib/demo/people";
 import { slugId } from "@/lib/utils";
 
 /**
@@ -37,7 +37,7 @@ export class DemoCampaignProvider implements CampaignProvider {
   }): Promise<Campaign> {
     // For the seeded NVIDIA job we have curated network data; for any other
     // imported job we still produce fit + gaps + tasks (people list empty).
-    const people = job.id === "job_nvidia_syssw" ? demoPeople : [];
+    const people = demoPeopleByJobId[job.id] ?? [];
 
     const fit = computeFit(candidate, job, people);
     const gaps = computeGaps(candidate, job);
@@ -57,7 +57,7 @@ export class DemoCampaignProvider implements CampaignProvider {
       stage: "analyzed",
       readiness,
       createdAt,
-      isDemo: job.id === "job_nvidia_syssw",
+      isDemo: job.id in demoPeopleByJobId,
       fit,
       gaps,
       tasks,

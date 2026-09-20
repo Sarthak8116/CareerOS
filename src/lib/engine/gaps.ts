@@ -46,6 +46,27 @@ export function computeGaps(candidate: Candidate, job: Job): Gap[] {
     // Requirement is comfortably met — no gap.
     if (rank >= 2 && match.confidence !== "low") continue;
 
+    /* --- Docker / CI / cloud: on a team with no DevOps, this IS the job. --- */
+    if (req.skillKey === "devops") {
+      gaps.push({
+        id: "gap_devops",
+        requirement: req.text,
+        requirementId: req.id,
+        classification: "true-skill-gap",
+        importance: "high",
+        action: {
+          kind: "build-project",
+          summary: "Containerize a project you already shipped and add CI to it",
+          detail:
+            "Nothing recorded shows Docker, CI/CD or cloud deployment. The fastest honest fix is to add it to work that already exists: write a Dockerfile for an existing project, add a CI workflow that runs its tests on every push, and note the deploy steps in the README. That turns a missing skill into public proof without inventing a new project.",
+          expectedImpact: "strong",
+          effort: "moderate",
+        },
+        evidenceNote: "No recorded evidence mentions containers, CI or deployment.",
+      });
+      continue;
+    }
+
     /* --- CUDA / GPU: a genuine missing skill (the "one true gap"). --- */
     if (req.skillKey === "cuda") {
       gaps.push({

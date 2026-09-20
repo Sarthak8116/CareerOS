@@ -13,7 +13,7 @@ import type { Job } from "@/lib/types";
 import {
   createCampaignFromJob,
   jobFromPastedText,
-  DEMO_JOB,
+  DEMO_JOBS,
 } from "@/lib/store";
 import { Shell } from "@/components/Shell";
 import { BuildingState } from "@/components/BuildingState";
@@ -97,13 +97,20 @@ export default function JobsPage() {
 
       {/* Section A — sample role */}
       <section className="mt-8">
-        <SectionTitle>Sample role</SectionTitle>
-        <SampleJobCard
-          job={DEMO_JOB}
-          building={building === DEMO_JOB.id}
-          disabled={building !== null}
-          onBuild={() => build(DEMO_JOB)}
-        />
+        <SectionTitle>Sample roles</SectionTitle>
+        <p className="mt-1 text-sm text-slate-500">
+          The same candidate against a large company and a nine-person startup
+          — the fit, the gaps and the people to reach all change.
+        </p>
+        {DEMO_JOBS.map((job) => (
+          <SampleJobCard
+            key={job.id}
+            job={job}
+            building={building === job.id}
+            disabled={building !== null}
+            onBuild={() => build(job)}
+          />
+        ))}
       </section>
 
       {/* Section B — import a job. The fallback when a link can't be parsed,

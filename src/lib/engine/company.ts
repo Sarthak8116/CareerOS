@@ -6,13 +6,13 @@ import type {
   ResearchSource,
   SourcedPost,
 } from "@/lib/types";
-import { nvidiaIntel } from "@/lib/demo/company";
+import { demoIntelByCompany } from "@/lib/demo/company";
 
 /**
  * Company intelligence resolver (build directive §5.6).
  *
- * In DEMO MODE the only researched company is NVIDIA — for that job we return
- * the cached, source-backed `nvidiaIntel`. For any other job we return a
+ * In DEMO MODE the researched companies are the cached ones (NVIDIA, and the
+ * fictional startup Quillfeather AI) — for those we return the cached intel. For any other job we return a
  * minimal, HONEST intel object derived purely from the job's own fields, with
  * NO sources and clearly-labelled low-reliability notes. We never fabricate
  * research for a company we haven't cached.
@@ -29,7 +29,7 @@ export function getCompanyIntel(
   job: Job,
   harvest?: Campaign["harvest"],
 ): CompanyIntel {
-  const base = job.company === "NVIDIA" ? nvidiaIntel : genericIntel(job);
+  const base = demoIntelByCompany[job.company] ?? genericIntel(job);
   if (!harvest?.company) return base;
   return withHarvest(base, harvest.company, harvest.companyPosts ?? []);
 }
@@ -92,7 +92,7 @@ function withHarvest(
   const products =
     base.products.length > 0 ? base.products : facts.specialities.slice(0, 8);
   const description =
-    base === nvidiaIntel || !facts.description
+    base.sources.length > 0 || !facts.description
       ? base.description
       : `${facts.description} (The company's own LinkedIn description — self-reported, not independent research.)`;
 
