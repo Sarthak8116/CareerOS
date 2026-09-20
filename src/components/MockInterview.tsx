@@ -10,6 +10,11 @@ import {
   EmptyState,
   SectionTitle,
 } from "@/components/ui/primitives";
+import {
+  ListenButton,
+  RecordAnswerButton,
+  useInterviewCapabilities,
+} from "@/components/InterviewVoice";
 
 /* ---------------------------------------------------------------- */
 /* Category + difficulty display (local to this view)                */
@@ -47,6 +52,10 @@ export function MockInterview({ questions }: { questions: InterviewQuestion[] })
   const [showHints, setShowHints] = React.useState(false);
   const [skipped, setSkipped] = React.useState<Set<number>>(new Set());
   const [finished, setFinished] = React.useState(false);
+  const [grading, setGrading] = React.useState(false);
+  const [gradedBy, setGradedBy] = React.useState<"model" | "offline">("offline");
+  const [voiceError, setVoiceError] = React.useState<string | null>(null);
+  const caps = useInterviewCapabilities();
 
   if (questions.length === 0) {
     return (
@@ -61,8 +70,36 @@ export function MockInterview({ questions }: { questions: InterviewQuestion[] })
   const current = questions[index];
   const isLast = index === total - 1;
 
-  function submit() {
-    if (!answer.trim()) return;
+  async function submit() {
+    if (!answer.trim() || grading) return;
+    // With an NVIDIA key, nemotron-3-super grades the answer. Any failure
+    // falls back to the offline heuristic, and the label says which one ran.
+    if (caps.grading) {
+      setGrading(true);
+      try {
+        const res = await fetch("/api/interview/grade", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question: current.prompt,
+            answer,
+            answerHints: current.answerHints,
+            evidenceToUse: current.evidenceToUse,
+          }),
+        });
+        const data = await res.json().catch(() => null);
+        if (res.ok && data?.evaluation) {
+          setGradedBy("model");
+          setEvaluation(data.evaluation as AnswerEvaluation);
+          return;
+        }
+      } catch {
+        // fall through to the offline grader
+      } finally {
+        setGrading(false);
+      }
+    }
+    setGradedBy("offline");
     setEvaluation(evaluateAnswer(current, answer));
   }
 
@@ -73,6 +110,7 @@ export function MockInterview({ questions }: { questions: InterviewQuestion[] })
     }
     setIndex((i) => i + 1);
     setAnswer("");
+    setVoiceError(null);
     setEvaluation(null);
     setShowHints(false);
   }
@@ -138,6 +176,11 @@ export function MockInterview({ questions }: { questions: InterviewQuestion[] })
         <p className="text-base font-medium leading-relaxed text-slate-900">
           {current.prompt}
         </p>
+        {caps.voice && (
+          <div className="mt-3">
+            <ListenButton text={current.prompt} onError={setVoiceError} />
+          </div>
+        )}
 
         {/* Hints affordance */}
         {current.answerHints.length > 0 && (
@@ -179,13 +222,29 @@ export function MockInterview({ questions }: { questions: InterviewQuestion[] })
             className="w-full resize-y rounded-xl border border-slate-200 p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
           />
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <Button onClick={submit} disabled={!answer.trim()}>
-              Submit answer
+            <Button onClick={() => void submit()} disabled={!answer.trim() || grading}>
+              {grading ? "Grading…" : "Submit answer"}
             </Button>
+            {caps.voice && (
+              <RecordAnswerButton
+                onError={setVoiceError}
+                onTranscript={(text) => setAnswer((a) => (a.trim() ? `${a.trim()} ${text}` : text))}
+              />
+            )}
             <Button variant="ghost" size="md" onClick={skip}>
               Skip
             </Button>
           </div>
+          {caps.voice && (
+            <p className="mt-2 text-xs text-slate-400">
+              Your recording is transcribed and discarded — check the transcript before you submit.
+            </p>
+          )}
+          {voiceError && (
+            <p role="alert" className="mt-2 text-sm text-rose-600">
+              {voiceError}
+            </p>
+          )}
         </Card>
       )}
 
@@ -193,6 +252,11 @@ export function MockInterview({ questions }: { questions: InterviewQuestion[] })
       {evaluation && (
         <>
           <Feedback evaluation={evaluation} />
+          <p className="text-xs text-slate-400">
+            {gradedBy === "model"
+              ? "Graded by NVIDIA Nemotron Super from what you said and your recorded evidence."
+              : "Offline feedback — a keyword check against the answer hints, not a model."}
+          </p>
           <div className="flex justify-end">
             <Button onClick={goNext}>
               {isLast ? "Finish" : "Next question"}
