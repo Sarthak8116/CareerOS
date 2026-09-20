@@ -256,6 +256,16 @@ These are **planned scope, not frozen contracts.** Freeze each one before writin
 
 ## 7. Known open items
 
+> Latest pass: navigation is feature-centred (Home, New campaign, Tracker, Tasks, Compare, Profile)
+> with a tab bar inside each campaign; `/tracker` replaces the mock inbox in the nav; mock sign-in,
+> sign-up and Gmail-connect routes redirect. An amazon.jobs adapter and a Nemotron page-reader
+> fallback were added to intake. The spoken mock interview (ElevenLabs TTS + Scribe, graded by
+> Super) was verified live. The live campaign path was exercised against the real API and hardened
+> (capacity retries, Lightning fast-fail with Super fallback, enum repair, overall 270s budget), but
+> **a fully green end-to-end live campaign has still not been observed**: NVIDIA's shared endpoints
+> were returning 503 "overloaded" during testing. There are no em dashes left in the project except
+> one inside a regex that matches dashes in third-party postings.
+
 > Updated after P4–P7: style memory, project booster, Connections.csv matching (browser-side),
 > persona-neutral outreach, Gmail hand-off (opens the user's own compose window, never sends), and
 > requirement-driven interview prep are all committed. `types.ts` is now a barrel over

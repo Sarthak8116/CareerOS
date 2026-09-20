@@ -157,7 +157,7 @@ export function MockInterview({ questions }: { questions: InterviewQuestion[] })
           aria-label={`Progress: question ${index + 1} of ${total}`}
         >
           <div
-            className="h-full rounded-full bg-brand-500 transition-all"
+            className="brand-gradient h-full rounded-full transition-all"
             style={{ width: `${((index + 1) / total) * 100}%` }}
           />
         </div>

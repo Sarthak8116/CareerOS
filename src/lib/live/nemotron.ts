@@ -22,7 +22,7 @@ const REQUEST_TIMEOUT_MS = 90_000;
 
 /** Capacity errors worth waiting out, and how long to wait before each retry. */
 const RETRYABLE_STATUS = new Set([429, 502, 503, 504]);
-const RETRY_DELAYS_MS = process.env.NODE_ENV === "test" ? [0, 0] : [1500, 5000];
+const RETRY_DELAYS_MS = process.env.NODE_ENV === "test" ? [0, 0, 0] : [2000, 6000, 15000];
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Verified present in the live model list. */

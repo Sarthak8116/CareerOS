@@ -182,7 +182,9 @@ export async function POST(req: Request) {
       ? "Authentication failed, check your NVIDIA API key."
       : /\b429\b|rate.?limit/i.test(message)
         ? "Rate limited by the model API, try again shortly."
-        : /could not read/i.test(message)
+        : /returned 50[234]\b|overloaded|request limit/i.test(message)
+          ? "NVIDIA's models are overloaded right now. Nothing was saved. Try again in a few minutes."
+          : /could not read/i.test(message)
           ? "CareerOS could not read that résumé. Try re-exporting the PDF and uploading it again."
           : "Live analysis failed. The model may have returned an unexpected result; try again.";
     // In development only, include the (already key-scrubbed) cause so a

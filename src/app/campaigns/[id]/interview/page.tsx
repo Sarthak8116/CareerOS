@@ -84,9 +84,9 @@ export default function CampaignInterviewPage() {
           Mock interview
         </h1>
         <p className="mt-1 text-sm text-slate-500">
-          {job.company}
-          {job.team ? ` · ${job.team}` : ""}, practice one question at a time
-          for {job.title}. Feedback is qualitative, grounded in your evidence.
+          Practice one question at a time for {job.title} at {job.company}.
+          Hear each question, answer out loud or in writing, and get feedback
+          grounded in your own evidence.
         </p>
       </div>
 

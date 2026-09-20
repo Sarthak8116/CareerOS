@@ -51,7 +51,7 @@ export default function JobsPage() {
     <Shell>
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          Find a job
+          New campaign
         </h1>
         <p className="mt-1 text-sm text-slate-500">
           Paste one job link and CareerOS does the rest, or start from the
@@ -112,7 +112,7 @@ export default function JobsPage() {
       {/* Section B, import a job. The fallback when a link can't be parsed,
           and the only route into a login-walled portal. Always available. */}
       <section className="mt-10" id="paste-fallback">
-        <SectionTitle>Import a job</SectionTitle>
+        <SectionTitle>Or paste the description</SectionTitle>
         <ImportJobForm
           // Remount when a failed parse hands us values to prefill.
           key={prefill?.nonce ?? "blank"}
