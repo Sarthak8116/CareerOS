@@ -72,7 +72,7 @@ export function buildAlumnusCopy(ctx: OutreachContext): OutreachCopy {
     ``,
     `I'm a CS senior at ${ctx.university} heading toward a 2026 systems software internship. I came across your work on the ${ctx.team ?? "systems"} team, and as a fellow ${ctx.university} grad from the systems track I'd value your perspective.`,
     ``,
-    `To go deeper than coursework I've been building low-level projects — most recently a CPU cache simulator in C that models associativity and replacement policies. ${ctx.company}'s work at the hardware/software boundary is exactly where I want to grow.`,
+      `To go deeper than coursework I've been building low-level projects — most recently: ${ctx.projectClaim}. ${ctx.company}'s work at the hardware/software boundary is exactly where I want to grow.`,
     ``,
     `Would you be open to a short 15-minute chat about your experience on the team? If it feels useful, I'd also appreciate any pointers on how internship candidates are typically considered. Completely understand if you're heads-down.`,
     ``,
@@ -80,7 +80,7 @@ export function buildAlumnusCopy(ctx: OutreachContext): OutreachCopy {
     ctx.candidateFirstName,
   ].join("\n");
 
-  const concise = `Hi ${ctx.personFirstName} — I'm a ${ctx.university.includes("Illinois") ? "UIUC" : ctx.university} CS senior on the same systems track, aiming for a 2026 systems internship. I recently built a CPU cache simulator in C, and the ${ctx.team ?? "systems software"} work at ${ctx.company} is exactly where I want to grow. Would you be open to a quick 15-min chat about your experience there, and how interns are typically considered? Thanks either way. — ${ctx.candidateFirstName}`;
+  const concise = `Hi ${ctx.personFirstName} — I'm a ${ctx.university.includes("Illinois") ? "UIUC" : ctx.university} CS senior on the same systems track, aiming for a 2026 systems internship. I recently worked on ${ctx.projectClaim}, and the ${ctx.team ?? "systems software"} work at ${ctx.company} is exactly where I want to grow. Would you be open to a quick 15-min chat about your experience there, and how interns are typically considered? Thanks either way. — ${ctx.candidateFirstName}`;
 
   return {
     objective: `Request a brief informational chat with a fellow alum on the team, and softly learn the internship-consideration path — no direct referral ask.`,
@@ -102,7 +102,7 @@ export function buildRecruiterCopy(ctx: OutreachContext): OutreachCopy {
     ``,
     `I saw your posts about ${ctx.company}'s engineering internships and wanted to reach out directly. I'm a CS senior at ${ctx.university} targeting the ${ctx.jobTitle} role for 2026.`,
     ``,
-    `My background lines up with the core requirements: I program in C (I built a CPU cache simulator modeling associativity and replacement policies) and completed operating systems and computer architecture coursework. On work authorization: ${ctx.workAuth}.`,
+      `My background lines up with the core requirements: ${ctx.cClaim}; ${ctx.osClaim}. On work authorization: ${ctx.workAuth}.`,
     ``,
     `Could you point me to the best way to make sure my application is considered, and share the rough timeline for this requisition? Happy to send my resume and GitHub.`,
     ``,
@@ -110,7 +110,7 @@ export function buildRecruiterCopy(ctx: OutreachContext): OutreachCopy {
     ctx.candidateFullName,
   ].join("\n");
 
-  const concise = `Hi ${ctx.personFirstName} — I'm a ${ctx.university.includes("Illinois") ? "UIUC" : ctx.university} CS senior applying for the 2026 ${ctx.jobTitle} role. I program in C (built a CPU cache simulator) with OS + computer architecture coursework (${ctx.workAuth}). Could you share the best way to get my application considered and the rough timeline? Happy to send resume + GitHub. Thanks! — ${ctx.candidateFirstName}`;
+  const concise = `Hi ${ctx.personFirstName} — I'm a ${ctx.university.includes("Illinois") ? "UIUC" : ctx.university} CS senior applying for the 2026 ${ctx.jobTitle} role. My evidence includes ${ctx.cClaim} and ${ctx.osClaim} (${ctx.workAuth}). Could you share the best way to get my application considered and the rough timeline? Happy to send resume + GitHub. Thanks! — ${ctx.candidateFirstName}`;
 
   return {
     objective: `Express specific interest in the ${ctx.jobTitle} role and ask the recruiter about the application path and timeline.`,
@@ -132,7 +132,7 @@ export function buildManagerCopy(ctx: OutreachContext): OutreachCopy {
     ``,
     `I'm a CS senior at ${ctx.university} focused on low-level systems, and I follow the kind of ${ctx.team ?? "systems software"} work your org does. I'm not writing to ask for anything — just to learn from someone closer to it.`,
     ``,
-    `I recently built a CPU cache simulator in C to understand how associativity and replacement policies affect performance. It left me curious: on the ${ctx.team ?? "runtime/driver"} side, how does your team weigh raw throughput against debuggability when designing systems-software abstractions?`,
+      `I recently worked on ${ctx.projectClaim}. It left me curious: on the ${ctx.team ?? "runtime/driver"} side, how does your team weigh raw throughput against debuggability when designing systems-software abstractions?`,
     ``,
     `Totally understand if you don't have time to reply. Thanks for the work your team ships.`,
     ``,
@@ -140,7 +140,7 @@ export function buildManagerCopy(ctx: OutreachContext): OutreachCopy {
     ctx.candidateFirstName,
   ].join("\n");
 
-  const concise = `Hi ${ctx.personFirstName} — ${ctx.university.includes("Illinois") ? "UIUC" : ctx.university} CS senior focused on low-level systems here, not asking for anything. After building a CPU cache simulator in C, I got curious: on the ${ctx.team ?? "runtime"} side, how does your team weigh raw throughput against debuggability when designing systems-software abstractions? Understand if you're too busy. — ${ctx.candidateFirstName}`;
+  const concise = `Hi ${ctx.personFirstName} — ${ctx.university.includes("Illinois") ? "UIUC" : ctx.university} CS senior focused on low-level systems here, not asking for anything. After working on ${ctx.projectClaim}, I got curious: on the ${ctx.team ?? "runtime"} side, how does your team weigh raw throughput against debuggability when designing systems-software abstractions? Understand if you're too busy. — ${ctx.candidateFirstName}`;
 
   return {
     objective: `Ask one thoughtful, specific question about the team's systems-software work — no referral, interview, or application ask.`,
@@ -159,13 +159,13 @@ export function buildNetworkingCopy(ctx: OutreachContext): OutreachCopy {
     ``,
     `I'm a CS senior at ${ctx.university} working toward a 2026 systems software internship, and I'm trying to learn from people closer to ${ctx.company}'s work.`,
     ``,
-    `I've been building low-level projects — most recently a CPU cache simulator in C. If you have a few minutes sometime, I'd value any perspective you're willing to share about the team and the kind of work it does. No pressure at all.`,
+      `I've been building low-level projects — most recently: ${ctx.projectClaim}. If you have a few minutes sometime, I'd value any perspective you're willing to share about the team and the kind of work it does. No pressure at all.`,
     ``,
     `Thanks,`,
     ctx.candidateFirstName,
   ].join("\n");
 
-  const concise = `Hi ${ctx.personFirstName} — ${ctx.university.includes("Illinois") ? "UIUC" : ctx.university} CS senior aiming for a 2026 systems internship. I recently built a CPU cache simulator in C and would value any perspective you're willing to share about ${ctx.company}'s work. No pressure. — ${ctx.candidateFirstName}`;
+  const concise = `Hi ${ctx.personFirstName} — ${ctx.university.includes("Illinois") ? "UIUC" : ctx.university} CS senior aiming for a 2026 systems internship. I recently worked on ${ctx.projectClaim} and would value any perspective you're willing to share about ${ctx.company}'s work. No pressure. — ${ctx.candidateFirstName}`;
 
   return {
     objective: `Open a low-pressure networking conversation and learn about the team's work.`,

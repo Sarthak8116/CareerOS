@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { Sparkles } from "lucide-react";
-import type { Campaign } from "@/lib/types";
+import type { Campaign, Candidate } from "@/lib/types";
 import { getCampaign } from "@/lib/store";
-import { demoCandidate } from "@/lib/demo/candidate";
+import { getProfile } from "@/lib/profileStore";
 import { generateAllOutreach } from "@/lib/engine/outreach";
 import { Shell } from "@/components/Shell";
 import { ButtonLink, EmptyState } from "@/components/ui/primitives";
@@ -23,6 +23,7 @@ export default function OutreachPage() {
   const id = params.id;
 
   const [campaign, setCampaign] = useState<Campaign | undefined>(undefined);
+  const [candidate, setCandidate] = useState<Candidate | undefined>(undefined);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -31,6 +32,7 @@ export default function OutreachPage() {
       const c = await getCampaign(id);
       if (!active) return;
       setCampaign(c);
+      setCandidate(getProfile());
       setLoaded(true);
     })();
     return () => {
@@ -41,9 +43,9 @@ export default function OutreachPage() {
   const messages = useMemo(
     () =>
       campaign
-        ? generateAllOutreach(demoCandidate, campaign.job, campaign.people)
+        ? generateAllOutreach(candidate ?? getProfile(), campaign.job, campaign.people)
         : [],
-    [campaign],
+    [campaign, candidate],
   );
 
   /* Loading + not-found guards (no hydration flash). */

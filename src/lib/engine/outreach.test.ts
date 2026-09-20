@@ -66,4 +66,55 @@ describe("generateAllOutreach", () => {
       managerMsg!.claimsToVerify.some((c) => /unconfirmed|inferred/i.test(c)),
     ).toBe(true);
   });
+
+  it("uses only the imported candidate's evidence and copy", () => {
+    const imported = {
+      ...demoCandidate,
+      id: "cand_imported",
+      name: "Rosalind Ashgrove",
+      evidence: [
+        {
+          id: "real_project",
+          claim: "Built an embedded flight controller verification harness",
+          category: "project" as const,
+          sourceType: "github" as const,
+          sourceReference: "github.com/rashgrove/flight-check",
+          strength: "strong" as const,
+          recency: "current" as const,
+          publicProof: true,
+          trust: "source-backed" as const,
+        },
+        {
+          id: "real_c",
+          claim: "Developed C systems code for an embedded flight controller",
+          category: "skill" as const,
+          sourceType: "github" as const,
+          sourceReference: "github.com/rashgrove/flight-check",
+          strength: "strong" as const,
+          recency: "current" as const,
+          publicProof: true,
+          trust: "source-backed" as const,
+        },
+        {
+          id: "real_os",
+          claim: "Completed operating systems coursework",
+          category: "education" as const,
+          sourceType: "resume" as const,
+          sourceReference: "resume",
+          strength: "moderate" as const,
+          recency: "recent" as const,
+          publicProof: false,
+          trust: "user-provided" as const,
+        },
+      ],
+    };
+
+    const importedMessages = generateAllOutreach(imported, demoJob, demoPeople);
+    for (const message of importedMessages) {
+      expect(message.full.toLowerCase()).not.toContain("cache simulator");
+      for (const claim of message.evidenceUsed) {
+        expect(imported.evidence.map((evidence) => evidence.claim)).toContain(claim);
+      }
+    }
+  });
 });

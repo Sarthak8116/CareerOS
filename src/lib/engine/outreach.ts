@@ -1,4 +1,5 @@
 import type { Candidate, Job, Person, OutreachMessage } from "@/lib/types";
+import { LEVEL_RANK, matchSkill } from "@/lib/engine/skills";
 import {
   type OutreachRole,
   type OutreachContext,
@@ -54,16 +55,38 @@ function channelForRole(role: OutreachRole): "email" | "linkedin" {
 /* Context + evidence resolution                                       */
 /* ------------------------------------------------------------------ */
 
-const PROJECT_EVIDENCE_ID = "ev_cachesim";
-const C_EVIDENCE_ID = "ev_c";
-const OS_EVIDENCE_ID = "ev_os_course";
+type ResolvedOutreachEvidence = {
+  project?: Candidate["evidence"][number];
+  c?: Candidate["evidence"][number];
+  os?: Candidate["evidence"][number];
+};
+
+function resolveEvidence(
+  candidate: Candidate,
+  skillKey: string,
+  preferredCategory: Candidate["evidence"][number]["category"],
+): Candidate["evidence"][number] | undefined {
+  const supportingIds = new Set(matchSkill(skillKey, candidate).supportingEvidenceIds);
+  return [...candidate.evidence]
+    .filter((evidence) => supportingIds.has(evidence.id))
+    .sort((left, right) => {
+      const leftCategory = left.category === preferredCategory ? 1 : 0;
+      const rightCategory = right.category === preferredCategory ? 1 : 0;
+      if (leftCategory !== rightCategory) return rightCategory - leftCategory;
+      if (left.publicProof !== right.publicProof) return left.publicProof ? -1 : 1;
+      return LEVEL_RANK[right.strength] - LEVEL_RANK[left.strength];
+    })[0];
+}
 
 function resolveContext(candidate: Candidate, job: Job, person: Person): {
   ctx: OutreachContext;
-  claimOf: (id: string) => string;
+  evidence: ResolvedOutreachEvidence;
 } {
-  const byId = new Map(candidate.evidence.map((e) => [e.id, e] as const));
-  const claimOf = (id: string) => byId.get(id)?.claim ?? id;
+  const evidence: ResolvedOutreachEvidence = {
+    project: resolveEvidence(candidate, "systems_debug", "project"),
+    c: resolveEvidence(candidate, "c_cpp", "skill"),
+    os: resolveEvidence(candidate, "os_arch", "education"),
+  };
 
   const ctx: OutreachContext = {
     candidateFirstName: firstNameOf(candidate.name),
@@ -73,12 +96,12 @@ function resolveContext(candidate: Candidate, job: Job, person: Person): {
     jobTitle: job.title,
     company: job.company,
     team: job.team,
-    projectClaim: claimOf(PROJECT_EVIDENCE_ID),
-    cClaim: claimOf(C_EVIDENCE_ID),
-    osClaim: claimOf(OS_EVIDENCE_ID),
+    projectClaim: evidence.project?.claim ?? "a project from my background",
+    cClaim: evidence.c?.claim ?? "my recorded systems background",
+    osClaim: evidence.os?.claim ?? "my recorded coursework",
     workAuth: candidate.workAuthorization,
   };
-  return { ctx, claimOf };
+  return { ctx, evidence };
 }
 
 function copyForRole(role: OutreachRole, ctx: OutreachContext): OutreachCopy {
@@ -95,16 +118,23 @@ function copyForRole(role: OutreachRole, ctx: OutreachContext): OutreachCopy {
 }
 
 /** Which candidate evidence claims each role's copy actually references. */
-function evidenceUsedForRole(role: OutreachRole, claimOf: (id: string) => string): string[] {
-  switch (role) {
-    case "recruiter":
-      return [claimOf(C_EVIDENCE_ID), claimOf(PROJECT_EVIDENCE_ID), claimOf(OS_EVIDENCE_ID)];
-    case "likely-manager":
-      return [claimOf(PROJECT_EVIDENCE_ID)];
-    case "alumnus":
-    default:
-      return [claimOf(PROJECT_EVIDENCE_ID), claimOf(C_EVIDENCE_ID)];
-  }
+function evidenceUsedForRole(
+  role: OutreachRole,
+  evidence: ResolvedOutreachEvidence,
+): string[] {
+  const selected =
+    role === "recruiter"
+      ? [evidence.c, evidence.project, evidence.os]
+      : role === "likely-manager"
+        ? [evidence.project]
+        : [evidence.project, evidence.c];
+  return [
+    ...new Set(
+      selected
+        .filter((item): item is Candidate["evidence"][number] => Boolean(item))
+        .map((item) => item.claim),
+    ),
+  ];
 }
 
 /* ------------------------------------------------------------------ */
@@ -119,7 +149,7 @@ export function generateOutreach(input: {
   const { candidate, job, person } = input;
   const role = classifyOutreachRole(person);
   const channel = channelForRole(role);
-  const { ctx, claimOf } = resolveContext(candidate, job, person);
+  const { ctx, evidence } = resolveContext(candidate, job, person);
 
   const copy = copyForRole(role, ctx);
 
@@ -169,7 +199,7 @@ export function generateOutreach(input: {
     full: copy.full,
     concise: copy.concise,
     personalizationFacts,
-    evidenceUsed: evidenceUsedForRole(role, claimOf),
+    evidenceUsed: evidenceUsedForRole(role, evidence),
     claimsToVerify,
     recommendedSendTime: recommendedSendTime(channel),
     followUpDate: FOLLOW_UP,
