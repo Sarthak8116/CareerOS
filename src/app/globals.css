@@ -45,7 +45,33 @@
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-slate-200 bg-white shadow-card;
+    @apply rounded-2xl border border-slate-200/80 bg-white/90 shadow-card backdrop-blur-sm transition-shadow;
+  }
+  /* The one brand gradient. Used for the logo, primary actions and accents. */
+  .brand-gradient {
+    background-image: linear-gradient(135deg, #2549ea 0%, #6d4df2 55%, #a855f7 100%);
+  }
+  .brand-gradient-text {
+    background-image: linear-gradient(135deg, #1d38d7 0%, #6d4df2 55%, #a855f7 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* A card with a hairline gradient border, for the one thing that matters most. */
+  .card-accent {
+    @apply relative rounded-2xl bg-white shadow-lift;
+    border: 1px solid transparent;
+    background-image: linear-gradient(#fff, #fff),
+      linear-gradient(135deg, rgb(37 73 234 / 0.55), rgb(168 85 247 / 0.55));
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+  }
+  /* Soft colour wash behind the whole app. Fixed, so it never scrolls. */
+  .app-backdrop {
+    background-color: #f7f9fc;
+    background-image: radial-gradient(60rem 32rem at 100% -10%, rgb(168 85 247 / 0.10), transparent 60%),
+      radial-gradient(50rem 30rem at -10% 0%, rgb(37 73 234 / 0.10), transparent 55%);
+    background-attachment: fixed;
   }
   .muted {
     @apply text-slate-500;

@@ -16,11 +16,11 @@ export default function NotFound() {
       </h1>
       <p className="mt-2 max-w-md text-sm leading-relaxed text-slate-500">
         The page you&apos;re looking for may have been reset, moved, or never
-        existed. Head back to Mission Control to pick up where you left off.
+        existed. Head back to Home to pick up where you left off.
       </p>
       <div className="mt-8 flex items-center gap-3">
         <ButtonLink href="/dashboard">
-          <ArrowLeft className="h-4 w-4" /> Back to Mission Control
+          <ArrowLeft className="h-4 w-4" /> Back to Home
         </ButtonLink>
         <Link
           href="/"

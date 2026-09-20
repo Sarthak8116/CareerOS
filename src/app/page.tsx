@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { QuickStart } from "@/components/QuickStart";
 import {
   Sparkles,
   Network,
@@ -34,17 +35,17 @@ const features = [
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="app-backdrop min-h-screen">
       {/* Nav */}
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-white">
+          <div className="brand-gradient flex h-8 w-8 items-center justify-center rounded-lg text-white shadow-glow">
             <Sparkles className="h-4 w-4" />
           </div>
           <span className="font-serif text-lg font-semibold tracking-tight">CareerOS</span>
         </div>
-        <ButtonLink href="/demo" variant="secondary" size="sm">
-          Open the demo
+        <ButtonLink href="/dashboard" variant="secondary" size="sm">
+          Open the app
         </ButtonLink>
       </header>
 
@@ -56,23 +57,27 @@ export default function Landing() {
             Built for students and professionals
           </span>
           <h1 className="mt-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-            Turn every job opportunity into a complete campaign for getting hired.
+            Turn every job opportunity into a{" "}
+            <span className="brand-gradient-text">complete campaign</span> for getting hired.
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-600">
             CareerOS doesn&apos;t just help you apply. It researches each opportunity,
             understands your evidence, maps the hiring network, and runs a full
             campaign designed to help you win the role.
           </p>
-          <div className="mt-8 flex items-center justify-center gap-3">
-            <ButtonLink href="/dashboard" size="lg">
-              Open Mission Control <ArrowRight className="h-4 w-4" />
+          <div className="mx-auto mt-8 max-w-xl text-left">
+            <QuickStart />
+          </div>
+          <div className="mt-4 flex items-center justify-center gap-3">
+            <ButtonLink href="/demo" variant="secondary" size="sm">
+              See the sample campaign <ArrowRight className="h-4 w-4" />
             </ButtonLink>
-            <ButtonLink href="/jobs" variant="secondary" size="lg">
-              Build a campaign
+            <ButtonLink href="/dashboard" variant="ghost" size="sm">
+              Open the app
             </ButtonLink>
           </div>
           <p className="mt-4 text-sm text-slate-400">
-            Runs in demo mode with a real sample campaign, no sign-up, no API keys.
+            No sign-up and no API keys needed. Everything stays in your browser.
           </p>
         </div>
 
@@ -108,7 +113,7 @@ export default function Landing() {
 
       <footer className="border-t border-slate-200 py-8">
         <div className="mx-auto max-w-6xl px-6 text-center text-sm text-slate-400">
-          CareerOS, foundation + first vertical slice. Demo-mode build.
+          CareerOS. Evidence-backed job campaigns.
           <Link href="/dashboard" className="ml-2 font-medium text-brand-600 hover:underline">
             Enter the app →
           </Link>

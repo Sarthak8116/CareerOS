@@ -34,16 +34,10 @@ const steps = [
     href: "/onboarding/github",
   },
   {
-    icon: Mail,
-    title: "Gmail",
-    body: "Connected for approved outreach, messages only send with your OK.",
-    href: null,
-  },
-  {
     icon: Linkedin,
     title: "LinkedIn",
-    body: "Profile linked to map the hiring network around each role.",
-    href: null,
+    body: "Import your Connections.csv to flag people you already know.",
+    href: "/onboarding/linkedin",
   },
   {
     icon: SlidersHorizontal,
@@ -138,7 +132,7 @@ export default function Onboarding() {
             className="w-full sm:w-auto"
             onClick={() => router.push("/dashboard")}
           >
-            Go to Mission Control <ArrowRight className="h-4 w-4" />
+            Go to Home <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
       </div>

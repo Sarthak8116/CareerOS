@@ -61,7 +61,7 @@ export default function CampaignInterviewPage() {
         />
         <div className="mt-4">
           <ButtonLink href="/dashboard" variant="secondary" size="sm">
-            Back to Mission Control
+            Back to Home
           </ButtonLink>
         </div>
       </Shell>
@@ -78,11 +78,6 @@ export default function CampaignInterviewPage() {
   return (
     <Shell>
       {/* Back-link to the campaign */}
-      <div className="mb-3">
-        <ButtonLink href={`/campaigns/${campaign.id}`} variant="ghost" size="sm">
-          ← Back to campaign
-        </ButtonLink>
-      </div>
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">

@@ -95,7 +95,7 @@ export default function CampaignDetailPage() {
         />
         <div className="mt-4">
           <ButtonLink href="/dashboard" variant="secondary" size="sm">
-            Back to Mission Control
+            Back to Home
           </ButtonLink>
         </div>
       </Shell>
@@ -110,7 +110,7 @@ export default function CampaignDetailPage() {
       {/* Header */}
       <div className="mb-3">
         <ButtonLink href="/dashboard" variant="ghost" size="sm">
-          ← Mission Control
+          ← Home
         </ButtonLink>
       </div>
 
@@ -133,14 +133,14 @@ export default function CampaignDetailPage() {
       </div>
 
       {/* Next action highlight */}
-      <Card className="mt-5 border-l-4 border-l-brand-500 bg-brand-50/40">
-        <p className="text-xs font-medium uppercase tracking-wide text-brand-700">
+      <div className="card-accent mt-5 p-5">
+        <p className="brand-gradient-text text-xs font-semibold uppercase tracking-wide">
           Strongest next action
         </p>
         <p className="mt-1 text-base font-medium text-slate-800">
           {campaign.nextAction}
         </p>
-      </Card>
+      </div>
 
       {/* Deep-dive modules (sub-routes) */}
       <div className="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-5">

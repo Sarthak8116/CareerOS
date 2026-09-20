@@ -81,6 +81,12 @@ export function JobLinkIntake({
 }) {
   const router = useRouter();
   const [url, setUrl] = useState("");
+  // A link handed over from Home or the landing page: filled in, never
+  // fetched until the user presses the button themselves.
+  useEffect(() => {
+    const handed = new URLSearchParams(window.location.search).get("link");
+    if (handed) setUrl(handed.slice(0, 2000));
+  }, []);
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [shapeError, setShapeError] = useState<string | null>(null);
   const [adapters, setAdapters] = useState<{ key: string; label: string }[]>([]);

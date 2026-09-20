@@ -69,7 +69,7 @@ export default function OutreachPage() {
         />
         <div className="mt-4">
           <ButtonLink href="/dashboard" variant="secondary" size="sm">
-            Back to Mission Control
+            Back to Home
           </ButtonLink>
         </div>
       </Shell>
@@ -81,11 +81,6 @@ export default function OutreachPage() {
   return (
     <Shell>
       {/* Header */}
-      <div className="mb-3">
-        <ButtonLink href={`/campaigns/${campaign.id}`} variant="ghost" size="sm">
-          ← Back to campaign
-        </ButtonLink>
-      </div>
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>

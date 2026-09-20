@@ -35,6 +35,7 @@ const config: Config = {
       boxShadow: {
         card: "0 1px 2px 0 rgb(16 24 40 / 0.04), 0 1px 3px 0 rgb(16 24 40 / 0.06)",
         lift: "0 8px 24px -8px rgb(16 24 40 / 0.12)",
+        glow: "0 6px 20px -6px rgb(109 77 242 / 0.55)",
       },
     },
   },

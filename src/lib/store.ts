@@ -135,6 +135,24 @@ export function saveCampaign(campaign: Campaign) {
   writeRaw(next);
 }
 
+/** Move a campaign along the pipeline (the Tracker's one write). */
+export async function setCampaignStage(
+  campaignId: string,
+  stage: Campaign["stage"],
+): Promise<Campaign | undefined> {
+  const all = await ensureSeededCampaigns();
+  const campaign = all.find((c) => c.id === campaignId);
+  if (!campaign) return undefined;
+  const updated: Campaign = { ...campaign, stage };
+  saveCampaign(updated);
+  return updated;
+}
+
+/** Remove one campaign. The seeded demo campaign comes back on next load. */
+export function deleteCampaign(campaignId: string) {
+  writeRaw(readRaw().filter((c) => c.id !== campaignId));
+}
+
 /** Toggle a task's completion (persists). Returns the updated campaign. */
 export async function setTaskStatus(
   campaignId: string,

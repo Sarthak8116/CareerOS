@@ -404,8 +404,8 @@ export default function ImportLinkedin() {
       </Card>
 
       <div className="mt-8 flex items-center justify-between">
-        <ButtonLink href="/onboarding/gmail" variant="ghost" size="sm">
-          Back: Gmail
+        <ButtonLink href="/onboarding/github" variant="ghost" size="sm">
+          Back: GitHub
         </ButtonLink>
         <ButtonLink
           href="/onboarding/preferences"

@@ -5,6 +5,7 @@ import { ArrowRight, RotateCcw, Sparkles } from "lucide-react";
 import type { Campaign } from "@/lib/types";
 import { getCampaigns, resetToDemo } from "@/lib/store";
 import { Shell } from "@/components/Shell";
+import { QuickStart } from "@/components/QuickStart";
 import {
   Button,
   ButtonLink,
@@ -89,7 +90,7 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            Mission Control
+            Home
           </h1>
           <p className="mt-1 text-sm text-slate-500">
             Every opportunity you&apos;re pursuing, with the single strongest next
@@ -112,6 +113,10 @@ export default function DashboardPage() {
             <ArrowRight className="h-4 w-4" />
           </ButtonLink>
         </div>
+      </div>
+
+      <div className="mt-6">
+        <QuickStart />
       </div>
 
       {loading ? (

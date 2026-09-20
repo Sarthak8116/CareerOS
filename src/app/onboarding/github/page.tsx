@@ -151,10 +151,10 @@ export default function ConnectGithub() {
           Cancel
         </ButtonLink>
         <ButtonLink
-          href="/onboarding/gmail"
+          href="/onboarding/linkedin"
           variant={connected ? "primary" : "secondary"}
         >
-          Next: Gmail
+          Next: LinkedIn
           <ArrowRight className="h-4 w-4" />
         </ButtonLink>
       </div>
