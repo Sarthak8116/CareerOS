@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  VoiceError,
   MAX_TTS_CHARS,
   synthesizeSpeech,
   voiceAvailable,
@@ -28,7 +29,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "That text is too long to read aloud." }, { status: 413 });
   }
   if (!voiceAvailable()) {
-    return NextResponse.json({ error: voiceSafeMessage(null) }, { status: 503 });
+    return NextResponse.json({ error: voiceSafeMessage(new VoiceError("disabled", "")) }, { status: 503 });
   }
   try {
     const audio = await synthesizeSpeech(text);

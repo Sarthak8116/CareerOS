@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  VoiceError,
   MAX_AUDIO_BYTES,
   transcribeSpeech,
   voiceAvailable,
@@ -12,7 +13,7 @@ export const runtime = "nodejs";
 /** POST multipart { audio } → { text }. The recording is not stored. */
 export async function POST(req: Request) {
   if (!voiceAvailable()) {
-    return NextResponse.json({ error: voiceSafeMessage(null) }, { status: 503 });
+    return NextResponse.json({ error: voiceSafeMessage(new VoiceError("disabled", "")) }, { status: 503 });
   }
   let audio: FormDataEntryValue | null;
   try {
