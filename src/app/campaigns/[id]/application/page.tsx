@@ -13,7 +13,12 @@ import { getCampaign, setResumeRecommendationStatus } from "@/lib/store";
 import { getAnswers } from "@/lib/answers";
 import { getProfile } from "@/lib/profileStore";
 import { getResumeRecommendations, verifyClaims } from "@/lib/engine/resume";
+import type { ResumeStyleMemory } from "@/lib/engine/resume";
 import { computeRequirementCoverage } from "@/lib/engine/keywords";
+import {
+  getStyleMemory,
+  recordResumeDecision,
+} from "@/lib/styleMemory";
 import {
   CoverLetterDraft,
   type CoverLetterOrigin,
@@ -59,6 +64,9 @@ export default function ApplicationStudioPage() {
    * once, in the one place that owns that decision.
    */
   const [candidate, setCandidate] = useState<Candidate | undefined>(undefined);
+  const [styleMemory, setStyleMemory] = useState<ResumeStyleMemory | undefined>(
+    undefined,
+  );
   const [loaded, setLoaded] = useState(false);
 
   /* The package is built ON REQUEST, not on mount: with a key present it costs
@@ -77,6 +85,7 @@ export default function ApplicationStudioPage() {
       if (!active) return;
       setCampaign(c);
       setCandidate(getProfile());
+      setStyleMemory(getStyleMemory());
       setLoaded(true);
     })();
     return () => {
@@ -93,11 +102,11 @@ export default function ApplicationStudioPage() {
   const recommendations = useMemo(() => {
     if (!campaign || !candidate) return [];
     const decisions = campaign.resumeDecisions ?? {};
-    return getResumeRecommendations(candidate, campaign.job).map((rec) => ({
+    return getResumeRecommendations(candidate, campaign.job, styleMemory).map((rec) => ({
       ...rec,
       status: decisions[rec.id] ?? rec.status,
     }));
-  }, [campaign, candidate]);
+  }, [campaign, candidate, styleMemory]);
 
   const coverage = useMemo(
     () =>
@@ -110,15 +119,27 @@ export default function ApplicationStudioPage() {
   const decideRecommendation = useCallback(
     (recommendationId: string, status: ResumeRecommendation["status"]) => {
       void (async () => {
+        const current = recommendations.find((rec) => rec.id === recommendationId);
         const updated = await setResumeRecommendationStatus(
           id,
           recommendationId,
           status,
         );
-        if (updated) setCampaign(updated);
+        if (!updated) return;
+        setCampaign(updated);
+        if (current) {
+          setStyleMemory(
+            recordResumeDecision({
+              original: current.original,
+              suggested: current.suggested,
+              previousStatus: current.status,
+              nextStatus: status,
+            }),
+          );
+        }
       })();
     },
-    [id],
+    [id, recommendations],
   );
   const flags = useMemo(
     () => (candidate ? verifyClaims(candidate) : []),

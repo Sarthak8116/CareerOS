@@ -3,6 +3,7 @@
 import type { Candidate, Evidence, EvidenceSource } from "@/lib/types";
 import { Candidate as CandidateSchema, Evidence as EvidenceSchema } from "@/lib/types";
 import { demoCandidate } from "@/lib/demo/candidate";
+import { resetStyleMemory } from "@/lib/styleMemory";
 
 /**
  * Candidate profile persistence — the "profile memory" layer.
@@ -221,5 +222,6 @@ export function fillProfileFields(
 /** Wipe the stored profile and fall back to the demo candidate. */
 export function resetProfile(): Candidate {
   if (canPersist()) window.localStorage.removeItem(KEY);
+  resetStyleMemory();
   return demoCandidate;
 }

@@ -143,4 +143,16 @@ describe("getResumeRecommendations", () => {
     // that unsupported, and the rewrite gate reuses it rather than a softer rule.
     for (const rec of recs) expect(rec.evidenceUsed).not.toContain("ev_gpu:");
   });
+
+  it("applies a learned preference against merged bullets", () => {
+    const styled = getResumeRecommendations(demoCandidate, demoJob, {
+      proofLinks: "more",
+      mergedBullets: "less",
+    });
+    const debug = styled.find((rec) => rec.id === "rec_req_debug");
+
+    expect(debug).toBeDefined();
+    expect(debug!.suggested).not.toContain("; ");
+    expect(debug!.suggested).toContain("github.com/avechen/cachesim");
+  });
 });

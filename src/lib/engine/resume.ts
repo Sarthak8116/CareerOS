@@ -18,6 +18,13 @@ import {
   type RequirementCoverage,
 } from "@/lib/engine/keywords";
 
+export type ResumeStylePreference = "more" | "less" | "neutral";
+
+export interface ResumeStyleMemory {
+  proofLinks: ResumeStylePreference;
+  mergedBullets: ResumeStylePreference;
+}
+
 /**
  * Resume & Application Studio engine (§5.8).
  *
@@ -130,12 +137,21 @@ function proofReference(evidence: Evidence): string | undefined {
  * first time that proof appears. Two rows often share one repo, and printing
  * the same link twice in one line reads as padding rather than as evidence.
  */
-function mergeBullet(cited: Evidence[]): string {
+function mergeBullet(
+  cited: Evidence[],
+  styleMemory?: ResumeStyleMemory,
+): string {
   const seen = new Set<string>();
   return cited
     .map((evidence) => {
       const ref = proofReference(evidence);
-      if (!ref || seen.has(ref)) return evidence.claim;
+      if (
+        styleMemory?.proofLinks === "less" ||
+        !ref ||
+        seen.has(ref)
+      ) {
+        return evidence.claim;
+      }
       seen.add(ref);
       return `${evidence.claim} (${ref})`;
     })
@@ -223,6 +239,7 @@ function reasonFor(row: RequirementCoverage, merged: boolean): string {
 export function getResumeRecommendations(
   candidate: Candidate,
   job: Job,
+  styleMemory?: ResumeStyleMemory,
 ): ResumeRecommendation[] {
   const recommendations: ResumeRecommendation[] = [];
 
@@ -233,23 +250,25 @@ export function getResumeRecommendations(
       row.supportingEvidenceIds.includes(e.id),
     );
     const cited = orderForBullet(supporting).slice(0, MAX_MERGED_EVIDENCE);
-    if (cited.length === 0) continue;
+    const bulletEvidence =
+      styleMemory?.mergedBullets === "less" ? cited.slice(0, 1) : cited;
+    if (bulletEvidence.length === 0) continue;
 
-    const original = cited[0].claim;
-    const suggested = mergeBullet(cited);
+    const original = bulletEvidence[0].claim;
+    const suggested = mergeBullet(bulletEvidence, styleMemory);
     // Nothing to change is not a recommendation.
     if (suggested === original) continue;
-    if (!isGrounded(candidate, suggested, cited)) continue;
+    if (!isGrounded(candidate, suggested, bulletEvidence)) continue;
 
     recommendations.push({
       id: `rec_${row.requirementId}`,
-      section: SECTION_FOR_CATEGORY[cited[0].category],
+      section: SECTION_FOR_CATEGORY[bulletEvidence[0].category],
       original,
       suggested,
-      reason: reasonFor(row, cited.length > 1),
+      reason: reasonFor(row, bulletEvidence.length > 1),
       requirementAddressed: row.requirement,
-      evidenceUsed: citeEvidence(candidate, cited.map((e) => e.id)),
-      confidence: rewriteConfidence(candidate, cited),
+      evidenceUsed: citeEvidence(candidate, bulletEvidence.map((e) => e.id)),
+      confidence: rewriteConfidence(candidate, bulletEvidence),
       status: "pending" as const,
     });
   }
