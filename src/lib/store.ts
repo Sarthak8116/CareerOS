@@ -24,6 +24,7 @@ import { resetOutreachStates } from "@/lib/outreachStore";
  */
 
 const KEY = "careeros:campaigns:v1";
+const RETIRED_JOB_ID = "job_quillfeather_founding";
 const SEED_STAMP = "2026-07-14T00:00:00.000Z";
 
 function canPersist() {
@@ -39,6 +40,9 @@ function readRaw(): Campaign[] {
     if (!Array.isArray(parsed)) return [];
     // Validate each; drop anything that no longer matches the schema.
     return parsed
+      // A sample company that was removed from the app; drop any campaign a
+      // browser still has saved for it.
+      .filter((c) => c?.job?.id !== RETIRED_JOB_ID)
       .map((c) => CampaignSchema.safeParse(c))
       .filter((r) => r.success)
       .map((r) => (r as { data: Campaign }).data);
@@ -216,5 +220,5 @@ export async function resetToDemo(): Promise<Campaign[]> {
 
 export const DEMO_CANDIDATE = demoCandidate;
 export const DEMO_JOB = demoJob;
-/** Every cached sample role (a large company and a startup). */
+/** Every cached sample role. */
 export const DEMO_JOBS = demoJobs;

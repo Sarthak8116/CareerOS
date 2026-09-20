@@ -16,7 +16,7 @@ describe("matchSkill (demoCandidate)", () => {
     expect(m.level).toBe("strong");
     expect(m.confidence).toBe("high");
     // ev_py is the only supporting row and it exists on the candidate.
-    expect(m.supportingEvidenceIds).toEqual(["ev_py", "ev_oss"]);
+    expect(m.supportingEvidenceIds).toEqual(["ev_py"]);
     const ids = demoCandidate.evidence.map((e) => e.id);
     for (const id of m.supportingEvidenceIds) expect(ids).toContain(id);
   });
@@ -66,7 +66,6 @@ describe("matchSkill (demoCandidate)", () => {
 
     expect(matchSkill("python", imported).supportingEvidenceIds).toEqual([
       "imported_0",
-      "imported_11",
     ]);
     expect(matchSkill("systems_debug", imported).supportingEvidenceIds).toEqual([
       "imported_1",

@@ -88,28 +88,3 @@ describe("§19 demo flow — end to end", () => {
     expect(qs.some((q) => q.category === "project-deep-dive")).toBe(true);
   });
 });
-
-describe("the startup sample role", () => {
-  it("builds a full, distinct campaign for the same candidate", async () => {
-    const { getCampaignProvider } = await import("@/lib/providers/ai");
-    const { demoCandidate } = await import("@/lib/demo/candidate");
-    const { demoJob, demoStartupJob } = await import("@/lib/demo/job");
-    const { getCompanyIntel } = await import("@/lib/engine/company");
-    const provider = getCampaignProvider();
-    const startup = await provider.buildCampaign({ candidate: demoCandidate, job: demoStartupJob, createdAt: "t" });
-    const nvidia = await provider.buildCampaign({ candidate: demoCandidate, job: demoJob, createdAt: "t" });
-
-    expect(startup.isDemo).toBe(true);
-    expect(startup.people).toHaveLength(3);
-    expect(startup.people.every((p) => p.company === "Quillfeather AI")).toBe(true);
-    // The startup's real gap is operations, not CUDA — and it leads.
-    expect(startup.gaps[0].id).toBe("gap_devops");
-    expect(startup.nextAction).not.toBe(nvidia.nextAction);
-    // Shipped work is what this posting asks for, and the candidate has it.
-    expect(startup.gaps.some((g) => g.requirementId === "req_ship")).toBe(false);
-
-    const intel = getCompanyIntel(demoStartupJob);
-    expect(intel.description).toMatch(/fictional/i);
-    expect(intel.sources.every((s) => new URL(s.url).hostname.endsWith(".example"))).toBe(true);
-  });
-});

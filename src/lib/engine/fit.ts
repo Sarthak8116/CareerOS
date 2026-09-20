@@ -5,7 +5,8 @@ import type {
   FitDimension,
   Level,
 } from "@/lib/types";
-import { matchSkill, LEVEL_RANK } from "@/lib/engine/skills";
+import { LEVEL_RANK } from "@/lib/engine/skills";
+import { computeRequirementCoverage } from "@/lib/engine/keywords";
 
 /**
  * Computes the six categorical fit dimensions (build directive §5.3, §5.7).
@@ -27,15 +28,13 @@ export function computeFit(
   job: Job,
   people: Person[],
 ): FitDimension[] {
-  const minReqs = job.requirements.filter(
-    (r) => r.kind === "minimum" && r.skillKey,
-  );
-  const prefReqs = job.requirements.filter(
-    (r) => r.kind === "preferred" && r.skillKey,
-  );
-
-  const minMatches = minReqs.map((r) => matchSkill(r.skillKey!, candidate));
-  const prefMatches = prefReqs.map((r) => matchSkill(r.skillKey!, candidate));
+  // Coverage, not raw skill keys: an imported posting has no canonical
+  // `skillKey`s, and reading only keyed requirements reported "meets 0 of 0"
+  // for every real job while the coverage engine knew the actual answer.
+  const coverage = computeRequirementCoverage(candidate, job);
+  const minMatches = coverage.filter((r) => r.kind === "minimum");
+  const prefMatches = coverage.filter((r) => r.kind === "preferred");
+  const minReqs = minMatches;
 
   /* Role fit — coverage of the minimum bar. */
   const roleLevel = averageLevel(minMatches.map((m) => m.level));
@@ -55,10 +54,12 @@ export function computeFit(
   const titleMatch = candidate.targetRoles.some((r) =>
     job.normalizedTitle.toLowerCase().includes(r.toLowerCase().split(" ")[0]),
   );
-  const industryMatch = candidate.targetIndustries.some((i) =>
-    ["semiconductor", "ai", "infra", "developer"].some((k) =>
-      i.toLowerCase().includes(k),
-    ),
+  const jobText = `${job.company} ${job.team ?? ""} ${job.description}`.toLowerCase();
+  const industryMatch = candidate.targetIndustries.some((industry) =>
+    industry
+      .toLowerCase()
+      .split(/[^a-z0-9+#]+/)
+      .some((word) => word.length > 3 && jobText.includes(word)),
   );
   const preferenceLevel: Level =
     titleMatch && industryMatch ? "strong" : titleMatch || industryMatch ? "moderate" : "limited";
@@ -97,19 +98,29 @@ export function computeFit(
   const urgencyLevel: Level = job.deadline ? "moderate" : "limited";
 
   /* Improvement potential — how much a quick sprint could raise the profile. */
-  const weakPrefs = prefMatches.filter((m) => LEVEL_RANK[m.level] <= 1).length;
+  const closeToMet = coverage.filter((r) => r.state === "partially-covered").length;
+  // Only a canonically-keyed preferred skill has a known quick path to proof.
+  const weakPrefs = prefMatches.filter(
+    (m) => m.skillKey && LEVEL_RANK[m.level] <= 1,
+  ).length;
   const improvementLevel: Level =
-    weakPrefs >= 1 ? "strong" : "moderate";
+    closeToMet >= 1 || weakPrefs >= 1 ? "strong" : "limited";
+  const hasAlum = people.some((p) => /alum|same university/i.test(p.connection));
 
   return [
     {
       category: "role",
       label: "Role Fit",
       level: roleLevel,
-      confidence: "high",
-      explanation: `Meets ${metMin} of ${minReqs.length} minimum requirements with moderate-or-better evidence. Core systems + C background aligns with the role; ${
-        metMin < minReqs.length ? "one area is thinner (see gaps)." : "coverage is broad."
-      }`,
+      confidence: minReqs.length === 0 ? "low" : "high",
+      explanation:
+        minReqs.length === 0
+          ? "This posting lists no minimum requirements we could read, so role fit cannot be judged from it."
+          : `Meets ${metMin} of ${minReqs.length} minimum requirements with moderate-or-better evidence; ${
+              metMin < minReqs.length
+                ? `${minReqs.length - metMin} ${minReqs.length - metMin === 1 ? "is" : "are"} thinner or unanswered (see gaps).`
+                : "coverage is broad."
+            }`,
       supportingEvidenceIds: minMatches.flatMap((m) => m.supportingEvidenceIds),
     },
     {
@@ -117,7 +128,7 @@ export function computeFit(
       label: "Evidence Fit",
       level: evidenceLevel,
       confidence: publicProof >= 2 ? "high" : "medium",
-      explanation: `${publicProof} of the supporting claims have public proof (GitHub repos). Systems and Python claims are source-backed; a few resume claims are user-provided only.`,
+      explanation: `${publicProof} of the ${new Set(supportingIds).size} evidence items supporting this role have public proof someone can check.`,
       supportingEvidenceIds: supportingIds,
     },
     {
@@ -125,7 +136,14 @@ export function computeFit(
       label: "Preference Fit",
       level: preferenceLevel,
       confidence: "high",
-      explanation: `The role matches the candidate's stated target of a systems/software internship in AI-infrastructure / semiconductors.`,
+      explanation:
+        titleMatch && industryMatch
+          ? "The title and the company's area both match your stated targets."
+          : titleMatch
+            ? "The title matches a role you are targeting; the company's area is outside your stated industries."
+            : industryMatch
+              ? "The company's area matches your stated industries, but the title is not one you listed as a target."
+              : "Neither the title nor the company's area matches your stated targets — worth a deliberate decision before investing in it.",
       supportingEvidenceIds: [],
     },
     {
@@ -136,7 +154,9 @@ export function computeFit(
       explanation:
         sourcedContacts > 0
           ? `${sourcedContacts} contacts found from public LinkedIn profiles, ${warmContacts} with overlapping background (${stronglyWarm} sharing a school or former employer). Employer and title are source-backed; overlap is common ground, not a connection, and reporting lines are not established.`
-          : `${strongRelevance} strongly-relevant contacts identified, including a same-university alumnus on the likely team. Reporting lines are inferred, not confirmed.`,
+          : people.length === 0
+            ? "No contacts identified yet for this company."
+            : `${strongRelevance} strongly-relevant contacts identified${hasAlum ? ", including someone from your university" : ""}. Reporting lines are inferred, not confirmed.`,
       supportingEvidenceIds: [],
     },
     {
@@ -154,7 +174,12 @@ export function computeFit(
       label: "Improvement Potential",
       level: improvementLevel,
       confidence: "medium",
-      explanation: `Several requirements are close to met — a short focused sprint (README polish, one resume rewrite, one small GPU exercise) could visibly strengthen this application.`,
+      explanation:
+        closeToMet >= 1
+          ? `${closeToMet} ${closeToMet === 1 ? "requirement is" : "requirements are"} partly met — a short focused sprint on wording and public proof could visibly strengthen this application.`
+          : weakPrefs >= 1
+            ? "A preferred skill is within reach of one small, focused project."
+            : "Few requirements are partly met, so quick wins are limited; larger gaps need new evidence.",
       supportingEvidenceIds: [],
     },
   ];

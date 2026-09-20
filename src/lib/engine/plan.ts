@@ -7,6 +7,7 @@ import type {
   Candidate,
   FitDimension,
 } from "@/lib/types";
+import { ELIGIBILITY } from "@/lib/engine/gaps";
 
 /**
  * Campaign Planner (build directive §5.18) — turns gaps + network into an
@@ -39,7 +40,7 @@ const ACTION_TO_CATEGORY: Record<string, CampaignTask["category"]> = {
 export function computeTasks(
   gaps: Gap[],
   people: Person[],
-  _job: Job,
+  job: Job,
 ): CampaignTask[] {
   const tasks: CampaignTask[] = [];
 
@@ -90,7 +91,7 @@ export function computeTasks(
   // 4) Interview prep.
   tasks.push({
     id: "task_interview",
-    title: "Prepare two technical topics (memory hierarchy, GPU basics)",
+    title: interviewPrepTitle(job),
     category: "interview",
     priority: "medium",
     impact: "moderate",
@@ -100,6 +101,17 @@ export function computeTasks(
   });
 
   return tasks;
+}
+
+/** Prep topics come from what THIS posting asks for, not a fixed syllabus. */
+function interviewPrepTitle(job: Job): string {
+  const topics = job.requirements
+    .filter((r) => r.kind !== "responsibility" && !ELIGIBILITY.test(r.text))
+    .slice(0, 2)
+    .map((r) => (r.text.length > 48 ? `${r.text.slice(0, 45).trimEnd()}…` : r.text));
+  return topics.length > 0
+    ? `Prepare to speak to: ${topics.join("; ")}`
+    : "Prepare two stories from your strongest recorded work";
 }
 
 /**
@@ -125,41 +137,49 @@ export function computeActivity(
     },
     {
       agent: "Company Researcher",
-      message: `Identified likely team: ${job.team}. Role centers on GPU runtime/driver systems software.`,
+      message: job.team
+        ? `Identified likely team: ${job.team}.`
+        : `The posting does not name a team at ${job.company}.`,
       kind: "conclusion",
       confidence: "medium",
     },
     {
       agent: "Candidate Analyst",
-      message: `Found strong source-backed evidence for Python and systems (C, cache simulator); ${roleFit} overall role fit.`,
+      message: `${candidate.evidence.filter((e) => e.trust === "source-backed" || e.trust === "verified").length} of ${candidate.evidence.length} evidence items are source-backed; role fit: ${roleFit}.`,
       kind: "evidence",
       confidence: "high",
     },
     {
       agent: "Team Mapper",
       message: alum
-        ? `Found ${people.length} relevant people, including ${alum.name} — a same-university alumnus likely on the team.`
+        ? `Found ${people.length} relevant people; ${alum.name} is the warmest first contact.`
         : `Mapped ${people.length} potentially relevant people.`,
       kind: "conclusion",
       confidence: "medium",
     },
     {
       agent: "Source Verifier",
-      message: `Manager and reporting lines are inferred from public signals, not confirmed. Marked as strong/weak inference accordingly.`,
+      message:
+        people.length > 0
+          ? "Manager and reporting lines are inferred from public signals, not confirmed. Marked as strong/weak inference accordingly."
+          : "No people were researched for this company, so nothing about its team is asserted.",
       kind: "conflict",
       confidence: "low",
     },
     {
       agent: "Gap Analyst",
-      message: trueGap
-        ? `One true skill gap (GPU/CUDA) and one resume-wording gap identified — both converted to concrete actions.`
-        : `Gaps converted into actions.`,
+      message:
+        gaps.length === 0
+          ? "No gaps found against the requirements this posting lists."
+          : `${gaps.length} ${gaps.length === 1 ? "gap" : "gaps"} identified${trueGap ? `, led by: ${trueGap.requirement}` : ""} — each converted to a concrete action.`,
       kind: "conclusion",
       confidence: "high",
     },
     {
       agent: "Campaign Planner",
-      message: `Recommended shipping one small CUDA exercise and reframing the systems bullet before contacting the team.`,
+      message: gaps[0]
+        ? `Recommended first step: ${gaps[0].action.summary}.`
+        : "Recommended tailoring the résumé and applying.",
       kind: "action",
     },
   ];

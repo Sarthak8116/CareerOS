@@ -3,6 +3,7 @@ import { greenhouseAdapter } from "@/lib/intake/adapters/greenhouse";
 import { leverAdapter } from "@/lib/intake/adapters/lever";
 import { ashbyAdapter } from "@/lib/intake/adapters/ashby";
 import { workdayAdapter } from "@/lib/intake/adapters/workday";
+import { amazonAdapter } from "@/lib/intake/adapters/amazon";
 import { genericAdapter } from "@/lib/intake/adapters/generic";
 
 /**
@@ -18,6 +19,7 @@ export const ADAPTERS: readonly IntakeAdapter[] = [
   leverAdapter,
   ashbyAdapter,
   workdayAdapter,
+  amazonAdapter,
   genericAdapter,
 ];
 

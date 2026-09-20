@@ -58,6 +58,18 @@ export interface Cleaner {
   flags(): string[];
 }
 
+const TEXT_UNESCAPES: Record<string, string> = {
+  "&amp;": "&",
+  "&lt;": "<",
+  "&gt;": ">",
+  "&quot;": '"',
+  "&#39;": "'",
+};
+
+function unescapeText(value: string): string {
+  return value.replace(/&(?:amp|lt|gt|quot|#39);/g, (entity) => TEXT_UNESCAPES[entity]);
+}
+
 export function createCleaner(): Cleaner {
   const seen = new Set<string>();
   return {
@@ -65,7 +77,11 @@ export function createCleaner(): Cleaner {
       if (!value) return undefined;
       const { clean: safe, flags } = sanitizeUntrusted(value);
       for (const flag of flags) seen.add(flag);
-      const trimmed = safe.trim();
+      // `sanitizeUntrusted` strips tags and then HTML-escapes what is left.
+      // Nothing in this app injects raw HTML — React escapes on render — so
+      // keeping the escape only made postings display as "Bachelor&#39;s" and
+      // "R&amp;D". Tags are already gone; restore the five characters.
+      const trimmed = unescapeText(safe).trim();
       if (!trimmed) return undefined;
       return trimmed.length > max
         ? `${trimmed.slice(0, max - 1).trimEnd()}…`

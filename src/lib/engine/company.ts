@@ -11,8 +11,8 @@ import { demoIntelByCompany } from "@/lib/demo/company";
 /**
  * Company intelligence resolver (build directive §5.6).
  *
- * In DEMO MODE the researched companies are the cached ones (NVIDIA, and the
- * fictional startup Quillfeather AI) — for those we return the cached intel. For any other job we return a
+ * In DEMO MODE the only researched companies are the cached ones (today,
+ * NVIDIA) — for those we return the cached, source-backed intel. For any other job we return a
  * minimal, HONEST intel object derived purely from the job's own fields, with
  * NO sources and clearly-labelled low-reliability notes. We never fabricate
  * research for a company we haven't cached.

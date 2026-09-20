@@ -46,9 +46,15 @@ export class DemoCampaignProvider implements CampaignProvider {
     const readiness = computeReadiness(fit);
 
     const trueGap = gaps.find((g) => g.classification === "true-skill-gap");
+    const unanswered = gaps.filter((g) => g.classification === "experience-gap").length;
+    const role = fit.find((f) => f.category === "role")?.level;
     const nextAction = trueGap
       ? trueGap.action.summary
-      : "Tailor the resume and submit the application";
+      : unanswered >= 2 && (role === "none" || role === "limited")
+        ? `Decide whether this role is the right target — ${unanswered} minimum requirements have no recorded evidence`
+        : gaps[0] && gaps[0].classification !== "low-priority-gap"
+          ? gaps[0].action.summary
+          : "Tailor the resume and submit the application";
 
     return {
       id: slugId("camp", `${candidate.id}:${job.id}`),

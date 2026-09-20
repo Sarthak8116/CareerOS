@@ -97,11 +97,7 @@ export default function JobsPage() {
 
       {/* Section A — sample role */}
       <section className="mt-8">
-        <SectionTitle>Sample roles</SectionTitle>
-        <p className="mt-1 text-sm text-slate-500">
-          The same candidate against a large company and a nine-person startup
-          — the fit, the gaps and the people to reach all change.
-        </p>
+        <SectionTitle>Sample role</SectionTitle>
         {DEMO_JOBS.map((job) => (
           <SampleJobCard
             key={job.id}
