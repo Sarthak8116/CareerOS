@@ -9,8 +9,8 @@ import {
 } from "@/components/CampaignInbox";
 import { getCampaigns } from "@/lib/store";
 import { generateAllOutreach } from "@/lib/engine/outreach";
-import { demoCandidate } from "@/lib/demo/candidate";
-import type { Campaign, Person } from "@/lib/types";
+import { getProfile } from "@/lib/profileStore";
+import type { Campaign, Candidate, Person } from "@/lib/types";
 
 /**
  * Campaign Inbox page (build directive §5.20).
@@ -42,12 +42,12 @@ function nextActionFor(status: InboxStatus): string {
   }
 }
 
-function buildRows(campaigns: Campaign[]): ConversationRow[] {
+function buildRows(campaigns: Campaign[], candidate: Candidate): ConversationRow[] {
   const rows: ConversationRow[] = [];
   for (const campaign of campaigns) {
     const byId = new Map(campaign.people.map((p) => [p.id, p] as const));
     const messages = generateAllOutreach(
-      demoCandidate,
+      candidate,
       campaign.job,
       campaign.people,
     );
@@ -77,7 +77,7 @@ export default function InboxPage() {
     let cancelled = false;
     getCampaigns()
       .then((campaigns) => {
-        if (!cancelled) setRows(buildRows(campaigns));
+        if (!cancelled) setRows(buildRows(campaigns, getProfile()));
       })
       .catch(() => {
         if (!cancelled) setRows([]);

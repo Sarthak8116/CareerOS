@@ -54,4 +54,27 @@ describe("buildOpportunityGraph", () => {
     expect(graph.warmestPath[0]).toBe(demoCandidate.id);
     expect(graph.warmestPath[graph.warmestPath.length - 1]).toBe(demoJob.id);
   });
+
+  it("resolves skill edges for imported evidence ids", () => {
+    const imported = {
+      ...demoCandidate,
+      id: "cand_imported",
+      evidence: demoCandidate.evidence.map((evidence, index) => ({
+        ...evidence,
+        id: `imported_${index}`,
+      })),
+    };
+    const importedGraph = buildOpportunityGraph({
+      candidate: imported,
+      job: demoJob,
+      people: demoPeople,
+      company: getCompanyIntel(demoJob),
+    });
+
+    expect(
+      importedGraph.edges.some(
+        (edge) => edge.source === imported.id && edge.target === "skill_systems_debug",
+      ),
+    ).toBe(true);
+  });
 });

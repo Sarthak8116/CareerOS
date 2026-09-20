@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Sparkles } from "lucide-react";
-import type { Campaign } from "@/lib/types";
+import type { Campaign, Candidate } from "@/lib/types";
 import { getCampaign } from "@/lib/store";
 import { buildOpportunityGraph } from "@/lib/engine/graph";
 import { getCompanyIntel } from "@/lib/engine/company";
-import { demoCandidate } from "@/lib/demo/candidate";
+import { getProfile } from "@/lib/profileStore";
 import { Shell } from "@/components/Shell";
 import { Card, CardHeader, ButtonLink, EmptyState } from "@/components/ui/primitives";
 import { OpportunityGraphView } from "@/components/OpportunityGraph";
@@ -22,6 +22,7 @@ export default function CampaignGraphPage() {
   const id = params.id;
 
   const [campaign, setCampaign] = useState<Campaign | undefined>(undefined);
+  const [candidate, setCandidate] = useState<Candidate | undefined>(undefined);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -30,6 +31,7 @@ export default function CampaignGraphPage() {
       const c = await getCampaign(id);
       if (!active) return;
       setCampaign(c);
+      setCandidate(getProfile());
       setLoaded(true);
     })();
     return () => {
@@ -66,7 +68,7 @@ export default function CampaignGraphPage() {
 
   const { job } = campaign;
   const graph = buildOpportunityGraph({
-    candidate: demoCandidate,
+    candidate: candidate ?? getProfile(),
     job,
     people: campaign.people,
     company: getCompanyIntel(job, campaign.harvest),

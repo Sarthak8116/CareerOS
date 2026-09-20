@@ -8,6 +8,7 @@ import type {
   Person,
   TrustLabel,
 } from "@/lib/types";
+import { matchSkill } from "@/lib/engine/skills";
 
 /**
  * Opportunity graph builder (§5.12).
@@ -81,26 +82,6 @@ const TRUST_RANK: Record<TrustLabel, number> = {
   "strong-inference": 2,
   "weak-inference": 1,
   unknown: 0,
-};
-
-/**
- * Which candidate evidence backs each canonical job skill. Deterministic and
- * intentionally conservative — CUDA is left empty because the candidate only
- * expresses *interest* (ev_gpu), with no shipped project.
- */
-const SKILL_EVIDENCE: Record<string, string[]> = {
-  c_cpp: ["ev_c", "ev_cpp"],
-  os_arch: ["ev_os_course", "ev_cachesim"],
-  systems_debug: ["ev_cachesim", "ev_c", "ev_linux"],
-  python: ["ev_py"],
-  cuda: [],
-  parallel: ["ev_gpu"],
-};
-
-/** Which job skills each candidate *project* concretely demonstrates. */
-const PROJECT_SKILL_MATCH: Record<string, string[]> = {
-  ev_cachesim: ["c_cpp", "os_arch", "systems_debug"],
-  ev_nn: ["python", "parallel"],
 };
 
 /** Readable labels for canonical skill keys (falls back to the key). */
@@ -265,9 +246,7 @@ export function buildOpportunityGraph(input: {
 
   // Candidate -> skill: demonstrates (or "interested in" when only weak signal).
   for (const key of skillKeys) {
-    const supportIds = (SKILL_EVIDENCE[key] ?? []).filter((id) =>
-      candidate.evidence.some((e) => e.id === id),
-    );
+    const supportIds = matchSkill(key, candidate).supportingEvidenceIds;
     if (supportIds.length === 0) continue; // no honest link — leave the gap visible
 
     const supporting = candidate.evidence.filter((e) => supportIds.includes(e.id));
@@ -287,8 +266,8 @@ export function buildOpportunityGraph(input: {
   // Candidate -> project (built it); project -> skill (matches requirement).
   for (const ev of projectEvidence) {
     addEdge(candidateId, projectNodeId(ev.id), "built", ev.trust);
-    for (const key of PROJECT_SKILL_MATCH[ev.id] ?? []) {
-      if (!skillKeys.includes(key)) continue;
+    for (const key of skillKeys) {
+      if (!matchSkill(key, candidate).supportingEvidenceIds.includes(ev.id)) continue;
       addEdge(projectNodeId(ev.id), skillNodeId(key), "matches", "source-backed");
     }
   }
